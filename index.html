@@ -3,66 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Network Operation Center</title>
+    <title>Network Operation Center - Dashboard</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col p-6">
+<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen flex flex-col">
 
-    <div class="max-w-7xl mx-auto w-full space-y-6">
-        <!-- Header -->
-        <div class="flex justify-between items-center bg-slate-800 p-4 rounded-xl border border-slate-700">
-            <div>
-                <h1 class="text-xl font-bold">Network Operation Center</h1>
-                <p class="text-xs text-slate-400">MikroTik Real-Time Monitor</p>
+    <!-- Top Navigation Bar -->
+    <header class="bg-slate-800 border-b border-slate-700 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-cyan-500 p-2 rounded-lg text-slate-950 font-bold">
+                    <i class="fa-solid fa-network-wired text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide">Network Operation Center</h1>
+                    <p class="text-xs text-slate-400">MikroTik Real-Time Monitoring</p>
+                </div>
             </div>
-            <button onclick="fetchData()" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-xs font-semibold transition">
-                <i class="fa-solid fa-rotate mr-1"></i> Refresh Data
-            </button>
-        </div>
-
-        <!-- Stats Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-                <p class="text-xs text-slate-400 uppercase">Total Records</p>
-                <h3 id="stat-records" class="text-2xl font-bold text-cyan-400 mt-1">0</h3>
-            </div>
-            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-                <p class="text-xs text-slate-400 uppercase">Active Clients</p>
-                <h3 id="stat-clients" class="text-2xl font-bold text-emerald-400 mt-1">0</h3>
-            </div>
-            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-                <p class="text-xs text-slate-400 uppercase">Latest CPU Load</p>
-                <h3 id="stat-cpu" class="text-2xl font-bold text-amber-400 mt-1">0%</h3>
+            <div class="flex items-center space-x-3">
+                <span class="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs rounded-full border border-emerald-500/30 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Live Sync Active
+                </span>
+                <button onclick="fetchData()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate"></i> Refresh
+                </button>
             </div>
         </div>
+    </header>
 
-        <!-- Table Data -->
-        <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-            <div class="p-4 border-b border-slate-700 font-semibold text-sm">Devices Log</div>
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full space-y-6">
+
+        <!-- Stat Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Card 1 -->
+            <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-400 uppercase">Total Records</p>
+                    <h3 id="stat-records" class="text-2xl font-bold mt-1 text-cyan-400">0</h3>
+                </div>
+                <div class="p-3 bg-cyan-500/10 rounded-lg text-cyan-400">
+                    <i class="fa-solid fa-server text-xl"></i>
+                </div>
+            </div>
+            <!-- Card 2 -->
+            <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-400 uppercase">Active Clients</p>
+                    <h3 id="stat-clients" class="text-2xl font-bold mt-1 text-emerald-400">0</h3>
+                </div>
+                <div class="p-3 bg-emerald-500/10 rounded-lg text-emerald-400">
+                    <i class="fa-solid fa-users text-xl"></i>
+                </div>
+            </div>
+            <!-- Card 3 -->
+            <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-400 uppercase">Latest CPU Load</p>
+                    <h3 id="stat-cpu" class="text-2xl font-bold mt-1 text-amber-400">0%</h3>
+                </div>
+                <div class="p-3 bg-amber-500/10 rounded-lg text-amber-400">
+                    <i class="fa-solid fa-microchip text-xl"></i>
+                </div>
+            </div>
+            <!-- Card 4 -->
+            <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-400 uppercase">System Status</p>
+                    <h3 class="text-2xl font-bold mt-1 text-purple-400">Optimal</h3>
+                </div>
+                <div class="p-3 bg-purple-500/10 rounded-lg text-purple-400">
+                    <i class="fa-solid fa-shield-halved text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- CPU Load Trend Chart -->
+            <div class="bg-slate-800 border border-slate-700 p-5 rounded-xl shadow-sm lg:col-span-2 flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-semibold text-slate-200"><i class="fa-solid fa-chart-line text-cyan-400 mr-2"></i> Router CPU Load History</h3>
+                    <span class="text-xs text-slate-400">Last 10 Records</span>
+                </div>
+                <div class="relative flex-grow h-64">
+                    <canvas id="cpuChart"></canvas>
+                </div>
+            </div>
+            <!-- System Info Box -->
+            <div class="bg-slate-800 border border-slate-700 p-5 rounded-xl shadow-sm flex flex-col justify-between">
+                <div>
+                    <h3 class="font-semibold text-slate-200 mb-3"><i class="fa-solid fa-circle-info text-cyan-400 mr-2"></i> Architecture Info</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed mb-4">
+                        Dashboard ini terhubung secara real-time ke Google Sheets backend melalui Apps Script API, merekam metrik performa router MikroTik secara otomatis.
+                    </p>
+                </div>
+                <div class="p-3 bg-slate-900/50 rounded-lg border border-slate-700 text-xs text-slate-400 space-y-1">
+                    <div><span class="font-semibold text-slate-300">Backend:</span> Google Sheets & Apps Script</div>
+                    <div><span class="font-semibold text-slate-300">Hosting:</span> Vercel Cloud</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Devices Table -->
+        <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-sm overflow-hidden">
+            <div class="p-4 border-b border-slate-700 flex justify-between items-center">
+                <h3 class="font-semibold text-slate-200"><i class="fa-solid fa-server text-cyan-400 mr-2"></i> Registered Devices Log</h3>
+                <span id="device-count" class="text-xs bg-slate-700 px-2.5 py-1 rounded-full text-slate-300">0 Items</span>
+            </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm">
-                    <thead class="bg-slate-900/50 text-slate-400 text-xs uppercase border-b border-slate-700">
-                        <tr>
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-900/50 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-700">
                             <th class="p-3">Timestamp</th>
                             <th class="p-3">Device Name</th>
+                            <th class="p-3">Type</th>
                             <th class="p-3">Status</th>
                             <th class="p-3">CPU Load</th>
                             <th class="p-3">Uptime</th>
                             <th class="p-3">Active Clients</th>
                         </tr>
                     </thead>
-                    <tbody id="table-body" class="divide-y divide-slate-700/50 text-slate-300">
-                        <tr><td colspan="6" class="p-6 text-center text-slate-400">Loading data...</td></tr>
+                    <tbody id="table-body" class="divide-y divide-slate-700/50 text-sm text-slate-300">
+                        <tr><td colspan="7" class="p-6 text-center text-slate-400">Loading data...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
-    </div>
 
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-800 border-t border-slate-700 py-4 text-center text-xs text-slate-500 mt-auto">
+        Network Management Dashboard &bull; Powered by MikroTik & Google Sheets
+    --></footer>
+
+    <!-- Script Logic -->
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbx4Yx18S7GJQUU0WpWfIgVoRPxk-yKKe9MM8HmXN3IjLufLMnNQTQXohdIs4-6h5b1izw/exec";
+        let cpuChartInstance = null;
 
         async function fetchData() {
             try {
@@ -72,6 +156,7 @@
                 if (json.status === "success" && json.devices) {
                     const devices = json.devices;
                     document.getElementById('stat-records').innerText = devices.length;
+                    document.getElementById('device-count').innerText = `${devices.length} Items`;
                     
                     if(devices.length > 0) {
                         const latest = devices[devices.length - 1];
@@ -79,26 +164,80 @@
                         document.getElementById('stat-cpu').innerText = latest.CpuLoad || '0%';
                     }
 
+                    // Render Table
                     const tbody = document.getElementById('table-body');
                     tbody.innerHTML = '';
                     
                     [...devices].reverse().forEach(d => {
                         tbody.innerHTML += `
-                            <tr class="hover:bg-slate-700/30">
+                            <tr class="hover:bg-slate-700/30 transition">
                                 <td class="p-3 text-xs text-slate-400">${d.Timestamp ? new Date(d.Timestamp).toLocaleString() : '-'}</td>
                                 <td class="p-3 font-medium text-slate-200">${d.DeviceName || '-'}</td>
-                                <td class="p-3"><span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded text-xs">${d.Status || 'Online'}</span></td>
-                                <td class="p-3 text-amber-400">${d.CpuLoad || '-'}</td>
+                                <td class="p-3"><span class="px-2 py-0.5 bg-cyan-500/10 text-cyan-400 rounded text-xs">${d.Type || 'mikrotik'}</span></td>
+                                <td class="p-3"><span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded text-xs font-semibold">${d.Status || 'Online'}</span></td>
+                                <td class="p-3 text-amber-400 font-medium">${d.CpuLoad || '-'}</td>
                                 <td class="p-3 text-xs text-slate-400">${d.Uptime || '-'}</td>
                                 <td class="p-3 font-semibold text-emerald-400">${d.ActiveClients || 0}</td>
                             </tr>
                         `;
                     });
+
+                    // Render Chart
+                    updateCpuChart(devices);
                 }
             } catch (err) {
                 console.error(err);
-                document.getElementById('table-body').innerHTML = `<tr><td colspan="6" class="p-6 text-center text-rose-400">Failed to load data from API.</td></tr>`;
+                document.getElementById('table-body').innerHTML = `<tr><td colspan="7" class="p-6 text-center text-rose-400">Failed to load data from API.</td></tr>`;
             }
+        }
+
+        function updateCpuChart(devices) {
+            const chartData = devices.slice(-10); // Ambil 10 data terakhir
+            const labels = chartData.map(d => d.Timestamp ? new Date(d.Timestamp).toLocaleTimeString() : '');
+            const cpuValues = chartData.map(d => {
+                let val = d.CpuLoad ? String(d.CpuLoad).replace('%', '') : '0';
+                return parseFloat(val) || 0;
+            });
+
+            const ctx = document.getElementById('cpuChart').getContext('2d');
+            if (cpuChartInstance) {
+                cpuChartInstance.destroy();
+            }
+
+            cpuChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'CPU Load (%)',
+                        data: cpuValues,
+                        borderColor: '#06b6d4',
+                        backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: { color: 'rgba(51, 65, 85, 0.5)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
         }
 
         fetchData();
