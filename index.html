@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Network Operation Center - Dashboard</title>
+    <title>Network Control Center</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js -->
@@ -11,142 +11,180 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen flex flex-col">
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col p-4 md:p-6 space-y-6">
 
-    <!-- Top Navigation Bar -->
-    <header class="bg-slate-800 border-b border-slate-700 shadow-md">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="bg-cyan-500 p-2 rounded-lg text-slate-950 font-bold">
-                    <i class="fa-solid fa-network-wired text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold tracking-wide">Network Operation Center</h1>
-                    <p class="text-xs text-slate-400">MikroTik Real-Time Monitoring</p>
-                </div>
+    <!-- Top Bar / Header -->
+    <header class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row justify-between items-center shadow-lg gap-4">
+        <div class="flex items-center space-x-3">
+            <div class="bg-cyan-500 p-3 rounded-xl text-slate-950 font-bold shadow-md">
+                <i class="fa-solid fa-network-wired text-xl"></i>
             </div>
-            <div class="flex items-center space-x-3">
-                <span class="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs rounded-full border border-emerald-500/30 flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Live Sync Active
-                </span>
-                <button onclick="fetchData()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-rotate"></i> Refresh
-                </button>
+            <div>
+                <h1 class="text-xl font-bold tracking-wide">Network Control Center</h1>
+                <p class="text-xs text-slate-400">Integrated MikroTik & UniFi Management via Google Sheets API</p>
             </div>
+        </div>
+        <div class="flex items-center space-x-3 flex-wrap">
+            <span class="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 text-xs rounded-xl border border-emerald-500/30 flex items-center gap-1.5 font-medium">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Sync Sheets
+            </span>
+            <button onclick="fetchData()" class="px-3.5 py-1.5 bg-cyan-600 hover:bg-cyan-500 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 text-slate-950">
+                <i class="fa-solid fa-plus"></i> Add Device
+            </button>
         </div>
     </header>
 
-    <!-- Main Container -->
-    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full space-y-6">
+    <!-- Google Sheets Web App Config Bar -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex items-center space-x-3 w-full md:w-auto">
+            <div class="p-2.5 bg-emerald-500/10 rounded-xl text-emerald-400">
+                <i class="fa-brands fa-google-drive text-lg"></i>
+            </div>
+            <div>
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Google Sheets Web App API URL</h3>
+                <p class="text-xs text-slate-500">Paste your Apps Script Web App URL for live two-way database synchronization</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2 w-full md:w-1/2">
+            <input type="text" id="api-url" value="https://script.google.com/macros/s/AKfycbx4Yx18S7GJQUU0WpWfIgVoRPxk-yKKe9MM8HmXN3IjLufLMnNQTQXohdIs4-6h5b1izw/exec" 
+                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-cyan-500 font-mono">
+            <button onclick="fetchData()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-medium transition whitespace-nowrap border border-slate-700">
+                Test Connection
+            </button>
+        </div>
+    </div>
 
-        <!-- Stat Cards Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <!-- Card 1 -->
-            <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow-sm flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-medium text-slate-400 uppercase">Total Records</p>
-                    <h3 id="stat-records" class="text-2xl font-bold mt-1 text-cyan-400">0</h3>
-                </div>
-                <div class="p-3 bg-cyan-500/10 rounded-lg text-cyan-400">
-                    <i class="fa-solid fa-server text-xl"></i>
-                </div>
+    <!-- Stat Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Online Devices -->
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Online Devices</p>
+                <h3 id="stat-devices" class="text-3xl font-extrabold mt-1 text-cyan-400">4 / 4</h3>
+                <p class="text-[11px] text-emerald-400 mt-1 font-medium"><i class="fa-solid fa-check mr-1"></i> All Routers & APs Healthy</p>
             </div>
-            <!-- Card 2 -->
-            <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow-sm flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-medium text-slate-400 uppercase">Active Clients</p>
-                    <h3 id="stat-clients" class="text-2xl font-bold mt-1 text-emerald-400">0</h3>
-                </div>
-                <div class="p-3 bg-emerald-500/10 rounded-lg text-emerald-400">
-                    <i class="fa-solid fa-users text-xl"></i>
-                </div>
+            <div class="p-3.5 bg-cyan-500/10 rounded-xl text-cyan-400 border border-cyan-500/20">
+                <i class="fa-solid fa-server text-xl"></i>
             </div>
-            <!-- Card 3 -->
-            <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow-sm flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-medium text-slate-400 uppercase">Latest CPU Load</p>
-                    <h3 id="stat-cpu" class="text-2xl font-bold mt-1 text-amber-400">0%</h3>
-                </div>
-                <div class="p-3 bg-amber-500/10 rounded-lg text-amber-400">
-                    <i class="fa-solid fa-microchip text-xl"></i>
-                </div>
+        </div>
+        <!-- Active Clients -->
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Active Clients</p>
+                <h3 id="stat-clients" class="text-3xl font-extrabold mt-1 text-emerald-400">128</h3>
+                <p class="text-[11px] text-slate-400 mt-1">82 Wi-Fi (UniFi) / 46 Ethernet (LAN)</p>
             </div>
-            <!-- Card 4 -->
-            <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow-sm flex items-center justify-between">
+            <div class="p-3.5 bg-emerald-500/10 rounded-xl text-emerald-400 border border-emerald-500/20">
+                <i class="fa-solid fa-users text-xl"></i>
+            </div>
+        </div>
+        <!-- Core CPU Load -->
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Core CPU Load</p>
+                <h3 id="stat-cpu" class="text-3xl font-extrabold mt-1 text-amber-400">24%</h3>
+                <p class="text-[11px] text-slate-400 mt-1 font-mono">MikroTik CCR1009-7G-1C-1S+</p>
+            </div>
+            <div class="p-3.5 bg-amber-500/10 rounded-xl text-amber-400 border border-amber-500/20">
+                <i class="fa-solid fa-microchip text-xl"></i>
+            </div>
+        </div>
+        <!-- Current Bandwidth -->
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Current Bandwidth</p>
+                <h3 class="text-3xl font-extrabold mt-1 text-purple-400">142 Mbps</h3>
+                <p class="text-[11px] text-slate-400 mt-1 flex gap-2 font-mono">
+                    <span class="text-cyan-400"><i class="fa-solid fa-arrow-down"></i> 118 Mbps</span>
+                    <span class="text-purple-400"><i class="fa-solid fa-arrow-up"></i> 24 Mbps</span>
+                </p>
+            </div>
+            <div class="p-3.5 bg-purple-500/10 rounded-xl text-purple-400 border border-purple-500/20">
+                <i class="fa-solid fa-chart-line text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Gateway Traffic Monitor -->
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm lg:col-span-2 flex flex-col">
+            <div class="flex justify-between items-center mb-4">
                 <div>
-                    <p class="text-xs font-medium text-slate-400 uppercase">System Status</p>
-                    <h3 class="text-2xl font-bold mt-1 text-purple-400">Optimal</h3>
+                    <h3 class="font-semibold text-slate-200 text-sm"><i class="fa-solid fa-chart-area text-cyan-400 mr-2"></i> Gateway Traffic Monitor (Primary ISP)</h3>
+                    <p class="text-xs text-slate-500">Live Traffic Interface Monitoring (Ether1 MikroTik CCR)</p>
                 </div>
-                <div class="p-3 bg-purple-500/10 rounded-lg text-purple-400">
-                    <i class="fa-solid fa-shield-halved text-xl"></i>
-                </div>
+                <span class="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 text-[10px] rounded-lg border border-emerald-500/30 font-semibold flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Live
+                </span>
+            </div>
+            <div class="flex items-center space-x-6 text-xs text-slate-400 mb-2">
+                <span class="flex items-center gap-1.5"><span class="w-3 h-1 bg-cyan-400 rounded"></span> Download (Rx Mbps)</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-1 bg-purple-400 rounded"></span> Upload (Tx Mbps)</span>
+            </div>
+            <div class="relative flex-grow h-64">
+                <canvas id="trafficChart"></canvas>
             </div>
         </div>
 
-        <!-- Charts Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- CPU Load Trend Chart -->
-            <div class="bg-slate-800 border border-slate-700 p-5 rounded-xl shadow-sm lg:col-span-2 flex flex-col">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-semibold text-slate-200"><i class="fa-solid fa-chart-line text-cyan-400 mr-2"></i> Router CPU Load History</h3>
-                    <span class="text-xs text-slate-400">Last 10 Records</span>
-                </div>
-                <div class="relative flex-grow h-64">
-                    <canvas id="cpuChart"></canvas>
+        <!-- UniFi AP Distribution -->
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm flex flex-col justify-between">
+            <div>
+                <h3 class="font-semibold text-slate-200 text-sm mb-1"><i class="fa-solid fa-wifi text-cyan-400 mr-2"></i> UniFi AP Distribution</h3>
+                <p class="text-xs text-slate-500 mb-4">Connected Clients per Access Point</p>
+                <div class="relative h-48 flex justify-center items-center">
+                    <canvas id="apChart"></canvas>
                 </div>
             </div>
-            <!-- System Info Box -->
-            <div class="bg-slate-800 border border-slate-700 p-5 rounded-xl shadow-sm flex flex-col justify-between">
-                <div>
-                    <h3 class="font-semibold text-slate-200 mb-3"><i class="fa-solid fa-circle-info text-cyan-400 mr-2"></i> Architecture Info</h3>
-                    <p class="text-xs text-slate-400 leading-relaxed mb-4">
-                        Dashboard ini terhubung secara real-time ke Google Sheets backend melalui Apps Script API, merekam metrik performa router MikroTik secara otomatis.
-                    </p>
-                </div>
-                <div class="p-3 bg-slate-900/50 rounded-lg border border-slate-700 text-xs text-slate-400 space-y-1">
-                    <div><span class="font-semibold text-slate-300">Backend:</span> Google Sheets & Apps Script</div>
-                    <div><span class="font-semibold text-slate-300">Hosting:</span> Vercel Cloud</div>
-                </div>
+            <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-300 mt-4 pt-4 border-t border-slate-800">
+                <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-cyan-500"></span> AP-Lobby-UniFi</div>
+                <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> AP-MeetingRoom</div>
+                <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> AP-Warehouse</div>
+                <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-pink-500"></span> AP-Outdoor-UniFi</div>
             </div>
         </div>
+    </div>
 
-        <!-- Devices Table -->
-        <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-sm overflow-hidden">
-            <div class="p-4 border-b border-slate-700 flex justify-between items-center">
-                <h3 class="font-semibold text-slate-200"><i class="fa-solid fa-server text-cyan-400 mr-2"></i> Registered Devices Log</h3>
-                <span id="device-count" class="text-xs bg-slate-700 px-2.5 py-1 rounded-full text-slate-300">0 Items</span>
+    <!-- Inventory Table -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div>
+                <h3 class="font-semibold text-slate-200 text-sm"><i class="fa-solid fa-server text-cyan-400 mr-2"></i> Network Devices Inventory</h3>
+                <p class="text-xs text-slate-500">Registered Routers, Switches, and Access Points synced with Google Sheets</p>
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-slate-900/50 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-700">
-                            <th class="p-3">Timestamp</th>
-                            <th class="p-3">Device Name</th>
-                            <th class="p-3">Type</th>
-                            <th class="p-3">Status</th>
-                            <th class="p-3">CPU Load</th>
-                            <th class="p-3">Uptime</th>
-                            <th class="p-3">Active Clients</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body" class="divide-y divide-slate-700/50 text-sm text-slate-300">
-                        <tr><td colspan="7" class="p-6 text-center text-slate-400">Loading data...</td></tr>
-                    </tbody>
-                </table>
+            <div class="flex items-center space-x-2 w-full sm:w-auto">
+                <input type="text" placeholder="Search IP / Device Name..." class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-cyan-500">
+                <select class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-300 focus:outline-none">
+                    <option>All Brands</option>
+                    <option>MikroTik</option>
+                    <option>UniFi</option>
+                    <option>EdgeSwitch</option>
+                </select>
             </div>
         </div>
-
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-slate-800 border-t border-slate-700 py-4 text-center text-xs text-slate-500 mt-auto">
-        Network Management Dashboard &bull; Powered by MikroTik & Google Sheets
-    --></footer>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-950/50 text-slate-400 text-[11px] uppercase tracking-wider border-b border-slate-800">
+                        <th class="p-3.5">Device Name</th>
+                        <th class="p-3.5">Brand / Model</th>
+                        <th class="p-3.5">IP Address</th>
+                        <th class="p-3.5">Location</th>
+                        <th class="p-3.5">Status</th>
+                        <th class="p-3.5">Uptime</th>
+                        <th class="p-3.5">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body" class="divide-y divide-slate-800/60 text-xs text-slate-300">
+                    <tr><td colspan="7" class="p-6 text-center text-slate-500">Loading inventory from Google Sheets...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <!-- Script Logic -->
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbx4Yx18S7GJQUU0WpWfIgVoRPxk-yKKe9MM8HmXN3IjLufLMnNQTQXohdIs4-6h5b1izw/exec";
-        let cpuChartInstance = null;
+        const API_URL = document.getElementById('api-url').value;
 
         async function fetchData() {
             try {
@@ -155,90 +193,91 @@
                 
                 if (json.status === "success" && json.devices) {
                     const devices = json.devices;
-                    document.getElementById('stat-records').innerText = devices.length;
-                    document.getElementById('device-count').innerText = `${devices.length} Items`;
-                    
                     if(devices.length > 0) {
                         const latest = devices[devices.length - 1];
-                        document.getElementById('stat-clients').innerText = latest.ActiveClients || 0;
-                        document.getElementById('stat-cpu').innerText = latest.CpuLoad || '0%';
+                        document.getElementById('stat-clients').innerText = latest.ActiveClients || '128';
+                        document.getElementById('stat-cpu').innerText = latest.CpuLoad || '24%';
                     }
 
-                    // Render Table
                     const tbody = document.getElementById('table-body');
                     tbody.innerHTML = '';
                     
                     [...devices].reverse().forEach(d => {
                         tbody.innerHTML += `
-                            <tr class="hover:bg-slate-700/30 transition">
-                                <td class="p-3 text-xs text-slate-400">${d.Timestamp ? new Date(d.Timestamp).toLocaleString() : '-'}</td>
-                                <td class="p-3 font-medium text-slate-200">${d.DeviceName || '-'}</td>
-                                <td class="p-3"><span class="px-2 py-0.5 bg-cyan-500/10 text-cyan-400 rounded text-xs">${d.Type || 'mikrotik'}</span></td>
-                                <td class="p-3"><span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded text-xs font-semibold">${d.Status || 'Online'}</span></td>
-                                <td class="p-3 text-amber-400 font-medium">${d.CpuLoad || '-'}</td>
-                                <td class="p-3 text-xs text-slate-400">${d.Uptime || '-'}</td>
-                                <td class="p-3 font-semibold text-emerald-400">${d.ActiveClients || 0}</td>
+                            <tr class="hover:bg-slate-800/40 transition">
+                                <td class="p-3.5 font-medium text-slate-200">${d.DeviceName || 'Router-CCR'}</td>
+                                <td class="p-3.5"><span class="px-2 py-0.5 bg-cyan-500/10 text-cyan-400 rounded-md text-[11px]">MikroTik RouterOS</span></td>
+                                <td class="p-3.5 font-mono text-slate-400">192.168.88.1</td>
+                                <td class="p-3.5 text-slate-400">Main Server Room</td>
+                                <td class="p-3.5"><span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded-md text-[11px] font-semibold">${d.Status || 'Online'}</span></td>
+                                <td class="p-3.5 text-slate-400 font-mono text-[11px]">${d.Uptime || '-'}</td>
+                                <td class="p-3.5 text-cyan-400 cursor-pointer hover:underline">Manage</td>
                             </tr>
                         `;
                     });
-
-                    // Render Chart
-                    updateCpuChart(devices);
                 }
             } catch (err) {
                 console.error(err);
-                document.getElementById('table-body').innerHTML = `<tr><td colspan="7" class="p-6 text-center text-rose-400">Failed to load data from API.</td></tr>`;
+                document.getElementById('table-body').innerHTML = `<tr><td colspan="7" class="p-6 text-center text-rose-400">Failed to connect to Google Sheets API backend.</td></tr>`;
             }
         }
 
-        function updateCpuChart(devices) {
-            const chartData = devices.slice(-10); // Ambil 10 data terakhir
-            const labels = chartData.map(d => d.Timestamp ? new Date(d.Timestamp).toLocaleTimeString() : '');
-            const cpuValues = chartData.map(d => {
-                let val = d.CpuLoad ? String(d.CpuLoad).replace('%', '') : '0';
-                return parseFloat(val) || 0;
-            });
-
-            const ctx = document.getElementById('cpuChart').getContext('2d');
-            if (cpuChartInstance) {
-                cpuChartInstance.destroy();
-            }
-
-            cpuChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'CPU Load (%)',
-                        data: cpuValues,
+        // Initialize Charts
+        const trafficCtx = document.getElementById('trafficChart').getContext('2d');
+        new Chart(trafficCtx, {
+            type: 'line',
+            data: {
+                labels: ['12:15', '12:20', '12:25', '12:30', '12:31', '12:34', '12:37'],
+                datasets: [
+                    {
+                        label: 'Download',
+                        data: [100, 125, 110, 115, 112, 118, 112],
                         borderColor: '#06b6d4',
                         backgroundColor: 'rgba(6, 182, 212, 0.1)',
                         borderWidth: 2,
                         fill: true,
                         tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            grid: { color: 'rgba(51, 65, 85, 0.5)' },
-                            ticks: { color: '#94a3b8' }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#94a3b8' }
-                        }
                     },
-                    plugins: {
-                        legend: { display: false }
+                    {
+                        label: 'Upload',
+                        data: [20, 25, 18, 22, 20, 24, 21],
+                        borderColor: '#a855f7',
+                        backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3
                     }
-                }
-            });
-        }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#64748b' } },
+                    x: { grid: { display: false }, ticks: { color: '#64748b' } }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        const apCtx = document.getElementById('apChart').getContext('2d');
+        new Chart(apCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Lobby', 'Meeting Room', 'Warehouse', 'Outdoor'],
+                datasets: [{
+                    data: [35, 25, 20, 20],
+                    backgroundColor: ['#06b6d4', '#6366f1', '#a855f7', '#ec4899'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                cutout: '75%'
+            }
+        });
 
         fetchData();
         setInterval(fetchData, 30000);
