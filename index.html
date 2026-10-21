@@ -226,8 +226,7 @@
 
             let totalClients = 0;
             list.forEach(d => {
-                // Mendukung ActiveLeases maupun ActiveClients
-                const clients = parseInt(d.ActiveLeases || d.ActiveClients || d.active_clients || 0);
+                const clients = parseInt(d.ActiveLeases || d.ActiveClients || d.active_leases || d.active_clients || 0);
                 totalClients += clients;
 
                 document.getElementById('stat-cpu').innerText = d.CpuLoad || d.cpu_load || '0%';
@@ -253,23 +252,27 @@
         }
 
         function updateTrafficChart(trafficData, deviceData) {
-            // Ambil data ether1 dari traffic (jika ada) atau fallback dari devices log terbaru
-            let chartData = trafficData.filter(t => t.VLANName === "ether1");
-            if (!chartData.length) chartData = trafficData.slice(-10);
+            // Ambil histori dari array traffic atau mapping dari device data
+            let chartData = trafficData.filter(t => t.VLANName === "ether1" || t.Interface === "ether1");
+            
+            let labels = [];
+            let rxValues = [];
+            let txValues = [];
 
-            const labels = chartData.map(t => t.Timestamp ? new Date(t.Timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '');
-            const rxValues = chartData.map(t => parseFloat(t.RxMbps || 0));
-            const txValues = chartData.map(t => parseFloat(t.TxMbps || 0));
+            if (chartData.length > 0) {
+                labels = chartData.slice(-10).map(t => t.Timestamp ? new Date(t.Timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '');
+                rxValues = chartData.slice(-10).map(t => parseFloat(t.RxMbps || t.RxBytes || 0));
+                txValues = chartData.slice(-10).map(t => parseFloat(t.TxMbps || t.TxBytes || 0));
+            } else if (deviceData.length > 0) {
+                // Fallback ambil dari log devices terbaru
+                const recentDevs = deviceData.slice(-10);
+                labels = recentDevs.map(d => d.Timestamp ? new Date(d.Timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '');
+                rxValues = recentDevs.map(d => parseFloat(d.rx_mbps || 0));
+                txValues = recentDevs.map(d => parseFloat(d.tx_mbps || 0));
+            }
 
-            // Ambil data bandwidth paling buncit/terbaru dari device log jika traffic kosong
             let latestRx = rxValues.length ? rxValues[rxValues.length - 1] : 0;
             let latestTx = txValues.length ? txValues[txValues.length - 1] : 0;
-
-            if (latestRx === 0 && latestTx === 0 && deviceData.length) {
-                const latestDev = deviceData[deviceData.length - 1];
-                latestRx = parseFloat(latestDev.RxMbps || latestDev.rx_mbps || 0);
-                latestTx = parseFloat(latestDev.TxMbps || latestDev.tx_mbps || 0);
-            }
 
             document.getElementById('stat-rx').innerHTML = `<i class="fa-solid fa-arrow-down"></i> ${latestRx.toFixed(1)} Mbps`;
             document.getElementById('stat-tx').innerHTML = `<i class="fa-solid fa-arrow-up"></i> ${latestTx.toFixed(1)} Mbps`;
@@ -283,8 +286,8 @@
                 data: {
                     labels: labels.length ? labels : ['--:--'],
                     datasets: [
-                        { label: 'Download', data: rxValues.length ? rxValues : [latestRx], borderColor: '#06b6d4', backgroundColor: 'rgba(6, 182, 212, 0.1)', borderWidth: 2, fill: true, tension: 0.3 },
-                        { label: 'Upload', data: txValues.length ? txValues : [latestTx], borderColor: '#a855f7', backgroundColor: 'rgba(168, 85, 247, 0.1)', borderWidth: 2, fill: true, tension: 0.3 }
+                        { label: 'Download', data: rxValues.length ? rxValues : [0], borderColor: '#06b6d4', backgroundColor: 'rgba(6, 182, 212, 0.1)', borderWidth: 2, fill: true, tension: 0.3 },
+                        { label: 'Upload', data: txValues.length ? txValues : [0], borderColor: '#a855f7', backgroundColor: 'rgba(168, 85, 247, 0.1)', borderWidth: 2, fill: true, tension: 0.3 }
                     ]
                 },
                 options: {
