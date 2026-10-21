@@ -14,7 +14,6 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Custom Scrollbar Styling */
         .custom-scrollbar::-webkit-scrollbar {
             height: 6px;
             width: 6px;
@@ -168,23 +167,21 @@
         </div>
     </div>
 
-    <!-- VLAN Segments Live Traffic Breakdown (2 BARIS COLORFUL GRID) -->
+    <!-- VLAN Segments Live Traffic Breakdown (PRESISI 1 BARIS 11 KARTU DI DESKTOP) -->
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
         <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
             <div>
                 <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-sm"><i class="fa-solid fa-sitemap text-cyan-600 dark:text-cyan-400 mr-2"></i> VLAN Segments Live Traffic Breakdown</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400">22 VLAN Segments • Sorted by Highest Usage (2 Rows Colorful Layout)</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Sorted by Highest Usage (2 Rows × 11 Cards Layout)</p>
             </div>
             <span id="vlan-count-badge" class="px-2.5 py-1 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-xs rounded-lg font-mono font-bold border border-cyan-500/20">
                 0 Active VLANs
             </span>
         </div>
-        <div class="p-4">
-            <!-- Container Grid 2 Baris Scrollable -->
-            <div class="max-h-[380px] overflow-y-auto custom-scrollbar pr-1">
-                <div id="vlan-cards-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3.5">
-                    <div class="text-xs text-slate-400 p-4">Loading VLAN metrics...</div>
-                </div>
+        <div class="p-4 overflow-x-auto custom-scrollbar">
+            <!-- Grid 11 Kolom Presisi di Layar Desktop (xl:grid-cols-11) -->
+            <div id="vlan-cards-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-11 gap-2.5 min-w-[1100px] xl:min-w-0">
+                <div class="text-xs text-slate-400 p-4">Loading VLAN metrics...</div>
             </div>
         </div>
     </div>
@@ -199,7 +196,7 @@
         let trafficHistoryRx = [];
         let trafficHistoryTx = [];
 
-        // Palet Warna-Warni Menyenangkan untuk Kartu VLAN
+        // Palet Warna-Warni Menyenangkan
         const COLOR_PALETTE = [
             { border: 'border-cyan-500/40', bg: 'bg-cyan-500/10', text: 'text-cyan-600 dark:text-cyan-400', badge: 'bg-cyan-500' },
             { border: 'border-indigo-500/40', bg: 'bg-indigo-500/10', text: 'text-indigo-600 dark:text-indigo-400', badge: 'bg-indigo-500' },
@@ -389,18 +386,17 @@
                 const rx = parseFloat(v.RxMbps || 0); // Klien Download
                 const tx = parseFloat(v.TxMbps || 0); // Klien Upload
                 
-                // Pilih skema warna acak/berurutan dari palet
                 const theme = COLOR_PALETTE[idx % COLOR_PALETTE.length];
 
                 container.innerHTML += `
-                    <div class="bg-slate-50 dark:bg-slate-950/80 border ${theme.border} p-3.5 rounded-xl flex flex-col justify-between shadow-sm hover:scale-[1.02] transition-transform duration-200">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-bold text-xs ${theme.text} font-mono truncate">${vlanName}</span>
-                            <span class="w-2 h-2 rounded-full ${theme.badge} animate-pulse"></span>
+                    <div class="bg-slate-50 dark:bg-slate-950/80 border ${theme.border} p-2.5 rounded-xl flex flex-col justify-between shadow-sm hover:scale-[1.02] transition-transform duration-200">
+                        <div class="flex justify-between items-center mb-1.5">
+                            <span class="font-bold text-[11px] ${theme.text} font-mono truncate" title="${vlanName}">${vlanName}</span>
+                            <span class="w-1.5 h-1.5 rounded-full ${theme.badge} animate-pulse"></span>
                         </div>
-                        <div class="space-y-1 text-xs font-mono">
-                            <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>Down (Rx):</span> <span class="${theme.text} font-semibold">${formatSpeed(rx)}</span></div>
-                            <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>Up (Tx):</span> <span class="text-slate-700 dark:text-slate-300 font-semibold">${formatSpeed(tx)}</span></div>
+                        <div class="space-y-0.5 text-[10px] font-mono">
+                            <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>Down:</span> <span class="${theme.text} font-semibold">${formatSpeed(rx)}</span></div>
+                            <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>Up:</span> <span class="text-slate-700 dark:text-slate-300 font-semibold">${formatSpeed(tx)}</span></div>
                         </div>
                     </div>
                 `;
