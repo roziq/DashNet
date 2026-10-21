@@ -107,7 +107,6 @@
             </div>
         </div>
         <div class="p-4">
-            <!-- Container Sebaris di Desktop (Flex Auto-Fit) -->
             <div id="wan-cards-container" class="flex flex-wrap md:flex-nowrap gap-4 overflow-x-auto pb-1">
                 <div class="text-xs text-slate-400 p-2">Loading WAN interfaces...</div>
             </div>
@@ -151,14 +150,17 @@
         </div>
     </div>
 
-    <!-- VLAN Segments Live Traffic Breakdown -->
+    <!-- VLAN Segments Live Traffic Breakdown (5 KARTU SEBARIS DI DESKTOP & DIURUTKAN TERTINGGI) -->
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
-        <div class="p-4 border-b border-slate-200 dark:border-slate-800">
-            <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-sm"><i class="fa-solid fa-sitemap text-cyan-600 dark:text-cyan-400 mr-2"></i> VLAN Segments Live Traffic Breakdown</h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Real-time Bandwidth Usage per Segment</p>
+        <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
+            <div>
+                <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-sm"><i class="fa-solid fa-sitemap text-cyan-600 dark:text-cyan-400 mr-2"></i> VLAN Segments Live Traffic Breakdown</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Sorted by highest bandwidth usage (5 per row on desktop)</p>
+            </div>
         </div>
         <div class="p-4">
-            <div id="vlan-cards-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <!-- Grid 5 Kolom di Desktop (lg:grid-cols-5) -->
+            <div id="vlan-cards-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 <div class="text-xs text-slate-400 p-4">Loading VLAN metrics...</div>
             </div>
         </div>
@@ -191,6 +193,7 @@
             updateThemeUI(isDark);
             if (window.lastJsonData) {
                 updateWanCards(window.lastJsonData.wans || []);
+                updateVlanCards(window.lastJsonData.vlans || []);
             }
         }
 
@@ -212,7 +215,7 @@
             if (val === 0) return "0 Mbps";
             if (val < 1.0) {
                 const kbps = (val * 1000).toFixed(0);
-                return `${kbps} Kbps (${val.toFixed(2)} Mbps)`;
+                return `${kbps} Kbps`;
             }
             return `${val.toFixed(1)} Mbps`;
         }
@@ -329,14 +332,21 @@
             const container = document.getElementById('vlan-cards-container');
             container.innerHTML = '';
 
-            const keys = Object.keys(vlanMap);
-            if (!keys.length) {
+            const list = Object.values(vlanMap);
+            if (!list.length) {
                 container.innerHTML = `<div class="text-xs text-slate-400 p-2">No active VLAN metrics detected.</div>`;
                 return;
             }
 
-            keys.forEach(vlanName => {
-                const v = vlanMap[vlanName];
+            // PERBAIKAN: Urutkan VLAN dari Total Trafik (Rx + Tx) Tertinggi ke Terendah
+            list.sort((a, b) => {
+                const totalA = parseFloat(a.RxMbps || 0) + parseFloat(a.TxMbps || 0);
+                const totalB = parseFloat(b.RxMbps || 0) + parseFloat(b.TxMbps || 0);
+                return totalB - totalA;
+            });
+
+            list.forEach(v => {
+                const vlanName = v.VLANName;
                 const rx = parseFloat(v.RxMbps || 0); // Klien Download
                 const tx = parseFloat(v.TxMbps || 0); // Klien Upload
 
