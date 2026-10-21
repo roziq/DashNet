@@ -253,10 +253,10 @@
             let rxValues = [];
             let txValues = [];
 
-            // Hitung otomatis total bandwidth dari akumulasi seluruh VLAN cards yang aktif di bawah
             let latestRx = 0;
             let latestTx = 0;
 
+            // Selalu prioritaskan akumulasi murni dari kartu-kartu VLAN yang aktif di bawah agar konsisten & akurat
             if (window.latestVlanMap) {
                 Object.values(window.latestVlanMap).forEach(v => {
                     latestRx += parseFloat(v.RxMbps || 0);
@@ -264,11 +264,13 @@
                 });
             }
 
-            // Jika masih 0, ambil dari data parameter
+            // Jika map VLAN belum siap, fallback hitung dari parameter vlanData / trafficData
             if (latestRx === 0 && latestTx === 0 && trafficData.length > 0) {
                 trafficData.forEach(t => {
-                    latestRx += parseFloat(t.RxMbps || t.RxBytes || 0);
-                    latestTx += parseFloat(t.TxMbps || t.TxBytes || 0);
+                    if ((t.VLANName || "").toLowerCase() !== "ether1") {
+                        latestRx += parseFloat(t.RxMbps || t.RxBytes || 0);
+                        latestTx += parseFloat(t.TxMbps || t.TxBytes || 0);
+                    }
                 });
             }
 
