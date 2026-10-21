@@ -4,45 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Network Control Center</title>
-    <!-- Tailwind CSS with Dark Mode Class Strategy -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
+        tailwind.config = { darkMode: 'class' }
     </script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased min-h-screen flex flex-col p-4 md:p-6 space-y-6 transition-colors duration-300">
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased min-h-screen flex flex-col p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 transition-colors duration-300">
 
     <!-- Top Bar / Header -->
     <header class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row justify-between items-center shadow-md dark:shadow-lg gap-4 transition-colors duration-300">
-        <div class="flex items-center space-x-3">
-            <div class="bg-cyan-500 p-3 rounded-xl text-slate-950 font-bold shadow-md">
-                <i class="fa-solid fa-network-wired text-xl"></i>
-            </div>
-            <div>
-                <h1 class="text-xl font-bold tracking-wide text-slate-900 dark:text-slate-100">Network Control Center</h1>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Integrated MikroTik, VLANs, UDM Pro & EdgeSwitch Management</p>
+        <div class="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-start">
+            <div class="flex items-center space-x-3">
+                <div class="bg-cyan-500 p-2.5 sm:p-3 rounded-xl text-slate-950 font-bold shadow-md">
+                    <i class="fa-solid fa-network-wired text-lg sm:text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-xl font-bold tracking-wide text-slate-900 dark:text-slate-100">Network Control Center</h1>
+                    <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">MikroTik, Multi-WAN, VLANs & Infrastructure</p>
+                </div>
             </div>
         </div>
-        <div class="flex items-center space-x-3 flex-wrap">
-            <!-- Theme Toggle Button -->
-            <button onclick="toggleTheme()" class="px-3.5 py-1.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition flex items-center gap-2 border border-slate-300 dark:border-slate-700 shadow-sm">
+        <!-- Action Buttons / Badges -->
+        <div class="flex items-center justify-center space-x-2 sm:space-x-3 flex-wrap gap-y-2 w-full md:w-auto">
+            <button onclick="toggleTheme()" class="px-3 py-1.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 border border-slate-300 dark:border-slate-700 shadow-sm">
                 <i id="theme-icon" class="fa-solid fa-moon"></i>
                 <span id="theme-text">Dark</span>
             </button>
 
             <span id="db-status-badge" class="px-3 py-1.5 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs rounded-xl border border-emerald-500/30 flex items-center gap-1.5 font-medium">
                 <span id="db-status-dot" class="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>
-                <span id="db-status-text">Database Connected</span>
+                <span id="db-status-text">Connected</span>
             </span>
             
             <button onclick="fetchData()" class="px-3.5 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow">
-                <i class="fa-solid fa-rotate"></i> Refresh Data
+                <i class="fa-solid fa-rotate"></i> Refresh
             </button>
         </div>
     </header>
@@ -50,82 +50,97 @@
     <!-- Stat Cards Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Online Devices -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl shadow-sm flex items-center justify-between transition-colors duration-300">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm flex items-center justify-between">
             <div>
                 <p class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Online Devices</p>
-                <h3 id="stat-devices" class="text-3xl font-extrabold mt-1 text-cyan-600 dark:text-cyan-400">1 / 1</h3>
-                <p class="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1 font-medium"><i class="fa-solid fa-check mr-1"></i> Infrastructure Healthy</p>
+                <h3 id="stat-devices" class="text-2xl sm:text-3xl font-extrabold mt-1 text-cyan-600 dark:text-cyan-400">1 / 1</h3>
+                <p class="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1 font-medium"><i class="fa-solid fa-check mr-1"></i> Healthy</p>
             </div>
-            <div class="p-3.5 bg-cyan-500/10 rounded-xl text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
-                <i class="fa-solid fa-server text-xl"></i>
+            <div class="p-3 bg-cyan-500/10 rounded-xl text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
+                <i class="fa-solid fa-server text-lg sm:text-xl"></i>
             </div>
         </div>
         <!-- Active Clients -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl shadow-sm flex items-center justify-between transition-colors duration-300">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm flex items-center justify-between">
             <div>
                 <p class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Active Clients</p>
-                <h3 id="stat-clients" class="text-3xl font-extrabold mt-1 text-emerald-600 dark:text-emerald-400">0</h3>
-                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Total Active DHCP Leases</p>
+                <h3 id="stat-clients" class="text-2xl sm:text-3xl font-extrabold mt-1 text-emerald-600 dark:text-emerald-400">0</h3>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">DHCP Leases</p>
             </div>
-            <div class="p-3.5 bg-emerald-500/10 rounded-xl text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                <i class="fa-solid fa-users text-xl"></i>
+            <div class="p-3 bg-emerald-500/10 rounded-xl text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                <i class="fa-solid fa-users text-lg sm:text-xl"></i>
             </div>
         </div>
         <!-- Core CPU Load -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl shadow-sm flex items-center justify-between transition-colors duration-300">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm flex items-center justify-between">
             <div>
                 <p class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Core CPU Load</p>
-                <h3 id="stat-cpu" class="text-3xl font-extrabold mt-1 text-amber-600 dark:text-amber-400">0%</h3>
-                <p id="stat-core-name" class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-mono">MikroTik RouterOS</p>
+                <h3 id="stat-cpu" class="text-2xl sm:text-3xl font-extrabold mt-1 text-amber-600 dark:text-amber-400">0%</h3>
+                <p id="stat-core-name" class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-mono">MikroTik</p>
             </div>
-            <div class="p-3.5 bg-amber-500/10 rounded-xl text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                <i class="fa-solid fa-microchip text-xl"></i>
+            <div class="p-3 bg-amber-500/10 rounded-xl text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                <i class="fa-solid fa-microchip text-lg sm:text-xl"></i>
             </div>
         </div>
-        <!-- Total Bandwidth (ether1) -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl shadow-sm flex items-center justify-between transition-colors duration-300">
+        <!-- Total Combined WAN Bandwidth -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm flex items-center justify-between">
             <div>
-                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Bandwidth (ether1)</p>
-                <h3 id="stat-bandwidth-total" class="text-3xl font-extrabold mt-1 text-purple-600 dark:text-purple-400">0 Mbps</h3>
+                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Bandwidth (All WAN)</p>
+                <h3 id="stat-bandwidth-total" class="text-2xl sm:text-3xl font-extrabold mt-1 text-purple-600 dark:text-purple-400">0 Mbps</h3>
                 <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex gap-2 font-mono">
-                    <span id="stat-rx" class="text-cyan-600 dark:text-cyan-400"><i class="fa-solid fa-arrow-down"></i> 0 Mbps</span>
-                    <span id="stat-tx" class="text-purple-600 dark:text-purple-400"><i class="fa-solid fa-arrow-up"></i> 0 Mbps</span>
+                    <span id="stat-rx" class="text-cyan-600 dark:text-cyan-400" title="Download"><i class="fa-solid fa-arrow-down"></i> 0 Mbps</span>
+                    <span id="stat-tx" class="text-purple-600 dark:text-purple-400" title="Upload"><i class="fa-solid fa-arrow-up"></i> 0 Mbps</span>
                 </p>
             </div>
-            <div class="p-3.5 bg-purple-500/10 rounded-xl text-purple-600 dark:text-purple-400 border border-purple-500/20">
-                <i class="fa-solid fa-chart-line text-xl"></i>
+            <div class="p-3 bg-purple-500/10 rounded-xl text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                <i class="fa-solid fa-globe text-lg sm:text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- WAN Interfaces Live Status & Breakdown -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
+            <div>
+                <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-sm"><i class="fa-solid fa-globe text-cyan-600 dark:text-cyan-400 mr-2"></i> WAN Interfaces Status & Live Traffic</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Real-time status and bandwidth per WAN Gateway link</p>
+            </div>
+        </div>
+        <div class="p-4">
+            <div id="wan-cards-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div class="text-xs text-slate-400 p-4">Loading WAN interfaces...</div>
             </div>
         </div>
     </div>
 
     <!-- Charts & VLAN Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Gateway Traffic Monitor (ether1 Trunk) -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl shadow-sm lg:col-span-2 flex flex-col transition-colors duration-300">
+        <!-- Gateway Traffic Monitor -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm lg:col-span-2 flex flex-col">
             <div class="flex justify-between items-center mb-4">
                 <div>
-                    <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-sm"><i class="fa-solid fa-chart-area text-cyan-600 dark:text-cyan-400 mr-2"></i> Gateway Traffic Monitor (ether1 Trunk)</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Live Traffic Accumulation across all VLANs</p>
+                    <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-sm"><i class="fa-solid fa-chart-area text-cyan-600 dark:text-cyan-400 mr-2"></i> WAN Aggregate Traffic Monitor</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Live Combined Download / Upload Trend across active WANs</p>
                 </div>
                 <span class="px-2.5 py-1 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] rounded-lg border border-emerald-500/30 font-semibold flex items-center gap-1">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span> Live
                 </span>
             </div>
             <div class="flex items-center space-x-6 text-xs text-slate-500 dark:text-slate-400 mb-2">
-                <span class="flex items-center gap-1.5"><span class="w-3 h-1 bg-cyan-500 rounded"></span> Download (Rx Mbps)</span>
-                <span class="flex items-center gap-1.5"><span class="w-3 h-1 bg-purple-500 rounded"></span> Upload (Tx Mbps)</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-1 bg-cyan-500 rounded"></span> Download (Rx)</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-1 bg-purple-500 rounded"></span> Upload (Tx)</span>
             </div>
-            <div class="relative flex-grow h-64">
+            <div class="relative flex-grow h-56 sm:h-64">
                 <canvas id="trafficChart"></canvas>
             </div>
         </div>
 
         <!-- UniFi AP Distribution -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl shadow-sm flex flex-col justify-between transition-colors duration-300">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm flex flex-col justify-between">
             <div>
                 <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-sm mb-1"><i class="fa-solid fa-wifi text-cyan-600 dark:text-cyan-400 mr-2"></i> UniFi AP Distribution</h3>
                 <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Connected Clients per Access Point</p>
-                <div class="relative h-48 flex justify-center items-center">
+                <div class="relative h-44 sm:h-48 flex justify-center items-center">
                     <canvas id="apChart"></canvas>
                 </div>
             </div>
@@ -136,46 +151,15 @@
     </div>
 
     <!-- VLAN Segments Live Traffic Breakdown -->
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden transition-colors duration-300">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
         <div class="p-4 border-b border-slate-200 dark:border-slate-800">
             <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-sm"><i class="fa-solid fa-sitemap text-cyan-600 dark:text-cyan-400 mr-2"></i> VLAN Segments Live Traffic Breakdown</h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Real-time Bandwidth Usage per Segment on Parent Interface ether1</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Real-time Bandwidth Usage per Segment</p>
         </div>
         <div class="p-4">
             <div id="vlan-cards-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <div class="text-xs text-slate-400 p-4">Loading VLAN segment metrics...</div>
+                <div class="text-xs text-slate-400 p-4">Loading VLAN metrics...</div>
             </div>
-        </div>
-    </div>
-
-    <!-- Inventory Table -->
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden transition-colors duration-300">
-        <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
-            <div>
-                <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-sm"><i class="fa-solid fa-server text-cyan-600 dark:text-cyan-400 mr-2"></i> Network Devices Inventory</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Registered Routers, EdgeSwitch, and APs synced with Google Sheets</p>
-            </div>
-            <div class="flex items-center space-x-2">
-                <input type="text" id="search-input" onkeyup="filterInventory()" placeholder="Search IP / Device..." class="bg-slate-100 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:border-cyan-500">
-            </div>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-slate-50 dark:bg-slate-950/50 text-slate-500 dark:text-slate-400 text-[11px] uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
-                        <th class="p-3.5">Device Name</th>
-                        <th class="p-3.5">Brand / Model</th>
-                        <th class="p-3.5">IP Address</th>
-                        <th class="p-3.5">Location</th>
-                        <th class="p-3.5">Status</th>
-                        <th class="p-3.5">Uptime</th>
-                        <th class="p-3.5">Active Clients</th>
-                    </tr>
-                </thead>
-                <tbody id="table-body" class="divide-y divide-slate-200 dark:divide-slate-800/60 text-xs text-slate-700 dark:text-slate-300">
-                    <tr><td colspan="7" class="p-6 text-center text-slate-400">Loading inventory from Google Sheets...</td></tr>
-                </tbody>
-            </table>
         </div>
     </div>
 
@@ -189,7 +173,6 @@
         let trafficHistoryRx = [];
         let trafficHistoryTx = [];
 
-        // --- Theme Switcher Logic ---
         function initTheme() {
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme === 'light') {
@@ -205,10 +188,8 @@
             const isDark = document.documentElement.classList.toggle('dark');
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
             updateThemeUI(isDark);
-            
-            // Re-render chart to adjust grid/label colors for theme
             if (window.lastJsonData) {
-                updateTrafficChart(window.lastJsonData.traffic || [], window.lastJsonData.devices || []);
+                updateWanCards(window.lastJsonData.wans || []);
             }
         }
 
@@ -232,9 +213,9 @@
                 
                 if (json.status === "success") {
                     setDatabaseStatus(true);
-                    updateInventoryTable(json.devices || []);
+                    updateInventorySummary(json.devices || []);
+                    updateWanCards(json.wans || []);
                     updateVlanCards(json.vlans || []);
-                    updateTrafficChart(json.traffic || [], json.devices || []);
                     updateApDistributionChart(json.ap_distribution || []);
                 } else {
                     setDatabaseStatus(false, "API Error");
@@ -245,7 +226,7 @@
             }
         }
 
-        function setDatabaseStatus(isConnected, message = "Database Connected") {
+        function setDatabaseStatus(isConnected, message = "Connected") {
             const badge = document.getElementById('db-status-badge');
             const dot = document.getElementById('db-status-dot');
             const text = document.getElementById('db-status-text');
@@ -261,15 +242,8 @@
             }
         }
 
-        function updateInventoryTable(devices) {
-            const tbody = document.getElementById('table-body');
-            tbody.innerHTML = '';
-
-            if (!devices.length) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">No registered devices found.</td></tr>`;
-                return;
-            }
-
+        function updateInventorySummary(devices) {
+            if (!devices.length) return;
             const latestDev = devices[devices.length - 1];
             const activeClients = parseInt(latestDev.ActiveLeases || latestDev.active_leases || latestDev.ActiveClients || latestDev.active_clients || 0);
             const cpuLoad = latestDev.CpuLoad || latestDev.cpu_load || '0%';
@@ -277,26 +251,61 @@
             document.getElementById('stat-clients').innerText = activeClients;
             document.getElementById('stat-cpu').innerText = typeof cpuLoad === 'number' ? (cpuLoad * 100).toFixed(0) + '%' : cpuLoad;
             document.getElementById('stat-core-name').innerText = latestDev.DeviceName || 'MikroTik';
+        }
 
-            const uniqueDevices = {};
-            devices.forEach(d => { uniqueDevices[d.DeviceName] = d; });
-            const list = Object.values(uniqueDevices);
+        function updateWanCards(wanData) {
+            const wanMap = {};
+            wanData.forEach(item => {
+                if (item.WANName) wanMap[item.WANName] = item;
+            });
 
-            list.forEach(d => {
-                const clients = parseInt(d.ActiveLeases || d.active_leases || d.ActiveClients || d.active_clients || activeClients);
+            const container = document.getElementById('wan-cards-container');
+            container.innerHTML = '';
 
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-100 dark:hover:bg-slate-800/40 transition">
-                        <td class="p-3.5 font-medium text-slate-800 dark:text-slate-200">${d.DeviceName || 'CCR2004|SMEGA'}</td>
-                        <td class="p-3.5"><span class="px-2 py-0.5 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 rounded-md text-[11px]">MikroTik RouterOS</span></td>
-                        <td class="p-3.5 font-mono text-slate-500 dark:text-slate-400">192.168.88.1</td>
-                        <td class="p-3.5 text-slate-500 dark:text-slate-400">Server Room</td>
-                        <td class="p-3.5"><span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-md text-[11px] font-semibold">Online</span></td>
-                        <td class="p-3.5 text-slate-500 dark:text-slate-400 font-mono text-[11px]">${d.Uptime || 'Online'}</td>
-                        <td class="p-3.5 font-semibold text-emerald-600 dark:text-emerald-400">${clients}</td>
-                    </tr>
+            const keys = Object.keys(wanMap);
+            if (!keys.length) {
+                container.innerHTML = `<div class="text-xs text-slate-400 p-2">No active WAN metrics detected.</div>`;
+                return;
+            }
+
+            let totalRx = 0;
+            let totalTx = 0;
+
+            keys.forEach(wanName => {
+                const w = wanMap[wanName];
+                const rx = parseFloat(w.RxMbps || 0);
+                const tx = parseFloat(w.TxMbps || 0);
+                const isUp = (w.Status || "UP").toUpperCase() === "UP";
+
+                if (isUp) {
+                    totalRx += rx;
+                    totalTx += tx;
+                }
+
+                const statusBadge = isUp 
+                    ? `<span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-md text-[10px] font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span> UP</span>`
+                    : `<span class="px-2 py-0.5 bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded-md text-[10px] font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-500 dark:bg-rose-400"></span> DOWN</span>`;
+
+                container.innerHTML += `
+                    <div class="bg-slate-50 dark:bg-slate-950/70 border ${isUp ? 'border-slate-200 dark:border-slate-800' : 'border-rose-500/50'} p-4 rounded-xl flex flex-col justify-between">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-xs text-cyan-600 dark:text-cyan-400 font-mono">${wanName}</span>
+                            ${statusBadge}
+                        </div>
+                        <div class="space-y-1 text-xs font-mono">
+                            <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>Download (Rx):</span> <span class="text-cyan-600 dark:text-cyan-400 font-semibold">${rx.toFixed(1)} Mbps</span></div>
+                            <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>Upload (Tx):</span> <span class="text-purple-600 dark:text-purple-400 font-semibold">${tx.toFixed(1)} Mbps</span></div>
+                        </div>
+                    </div>
                 `;
             });
+
+            // Update Total Stat Cards Atas & Chart
+            document.getElementById('stat-rx').innerHTML = `<i class="fa-solid fa-arrow-down"></i> ${totalRx.toFixed(1)} Mbps`;
+            document.getElementById('stat-tx').innerHTML = `<i class="fa-solid fa-arrow-up"></i> ${totalTx.toFixed(1)} Mbps`;
+            document.getElementById('stat-bandwidth-total').innerText = `${(totalRx + totalTx).toFixed(1)} Mbps`;
+
+            updateTrafficChart(totalRx, totalTx);
         }
 
         function updateVlanCards(vlanData) {
@@ -304,14 +313,13 @@
             vlanData.forEach(item => {
                 if (item.VLANName) vlanMap[item.VLANName] = item;
             });
-            window.latestVlanMap = vlanMap;
 
             const container = document.getElementById('vlan-cards-container');
             container.innerHTML = '';
 
             const keys = Object.keys(vlanMap);
             if (!keys.length) {
-                container.innerHTML = `<div class="text-xs text-slate-400 p-2">No active VLAN metrics detected in database.</div>`;
+                container.innerHTML = `<div class="text-xs text-slate-400 p-2">No active VLAN metrics detected.</div>`;
                 return;
             }
 
@@ -321,40 +329,21 @@
                 const tx = parseFloat(v.TxMbps || 0).toFixed(1);
 
                 container.innerHTML += `
-                    <div class="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 p-4 rounded-xl flex flex-col justify-between transition-colors duration-300">
+                    <div class="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 p-4 rounded-xl flex flex-col justify-between">
                         <div class="flex justify-between items-center mb-2">
                             <span class="font-semibold text-xs text-cyan-600 dark:text-cyan-400 font-mono">${vlanName}</span>
                             <span class="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>
                         </div>
                         <div class="space-y-1 text-xs font-mono">
-                            <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>Rx (Down):</span> <span class="text-cyan-600 dark:text-cyan-400 font-semibold">${rx} Mbps</span></div>
-                            <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>Tx (Up):</span> <span class="text-purple-600 dark:text-purple-400 font-semibold">${tx} Mbps</span></div>
+                            <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>Download (Rx):</span> <span class="text-cyan-600 dark:text-cyan-400 font-semibold">${rx} Mbps</span></div>
+                            <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>Upload (Tx):</span> <span class="text-purple-600 dark:text-purple-400 font-semibold">${tx} Mbps</span></div>
                         </div>
                     </div>
                 `;
             });
         }
 
-        function updateTrafficChart(trafficData, deviceData) {
-            let latestRx = 0;
-            let latestTx = 0;
-
-            if (window.latestVlanMap) {
-                Object.values(window.latestVlanMap).forEach(v => {
-                    latestRx += parseFloat(v.RxMbps || 0);
-                    latestTx += parseFloat(v.TxMbps || 0);
-                });
-            }
-
-            if (latestRx === 0 && latestTx === 0 && trafficData.length > 0) {
-                trafficData.forEach(t => {
-                    if ((t.VLANName || "").toLowerCase() !== "ether1") {
-                        latestRx += parseFloat(t.RxMbps || t.RxBytes || 0);
-                        latestTx += parseFloat(t.TxMbps || t.TxBytes || 0);
-                    }
-                });
-            }
-
+        function updateTrafficChart(latestRx, latestTx) {
             const currentTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
 
             if (!trafficHistoryLabels.includes(currentTime)) {
@@ -368,10 +357,6 @@
                     trafficHistoryTx.shift();
                 }
             }
-
-            document.getElementById('stat-rx').innerHTML = `<i class="fa-solid fa-arrow-down"></i> ${latestRx.toFixed(1)} Mbps`;
-            document.getElementById('stat-tx').innerHTML = `<i class="fa-solid fa-arrow-up"></i> ${latestTx.toFixed(1)} Mbps`;
-            document.getElementById('stat-bandwidth-total').innerText = `${(latestRx + latestTx).toFixed(1)} Mbps`;
 
             const isDark = document.documentElement.classList.contains('dark');
             const gridColor = isDark ? 'rgba(51, 65, 85, 0.3)' : 'rgba(226, 232, 240, 0.8)';
@@ -396,9 +381,7 @@
                         y: { grid: { color: gridColor }, ticks: { color: tickColor } },
                         x: { grid: { display: false }, ticks: { color: tickColor } }
                     },
-                    plugins: { 
-                        legend: { display: false } 
-                    }
+                    plugins: { legend: { display: false } }
                 }
             });
         }
@@ -442,16 +425,6 @@
             });
         }
 
-        function filterInventory() {
-            const query = document.getElementById('search-input').value.toLowerCase();
-            const rows = document.querySelectorAll('#table-body tr');
-            rows.forEach(row => {
-                const text = row.innerText.toLowerCase();
-                row.style.display = text.includes(query) ? '' : 'none';
-            });
-        }
-
-        // Init Theme and Fetch Data
         initTheme();
         fetchData();
         setInterval(fetchData, 30000);
