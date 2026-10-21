@@ -310,7 +310,15 @@
                 if (item.VLANName) vlanMap[item.VLANName] = item;
             });
             window.latestVlanMap = vlanMap; // Simpan untuk referensi total bandwidth
-            // ... (lanjutan kode render card seperti biasa)
+
+            const container = document.getElementById('vlan-cards-container');
+            container.innerHTML = '';
+
+            const keys = Object.keys(vlanMap);
+            if (!keys.length) {
+                container.innerHTML = `<div class="text-xs text-slate-500 p-2">No active VLAN metrics detected in database.</div>`;
+                return;
+            }
 
             keys.forEach(vlanName => {
                 const v = vlanMap[vlanName];
