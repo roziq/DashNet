@@ -248,39 +248,33 @@
             });
         }
 
-        function updateTrafficChart(trafficData, deviceData) {
+        function updateTrafficChart(trafficData, deviceData, vlanData = []) {
             let labels = [];
             let rxValues = [];
             let txValues = [];
 
-            // Ambil histori dari traffic ether1 jika ada
-            let chartData = trafficData.filter(t => (t.VLANName || "").toLowerCase() === "ether1");
+            // Hitung otomatis total bandwidth dari akumulasi seluruh VLAN cards yang aktif di bawah
+            let latestRx = 0;
+            let latestTx = 0;
 
-            if (chartData.length > 0) {
-                labels = chartData.slice(-10).map(t => t.Timestamp ? new Date(t.Timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '');
-                rxValues = chartData.slice(-10).map(t => parseFloat(t.RxMbps || t.RxBytes || 0));
-                txValues = chartData.slice(-10).map(t => parseFloat(t.TxMbps || t.TxBytes || 0));
-            } else {
-                // Jika log ether1 terpisah, buat dummy timeline dari jam saat ini
-                const nowStr = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                labels = [nowStr];
-                rxValues = [0];
-                txValues = [0];
-            }
-
-            // Hitung otomatis total bandwidth dari seluruh kartu VLAN aktif di bawah (jika data ether1 utama 0)
-            let latestRx = rxValues.length ? rxValues[rxValues.length - 1] : 0;
-            let latestTx = txValues.length ? txValues[txValues.length - 1] : 0;
-
-            if (latestRx === 0 && latestTx === 0) {
-                // Akumulasi dari semua nilai Rx dan Tx VLAN cards yang ada di database
-                trafficData.forEach(t => {
-                    if ((t.VLANName || "").toLowerCase() !== "ether1") {
-                        latestRx += parseFloat(t.RxMbps || 0);
-                        latestTx += parseFloat(t.TxMbps || 0);
-                    }
+            if (window.latestVlanMap) {
+                Object.values(window.latestVlanMap).forEach(v => {
+                    latestRx += parseFloat(v.RxMbps || 0);
+                    latestTx += parseFloat(v.TxMbps || 0);
                 });
             }
+
+            // Jika masih 0, ambil dari data parameter
+            if (latestRx === 0 && latestTx === 0 && trafficData.length > 0) {
+                trafficData.forEach(t => {
+                    latestRx += parseFloat(t.RxMbps || t.RxBytes || 0);
+                    latestTx += parseFloat(t.TxMbps || t.TxBytes || 0);
+                });
+            }
+
+            labels = [new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})];
+            rxValues = [latestRx];
+            txValues = [latestTx];
 
             document.getElementById('stat-rx').innerHTML = `<i class="fa-solid fa-arrow-down"></i> ${latestRx.toFixed(1)} Mbps`;
             document.getElementById('stat-tx').innerHTML = `<i class="fa-solid fa-arrow-up"></i> ${latestTx.toFixed(1)} Mbps`;
@@ -294,8 +288,8 @@
                 data: {
                     labels: labels.length ? labels : ['--:--'],
                     datasets: [
-                        { label: 'Download', data: rxValues.length ? rxValues : [latestRx], borderColor: '#06b6d4', backgroundColor: 'rgba(6, 182, 212, 0.1)', borderWidth: 2, fill: true, tension: 0.3 },
-                        { label: 'Upload', data: txValues.length ? txValues : [latestTx], borderColor: '#a855f7', backgroundColor: 'rgba(168, 85, 247, 0.1)', borderWidth: 2, fill: true, tension: 0.3 }
+                        { label: 'Download', data: rxValues, borderColor: '#06b6d4', backgroundColor: 'rgba(6, 182, 212, 0.1)', borderWidth: 2, fill: true, tension: 0.3 },
+                        { label: 'Upload', data: txValues, borderColor: '#a855f7', backgroundColor: 'rgba(168, 85, 247, 0.1)', borderWidth: 2, fill: true, tension: 0.3 }
                     ]
                 },
                 options: {
@@ -315,15 +309,8 @@
             vlanData.forEach(item => {
                 if (item.VLANName) vlanMap[item.VLANName] = item;
             });
-
-            const container = document.getElementById('vlan-cards-container');
-            container.innerHTML = '';
-
-            const keys = Object.keys(vlanMap);
-            if (!keys.length) {
-                container.innerHTML = `<div class="text-xs text-slate-500 p-2">No active VLAN metrics detected in database.</div>`;
-                return;
-            }
+            window.latestVlanMap = vlanMap; // Simpan untuk referensi total bandwidth
+            // ... (lanjutan kode render card seperti biasa)
 
             keys.forEach(vlanName => {
                 const v = vlanMap[vlanName];
