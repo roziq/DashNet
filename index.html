@@ -14,7 +14,6 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Custom Scrollbar Ringkas */
         .custom-scrollbar::-webkit-scrollbar {
             height: 4px;
             width: 4px;
@@ -70,7 +69,7 @@
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2.5 py-1.5 rounded-xl shadow-sm flex items-center justify-between">
                 <div>
                     <p class="text-[9px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Online Devices</p>
-                    <h3 id="stat-devices" class="text-sm font-extrabold text-cyan-600 dark:text-cyan-400 leading-tight">1 / 1</h3>
+                    <h3 id="stat-devices" class="text-sm font-extrabold text-cyan-600 dark:text-cyan-400 leading-tight">2 / 2</h3>
                     <p class="text-[8px] text-emerald-600 dark:text-emerald-400 font-medium"><i class="fa-solid fa-check mr-0.5"></i> Healthy</p>
                 </div>
                 <div class="p-1.5 bg-cyan-500/10 rounded-lg text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
@@ -299,10 +298,12 @@
             const latestDev = devices[devices.length - 1];
             const activeClients = parseInt(latestDev.ActiveLeases || latestDev.active_leases || latestDev.ActiveClients || latestDev.active_clients || 0);
             const cpuLoad = latestDev.CpuLoad || latestDev.cpu_load || '0%';
+            const onlineDevs = latestDev.Note || latestDev.online_devices || "2 / 2";
 
+            document.getElementById('stat-devices').innerText = onlineDevs;
             document.getElementById('stat-clients').innerText = activeClients;
             document.getElementById('stat-cpu').innerText = typeof cpuLoad === 'number' ? (cpuLoad * 100).toFixed(0) + '%' : cpuLoad;
-            document.getElementById('stat-core-name').innerText = latestDev.DeviceName || 'MikroTik';
+            document.getElementById('stat-core-name').innerText = latestDev.DeviceName || 'CCR2004';
         }
 
         function updateWanCards(wanData) {
