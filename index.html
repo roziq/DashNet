@@ -226,7 +226,7 @@
 
             let totalClients = 0;
             list.forEach(d => {
-                const clients = parseInt(d.ActiveLeases || d.ActiveClients || d.active_leases || d.active_clients || 0);
+                const clients = parseInt(d.ActiveLeases || d.active_leases || d.ActiveClients || d.active_clients || 0);
                 totalClients += clients;
 
                 document.getElementById('stat-cpu').innerText = d.CpuLoad || d.cpu_load || '0%';
@@ -252,19 +252,16 @@
         }
 
         function updateTrafficChart(trafficData, deviceData) {
-            // Ambil histori dari array traffic atau mapping dari device data
-            let chartData = trafficData.filter(t => t.VLANName === "ether1" || t.Interface === "ether1");
-            
+            let chartData = trafficData.filter(t => t.VLANName === "ether1");
             let labels = [];
             let rxValues = [];
             let txValues = [];
 
             if (chartData.length > 0) {
                 labels = chartData.slice(-10).map(t => t.Timestamp ? new Date(t.Timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '');
-                rxValues = chartData.slice(-10).map(t => parseFloat(t.RxMbps || t.RxBytes || 0));
-                txValues = chartData.slice(-10).map(t => parseFloat(t.TxMbps || t.TxBytes || 0));
+                rxValues = chartData.slice(-10).map(t => parseFloat(t.RxMbps || 0));
+                txValues = chartData.slice(-10).map(t => parseFloat(t.TxMbps || 0));
             } else if (deviceData.length > 0) {
-                // Fallback ambil dari log devices terbaru
                 const recentDevs = deviceData.slice(-10);
                 labels = recentDevs.map(d => d.Timestamp ? new Date(d.Timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '');
                 rxValues = recentDevs.map(d => parseFloat(d.rx_mbps || 0));
