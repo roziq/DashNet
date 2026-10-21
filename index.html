@@ -152,20 +152,20 @@
         </div>
     </div>
 
-    <!-- 3. SWITCH & UNIFI AP DISTRIBUTION AREA (SEKSI BAWAH) -->
+    <!-- 3. EDGESWITCH & UNIFI AP DISTRIBUTION AREA (SEKSI BAWAH) -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 shrink-0">
-        <!-- Switch Status (Placeholder / EdgeSwitch & UDM Pro) -->
+        <!-- EdgeSwitch 8 150W Status Card -->
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded-xl shadow-sm flex items-center justify-between">
             <div class="flex items-center space-x-2">
                 <div class="p-2 bg-indigo-500/10 rounded-lg text-indigo-500 border border-indigo-500/20">
                     <i class="fa-solid fa-network-wired text-xs"></i>
                 </div>
                 <div>
-                    <h4 class="text-[11px] font-bold text-slate-800 dark:text-slate-200">EdgeSwitch & USW</h4>
-                    <p class="text-[9px] text-slate-500 dark:text-slate-400">Core Switches Link Active</p>
+                    <h4 class="text-[11px] font-bold text-slate-800 dark:text-slate-200">EdgeSwitch 8 150W</h4>
+                    <p id="es-status-desc" class="text-[9px] text-emerald-500 font-medium">SNMP Polling Active</p>
                 </div>
             </div>
-            <span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded text-[9px] font-bold">STP OK</span>
+            <span id="es-status-badge" class="px-2 py-0.5 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded text-[9px] font-bold">ONLINE</span>
         </div>
 
         <!-- UniFi AP Distribution (Doughnut Chart) -->
@@ -179,11 +179,9 @@
                     <p class="text-[9px] text-slate-500 dark:text-slate-400">Connected Clients per AP</p>
                 </div>
             </div>
-            <!-- Chart Mini -->
             <div class="relative w-16 h-16 shrink-0">
                 <canvas id="apChart"></canvas>
             </div>
-            <!-- Legend Area -->
             <div id="ap-legend" class="grid grid-cols-3 gap-1.5 text-[9px] text-slate-600 dark:text-slate-300 flex-grow font-mono">
                 <div class="text-slate-400">Waiting AP...</div>
             </div>
@@ -269,6 +267,7 @@
                     updateInventorySummary(json.devices || []);
                     updateWanCards(json.wans || []);
                     updateVlanCards(json.vlans || []);
+                    updateEdgeSwitchStatus(json.edgeswitch || []);
                     updateApDistributionChart(json.ap_distribution || []);
                 } else {
                     setDatabaseStatus(false, "API Error");
@@ -405,6 +404,24 @@
             });
         }
 
+        function updateEdgeSwitchStatus(esData) {
+            if (!esData || !esData.length) return;
+            const latestES = esData[esData.length - 1];
+            const isOnline = (latestES.Status || "").toUpperCase() === "ONLINE";
+            const badge = document.getElementById('es-status-badge');
+            const desc = document.getElementById('es-status-desc');
+
+            if (isOnline) {
+                badge.className = "px-2 py-0.5 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded text-[9px] font-bold";
+                badge.innerText = "ONLINE";
+                desc.innerText = "SNMP Polling Active";
+            } else {
+                badge.className = "px-2 py-0.5 bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded text-[9px] font-bold";
+                badge.innerText = "OFFLINE";
+                desc.innerText = "No SNMP Response";
+            }
+        }
+
         function updateTrafficChart(latestRx, latestTx) {
             const currentTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
 
@@ -489,7 +506,7 @@
 
         initTheme();
         fetchData();
-        setInterval(fetchData, 60000);
+        setInterval(fetchData, 30000);
     </script>
 </body>
 </html>
