@@ -13,6 +13,24 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom Scrollbar Styling */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.1);
+            border-radius: 8px;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #06b6d4;
+            border-radius: 8px;
+        }
+    </style>
 </head>
 <body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased min-h-screen flex flex-col p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 transition-colors duration-300">
 
@@ -107,13 +125,13 @@
             </div>
         </div>
         <div class="p-4">
-            <div id="wan-cards-container" class="flex flex-wrap md:flex-nowrap gap-4 overflow-x-auto pb-1">
+            <div id="wan-cards-container" class="flex flex-wrap md:flex-nowrap gap-4 overflow-x-auto pb-1 custom-scrollbar">
                 <div class="text-xs text-slate-400 p-2">Loading WAN interfaces...</div>
             </div>
         </div>
     </div>
 
-    <!-- Charts & VLAN Grid -->
+    <!-- Charts & AP Distribution -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Gateway Traffic Monitor -->
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm lg:col-span-2 flex flex-col">
@@ -150,18 +168,23 @@
         </div>
     </div>
 
-    <!-- VLAN Segments Live Traffic Breakdown (5 KARTU SEBARIS DI DESKTOP & DIURUTKAN TERTINGGI) -->
+    <!-- VLAN Segments Live Traffic Breakdown (2 BARIS COLORFUL GRID) -->
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
         <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
             <div>
                 <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-sm"><i class="fa-solid fa-sitemap text-cyan-600 dark:text-cyan-400 mr-2"></i> VLAN Segments Live Traffic Breakdown</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Sorted by highest bandwidth usage (5 per row on desktop)</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">22 VLAN Segments • Sorted by Highest Usage (2 Rows Colorful Layout)</p>
             </div>
+            <span id="vlan-count-badge" class="px-2.5 py-1 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-xs rounded-lg font-mono font-bold border border-cyan-500/20">
+                0 Active VLANs
+            </span>
         </div>
         <div class="p-4">
-            <!-- Grid 5 Kolom di Desktop (lg:grid-cols-5) -->
-            <div id="vlan-cards-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                <div class="text-xs text-slate-400 p-4">Loading VLAN metrics...</div>
+            <!-- Container Grid 2 Baris Scrollable -->
+            <div class="max-h-[380px] overflow-y-auto custom-scrollbar pr-1">
+                <div id="vlan-cards-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3.5">
+                    <div class="text-xs text-slate-400 p-4">Loading VLAN metrics...</div>
+                </div>
             </div>
         </div>
     </div>
@@ -175,6 +198,22 @@
         let trafficHistoryLabels = [];
         let trafficHistoryRx = [];
         let trafficHistoryTx = [];
+
+        // Palet Warna-Warni Menyenangkan untuk Kartu VLAN
+        const COLOR_PALETTE = [
+            { border: 'border-cyan-500/40', bg: 'bg-cyan-500/10', text: 'text-cyan-600 dark:text-cyan-400', badge: 'bg-cyan-500' },
+            { border: 'border-indigo-500/40', bg: 'bg-indigo-500/10', text: 'text-indigo-600 dark:text-indigo-400', badge: 'bg-indigo-500' },
+            { border: 'border-emerald-500/40', bg: 'bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-400', badge: 'bg-emerald-500' },
+            { border: 'border-purple-500/40', bg: 'bg-purple-500/10', text: 'text-purple-600 dark:text-purple-400', badge: 'bg-purple-500' },
+            { border: 'border-amber-500/40', bg: 'bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', badge: 'bg-amber-500' },
+            { border: 'border-rose-500/40', bg: 'bg-rose-500/10', text: 'text-rose-600 dark:text-rose-400', badge: 'bg-rose-500' },
+            { border: 'border-pink-500/40', bg: 'bg-pink-500/10', text: 'text-pink-600 dark:text-pink-400', badge: 'bg-pink-500' },
+            { border: 'border-teal-500/40', bg: 'bg-teal-500/10', text: 'text-teal-600 dark:text-teal-400', badge: 'bg-teal-500' },
+            { border: 'border-sky-500/40', bg: 'bg-sky-500/10', text: 'text-sky-600 dark:text-sky-400', badge: 'bg-sky-500' },
+            { border: 'border-violet-500/40', bg: 'bg-violet-500/10', text: 'text-violet-600 dark:text-violet-400', badge: 'bg-violet-500' },
+            { border: 'border-lime-500/40', bg: 'bg-lime-500/10', text: 'text-lime-600 dark:text-lime-400', badge: 'bg-lime-500' },
+            { border: 'border-orange-500/40', bg: 'bg-orange-500/10', text: 'text-orange-600 dark:text-orange-400', badge: 'bg-orange-500' }
+        ];
 
         function initTheme() {
             const savedTheme = localStorage.getItem('theme');
@@ -209,7 +248,6 @@
             }
         }
 
-        // Format Tampilan Kecepatan (Kbps / Mbps)
         function formatSpeed(mbpsVal) {
             const val = parseFloat(mbpsVal || 0);
             if (val === 0) return "0 Mbps";
@@ -302,7 +340,7 @@
                     : `<span class="px-2 py-0.5 bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded-md text-[10px] font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-500 dark:bg-rose-400"></span> DOWN</span>`;
 
                 container.innerHTML += `
-                    <div class="flex-1 min-w-[200px] bg-slate-50 dark:bg-slate-950/70 border ${isUp ? 'border-slate-200 dark:border-slate-800' : 'border-rose-500/50'} p-4 rounded-xl flex flex-col justify-between">
+                    <div class="flex-1 min-w-[190px] bg-slate-50 dark:bg-slate-950/70 border ${isUp ? 'border-slate-200 dark:border-slate-800' : 'border-rose-500/50'} p-3.5 rounded-xl flex flex-col justify-between">
                         <div class="flex justify-between items-center mb-2">
                             <span class="font-bold text-xs text-cyan-600 dark:text-cyan-400 font-mono">${wanName}</span>
                             ${statusBadge}
@@ -315,7 +353,6 @@
                 `;
             });
 
-            // Update Total Stat Cards Atas & Chart
             document.getElementById('stat-rx').innerHTML = `<i class="fa-solid fa-arrow-down"></i> ${totalRx.toFixed(1)} Mbps`;
             document.getElementById('stat-tx').innerHTML = `<i class="fa-solid fa-arrow-up"></i> ${totalTx.toFixed(1)} Mbps`;
             document.getElementById('stat-bandwidth-total').innerText = `${(totalRx + totalTx).toFixed(1)} Mbps`;
@@ -333,32 +370,37 @@
             container.innerHTML = '';
 
             const list = Object.values(vlanMap);
+            document.getElementById('vlan-count-badge').innerText = `${list.length} Active VLANs`;
+
             if (!list.length) {
                 container.innerHTML = `<div class="text-xs text-slate-400 p-2">No active VLAN metrics detected.</div>`;
                 return;
             }
 
-            // PERBAIKAN: Urutkan VLAN dari Total Trafik (Rx + Tx) Tertinggi ke Terendah
+            // Urutkan VLAN dari Total Bandwidth Tertinggi ke Terendah
             list.sort((a, b) => {
                 const totalA = parseFloat(a.RxMbps || 0) + parseFloat(a.TxMbps || 0);
                 const totalB = parseFloat(b.RxMbps || 0) + parseFloat(b.TxMbps || 0);
                 return totalB - totalA;
             });
 
-            list.forEach(v => {
+            list.forEach((v, idx) => {
                 const vlanName = v.VLANName;
                 const rx = parseFloat(v.RxMbps || 0); // Klien Download
                 const tx = parseFloat(v.TxMbps || 0); // Klien Upload
+                
+                // Pilih skema warna acak/berurutan dari palet
+                const theme = COLOR_PALETTE[idx % COLOR_PALETTE.length];
 
                 container.innerHTML += `
-                    <div class="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 p-4 rounded-xl flex flex-col justify-between">
+                    <div class="bg-slate-50 dark:bg-slate-950/80 border ${theme.border} p-3.5 rounded-xl flex flex-col justify-between shadow-sm hover:scale-[1.02] transition-transform duration-200">
                         <div class="flex justify-between items-center mb-2">
-                            <span class="font-semibold text-xs text-cyan-600 dark:text-cyan-400 font-mono">${vlanName}</span>
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>
+                            <span class="font-bold text-xs ${theme.text} font-mono truncate">${vlanName}</span>
+                            <span class="w-2 h-2 rounded-full ${theme.badge} animate-pulse"></span>
                         </div>
                         <div class="space-y-1 text-xs font-mono">
-                            <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>Down (Rx):</span> <span class="text-cyan-600 dark:text-cyan-400 font-semibold">${formatSpeed(rx)}</span></div>
-                            <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>Up (Tx):</span> <span class="text-purple-600 dark:text-purple-400 font-semibold">${formatSpeed(tx)}</span></div>
+                            <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>Down (Rx):</span> <span class="${theme.text} font-semibold">${formatSpeed(rx)}</span></div>
+                            <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>Up (Tx):</span> <span class="text-slate-700 dark:text-slate-300 font-semibold">${formatSpeed(tx)}</span></div>
                         </div>
                     </div>
                 `;
