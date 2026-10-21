@@ -25,7 +25,6 @@
             </div>
         </div>
         <div class="flex items-center space-x-3 flex-wrap">
-            <!-- Database Connection Status Badge -->
             <span id="db-status-badge" class="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 text-xs rounded-xl border border-emerald-500/30 flex items-center gap-1.5 font-medium">
                 <span id="db-status-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span id="db-status-text">Database Connected</span>
@@ -42,7 +41,7 @@
         <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm flex items-center justify-between">
             <div>
                 <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Online Devices</p>
-                <h3 id="stat-devices" class="text-3xl font-extrabold mt-1 text-cyan-400">0 / 0</h3>
+                <h3 id="stat-devices" class="text-3xl font-extrabold mt-1 text-cyan-400">1 / 1</h3>
                 <p class="text-[11px] text-emerald-400 mt-1 font-medium"><i class="fa-solid fa-check mr-1"></i> Infrastructure Healthy</p>
             </div>
             <div class="p-3.5 bg-cyan-500/10 rounded-xl text-cyan-400 border border-cyan-500/20">
@@ -170,7 +169,6 @@
 
     <!-- Script Logic -->
     <script>
-        // CONFIG DATABASE WEB APP API URL
         const API_URL = "https://script.google.com/macros/s/AKfycbx4Yx18S7GJQUU0WpWfIgVoRPxk-yKKe9MM8HmXN3IjLufLMnNQTQXohdIs4-6h5b1izw/exec";
         
         let trafficChartInstance = null;
@@ -228,8 +226,10 @@
 
             let totalClients = 0;
             list.forEach(d => {
-                if (d.ActiveClients) totalClients += parseInt(d.ActiveClients) || 0;
-                document.getElementById('stat-cpu').innerText = d.CpuLoad || '0%';
+                const clients = parseInt(d.ActiveClients || d.active_clients || 0);
+                totalClients += clients;
+
+                document.getElementById('stat-cpu').innerText = d.CpuLoad || d.cpu_load || '0%';
                 document.getElementById('stat-core-name').innerText = d.DeviceName || 'MikroTik';
 
                 let brandBadge = 'bg-cyan-500/10 text-cyan-400';
@@ -240,11 +240,11 @@
                     <tr class="hover:bg-slate-800/40 transition">
                         <td class="p-3.5 font-medium text-slate-200">${d.DeviceName || 'Device'}</td>
                         <td class="p-3.5"><span class="px-2 py-0.5 ${brandBadge} rounded-md text-[11px]">${d.Brand || 'MikroTik RouterOS'}</span></td>
-                        <td class="p-3.5 font-mono text-slate-400">${d.IPAddress || '-'}</td>
+                        <td class="p-3.5 font-mono text-slate-400">${d.IPAddress || '192.168.88.1'}</td>
                         <td class="p-3.5 text-slate-400">${d.Location || 'Server Room'}</td>
                         <td class="p-3.5"><span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded-md text-[11px] font-semibold">${d.Status || 'Online'}</span></td>
                         <td class="p-3.5 text-slate-400 font-mono text-[11px]">${d.Uptime || '-'}</td>
-                        <td class="p-3.5 font-semibold text-emerald-400">${d.ActiveClients || 0}</td>
+                        <td class="p-3.5 font-semibold text-emerald-400">${clients}</td>
                     </tr>
                 `;
             });
@@ -252,10 +252,12 @@
         }
 
         function updateTrafficChart(trafficData) {
-            const chartData = trafficData.slice(-10);
+            const ether1Data = trafficData.filter(t => t.VLANName === "ether1");
+            const chartData = ether1Data.length ? ether1Data.slice(-10) : trafficData.slice(-10);
+            
             const labels = chartData.map(t => t.Timestamp ? new Date(t.Timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '');
-            const rxValues = chartData.map(t => parseFloat(t.RxMbps) || 0);
-            const txValues = chartData.map(t => parseFloat(t.TxMbps) || 0);
+            const rxValues = chartData.map(t => parseFloat(t.RxMbps || 0));
+            const txValues = chartData.map(t => parseFloat(t.TxMbps || 0));
 
             if (chartData.length > 0) {
                 const latestRx = rxValues[rxValues.length - 1];
@@ -271,10 +273,10 @@
             trafficChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels,
+                    labels: labels.length ? labels : ['--:--'],
                     datasets: [
-                        { label: 'Download', data: rxValues, borderColor: '#06b6d4', backgroundColor: 'rgba(6, 182, 212, 0.1)', borderWidth: 2, fill: true, tension: 0.3 },
-                        { label: 'Upload', data: txValues, borderColor: '#a855f7', backgroundColor: 'rgba(168, 85, 247, 0.1)', borderWidth: 2, fill: true, tension: 0.3 }
+                        { label: 'Download', data: rxValues.length ? rxValues : [0], borderColor: '#06b6d4', backgroundColor: 'rgba(6, 182, 212, 0.1)', borderWidth: 2, fill: true, tension: 0.3 },
+                        { label: 'Upload', data: txValues.length ? txValues : [0], borderColor: '#a855f7', backgroundColor: 'rgba(168, 85, 247, 0.1)', borderWidth: 2, fill: true, tension: 0.3 }
                     ]
                 },
                 options: {
