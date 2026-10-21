@@ -258,7 +258,10 @@
                 labels = chartData.slice(-10).map(t => t.Timestamp ? new Date(t.Timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '');
                 rxValues = chartData.slice(-10).map(t => parseFloat(t.RxMbps || 0));
                 txValues = chartData.slice(-10).map(t => parseFloat(t.TxMbps || 0));
-            } else if (deviceData.length > 0) {
+            } 
+            
+            // Fallback Ambil dari Devices log jika traffic sheet kosong
+            if (rxValues.length === 0 && deviceData.length > 0) {
                 const recentDevs = deviceData.slice(-10);
                 labels = recentDevs.map(d => d.Timestamp ? new Date(d.Timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '');
                 rxValues = recentDevs.map(d => parseFloat(d.rx_mbps || 0));
