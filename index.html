@@ -248,21 +248,78 @@
             });
         }
 
-        function updateTrafficChart(trafficData, deviceData, vlanData = []) {
-            let labels = [];
-            let rxValues = [];
-            let txValues = [];
+        f// Variabel global untuk menyimpan histori grafik
+        let trafficHistoryLabels = [];
+        let trafficHistoryRx = [];
+        let trafficHistoryTx = [];
 
+        function updateTrafficChart(trafficData, deviceData, vlanData = []) {
             let latestRx = 0;
             let latestTx = 0;
 
-            // Selalu prioritaskan akumulasi murni dari kartu-kartu VLAN yang aktif di bawah agar konsisten & akurat
+            // 1. Akumulasi murni dari kartu-kartu VLAN yang aktif di bawah
             if (window.latestVlanMap) {
                 Object.values(window.latestVlanMap).forEach(v => {
                     latestRx += parseFloat(v.RxMbps || 0);
                     latestTx += parseFloat(v.TxMbps || 0);
                 });
             }
+
+            // 2. Fallback jika map VLAN belum siap
+            if (latestRx === 0 && latestTx === 0 && trafficData.length > 0) {
+                trafficData.forEach(t => {
+                    if ((t.VLANName || "").toLowerCase() !== "ether1") {
+                        latestRx += parseFloat(t.RxMbps || t.RxBytes || 0);
+                        latestTx += parseFloat(t.TxMbps || t.TxBytes || 0);
+                    }
+                });
+            }
+
+            // Ambil waktu saat ini untuk label sumbu X
+            const currentTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+
+            // Masukkan data baru ke dalam array histori (simpan maksimum 15 titik data terakhir)
+            trafficHistoryLabels.push(currentTime);
+            trafficHistoryRx.push(latestRx);
+            trafficHistoryTx.push(latestTx);
+
+            if (trafficHistoryLabels.length > 15) {
+                trafficHistoryLabels.shift();
+                trafficHistoryRx.shift();
+                trafficHistoryTx.shift();
+            }
+
+            // Update teks kartu ringkasan di kanan atas
+            document.getElementById('stat-rx').innerHTML = `<i class="fa-solid fa-arrow-down"></i> ${latestRx.intended ? latestRx.toFixed(1) : latestRx.toFixed(1)} Mbps`;
+            document.getElementById('stat-tx').innerHTML = `<i class="fa-solid fa-arrow-up"></i> ${latestTx.toFixed(1)} Mbps`;
+            document.getElementById('stat-bandwidth-total').innerText = `${(latestRx + latestTx).toFixed(1)} Mbps`;
+
+            // Render Chart.js dengan data histori
+            const ctx = document.getElementById('trafficChart').getContext('2d');
+            if (trafficChartInstance) trafficChartInstance.destroy();
+
+            trafficChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: trafficHistoryLabels,
+                    datasets: [
+                        { label: 'Download (Rx)', data: trafficHistoryRx, borderColor: '#06b6d4', backgroundColor: 'rgba(6, 182, 212, 0.1)', borderWidth: 2, fill: true, tension: 0.3 },
+                        { label: 'Upload (Tx)', data: trafficHistoryTx, borderColor: '#a855f7', backgroundColor: 'rgba(168, 85, 247, 0.1)', borderWidth: 2, fill: true, tension: 0.3 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#64748b' } },
+                        x: { grid: { display: false }, ticks: { color: '#64748b' } }
+                    },
+                    plugins: { 
+                        legend: { display: true, labels: { color: '#94a3b8', font: { size: 11 } } } 
+                    }
+                }
+            });
+        }
 
             // Jika map VLAN belum siap, fallback hitung dari parameter vlanData / trafficData
             if (latestRx === 0 && latestTx === 0 && trafficData.length > 0) {
