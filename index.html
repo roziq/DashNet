@@ -294,33 +294,36 @@
         }
 
         function updateInventorySummary(devices) {
-            if (!devices.length) return;
+            if (!devices || !devices.length) return;
             const latestDev = devices[devices.length - 1];
             const activeClients = parseInt(latestDev.ActiveLeases || latestDev.active_leases || latestDev.ActiveClients || latestDev.active_clients || 0);
             const cpuLoad = latestDev.CpuLoad || latestDev.cpu_load || '0%';
-            const onlineDevs = latestDev.Note || latestDev.online_devices || "2 / 2";
+            
+            // Proteksi: Hanya update jika nilainya valid (bukan angka/string kosong)
+            const onlineDevs = latestDev.Note || latestDev.online_devices;
+            if (onlineDevs && onlineDevs !== "Normal") {
+                document.getElementById('stat-devices').innerText = onlineDevs;
+            } else {
+                document.getElementById('stat-devices').innerText = "2 / 2";
+            }
 
-            document.getElementById('stat-devices').innerText = onlineDevs;
             document.getElementById('stat-clients').innerText = activeClients;
             document.getElementById('stat-cpu').innerText = typeof cpuLoad === 'number' ? (cpuLoad * 100).toFixed(0) + '%' : cpuLoad;
             document.getElementById('stat-core-name').innerText = latestDev.DeviceName || 'CCR2004';
         }
 
         function updateWanCards(wanData) {
+            if (!wanData) return;
             const wanMap = {};
             wanData.forEach(item => {
                 if (item.WANName) wanMap[item.WANName] = item;
             });
 
             const container = document.getElementById('wan-cards-container');
-            container.innerHTML = '';
-
             const keys = Object.keys(wanMap);
-            if (!keys.length) {
-                container.innerHTML = `<div class="text-[10px] text-slate-400 p-1">No active WAN metrics detected.</div>`;
-                return;
-            }
+            if (!keys.length) return;
 
+            container.innerHTML = '';
             let totalRx = 0;
             let totalTx = 0;
 
@@ -361,22 +364,19 @@
         }
 
         function updateVlanCards(vlanData) {
+            if (!vlanData || !vlanData.length) return;
             const vlanMap = {};
             vlanData.forEach(item => {
                 if (item.VLANName) vlanMap[item.VLANName] = item;
             });
 
             const container = document.getElementById('vlan-cards-container');
-            container.innerHTML = '';
-
             const list = Object.values(vlanMap);
             document.getElementById('vlan-count-badge').innerText = `${list.length} Active VLANs`;
 
-            if (!list.length) {
-                container.innerHTML = `<div class="text-[9px] text-slate-400 p-1">No active VLAN metrics detected.</div>`;
-                return;
-            }
+            if (!list.length) return;
 
+            container.innerHTML = '';
             list.sort((a, b) => {
                 const totalA = parseFloat(a.RxMbps || 0) + parseFloat(a.TxMbps || 0);
                 const totalB = parseFloat(b.RxMbps || 0) + parseFloat(b.TxMbps || 0);
@@ -407,7 +407,17 @@
 
         function updateEdgeSwitchStatus(esData) {
             if (!esData || !esData.length) return;
-            const latestES = esData[esData.length - 1];
+            
+            // Cari data EdgeSwitch terakhir yang punya status valid
+            let latestES = null;
+            for (let i = esData.length - 1; i >= 0; i--) {
+                if (esData[i] && esData[i].Status) {
+                    latestES = esData[i];
+                    break;
+                }
+            }
+            if (!latestES) return;
+
             const isOnline = (latestES.Status || "").toUpperCase() === "ONLINE";
             const badge = document.getElementById('es-status-badge');
             const desc = document.getElementById('es-status-desc');
@@ -467,6 +477,7 @@
         }
 
         function updateApDistributionChart(apData) {
+            if (!apData) return;
             const apMap = {};
             apData.forEach(item => {
                 if (item.APName) apMap[item.APName] = parseInt(item.ClientCount) || 0;
