@@ -249,22 +249,26 @@
         }
 
         function updateTrafficChart(trafficData, deviceData) {
-            // Filter data yang memiliki VLANName atau Interface bernilai "ether1"
-            let chartData = trafficData.filter(t => t.VLANName === "ether1" || t.Interface === "ether1");
             let labels = [];
             let rxValues = [];
             let txValues = [];
 
-            if (chartData.length > 0) {
-                labels = chartData.slice(-10).map(t => t.Timestamp ? new Date(t.Timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '');
-                // Mendukung RxMbps, RxBytes, ataupun rx_mbps
-                rxValues = chartData.slice(-10).map(t => parseFloat(t.RxMbps || t.RxBytes || 0));
-                txValues = chartData.slice(-10).map(t => parseFloat(t.TxMbps || t.TxBytes || 0));
-            } else if (deviceData.length > 0) {
+            // 1. Prioritaskan ambil dari log Devices terbaru yang membawa payload rx_mbps & tx_mbps
+            if (deviceData.length > 0) {
                 const recentDevs = deviceData.slice(-10);
                 labels = recentDevs.map(d => d.Timestamp ? new Date(d.Timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '');
-                rxValues = recentDevs.map(d => parseFloat(d.RxMbps || d.rx_mbps || 0));
-                txValues = recentDevs.map(d => parseFloat(d.TxMbps || d.tx_mbps || 0));
+                rxValues = recentDevs.map(d => parseFloat(d.rx_mbps || d.RxMbps || 0));
+                txValues = recentDevs.map(d => parseFloat(d.tx_mbps || d.TxMbps || 0));
+            } 
+            
+            // 2. Fallback ke array traffic jika kosong
+            if (rxValues.every(val => val === 0) && trafficData.length > 0) {
+                const ether1Traffic = trafficData.filter(t => t.VLANName === "ether1" || t.Interface === "ether1").slice(-10);
+                if (ether1Traffic.length > 0) {
+                    labels = ether1Traffic.map(t => t.Timestamp ? new Date(t.Timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '');
+                    rxValues = ether1Traffic.map(t => parseFloat(t.RxMbps || t.RxBytes || 0));
+                    txValues = ether1Traffic.map(t => parseFloat(t.TxMbps || t.TxBytes || 0));
+                }
             }
 
             let latestRx = rxValues.length ? rxValues[rxValues.length - 1] : 0;
