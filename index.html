@@ -25,34 +25,16 @@
             </div>
         </div>
         <div class="flex items-center space-x-3 flex-wrap">
-            <span class="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 text-xs rounded-xl border border-emerald-500/30 flex items-center gap-1.5 font-medium">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Sync Active
+            <!-- Database Connection Status Badge -->
+            <span id="db-status-badge" class="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 text-xs rounded-xl border border-emerald-500/30 flex items-center gap-1.5 font-medium">
+                <span id="db-status-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span id="db-status-text">Database Connected</span>
             </span>
-            <button onclick="fetchData()" class="px-3.5 py-1.5 bg-cyan-600 hover:bg-cyan-500 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 text-slate-950">
+            <button onclick="fetchData()" class="px-3.5 py-1.5 bg-cyan-600 hover:bg-cyan-500 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 text-slate-950 shadow">
                 <i class="fa-solid fa-rotate"></i> Refresh Data
             </button>
         </div>
     </header>
-
-    <!-- Google Sheets Web App Config Bar -->
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div class="flex items-center space-x-3 w-full md:w-auto">
-            <div class="p-2.5 bg-emerald-500/10 rounded-xl text-emerald-400">
-                <i class="fa-brands fa-google-drive text-lg"></i>
-            </div>
-            <div>
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Google Sheets Web App API URL</h3>
-                <p class="text-xs text-slate-500">Live Database Endpoint URL</p>
-            </div>
-        </div>
-        <div class="flex items-center space-x-2 w-full md:w-1/2">
-            <input type="text" id="api-url" value="https://script.google.com/macros/s/AKfycbx4Yx18S7GJQUU0WpWfIgVoRPxk-yKKe9MM8HmXN3IjLufLMnNQTQXohdIs4-6h5b1izw/exec" 
-                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-cyan-500 font-mono">
-            <button onclick="fetchData()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-medium transition whitespace-nowrap border border-slate-700">
-                Test Connection
-            </button>
-        </div>
-    </div>
 
     <!-- Stat Cards Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -188,23 +170,45 @@
 
     <!-- Script Logic -->
     <script>
+        // CONFIG DATABASE WEB APP API URL
+        const API_URL = "https://script.google.com/macros/s/AKfycbx4Yx18S7GJQUU0WpWfIgVoRPxk-yKKe9MM8HmXN3IjLufLMnNQTQXohdIs4-6h5b1izw/exec";
+        
         let trafficChartInstance = null;
         let apChartInstance = null;
 
         async function fetchData() {
-            const apiUrl = document.getElementById('api-url').value;
             try {
-                const res = await fetch(apiUrl);
+                const res = await fetch(API_URL);
                 const json = await res.json();
                 
                 if (json.status === "success") {
+                    setDatabaseStatus(true);
                     updateInventoryTable(json.devices || []);
                     updateTrafficChart(json.traffic || []);
                     updateVlanCards(json.vlans || []);
                     updateApDistributionChart(json.ap_distribution || []);
+                } else {
+                    setDatabaseStatus(false, "API Error");
                 }
             } catch (err) {
                 console.error("Fetch Error:", err);
+                setDatabaseStatus(false, "Connection Failed");
+            }
+        }
+
+        function setDatabaseStatus(isConnected, message = "Database Connected") {
+            const badge = document.getElementById('db-status-badge');
+            const dot = document.getElementById('db-status-dot');
+            const text = document.getElementById('db-status-text');
+
+            if (isConnected) {
+                badge.className = "px-3 py-1.5 bg-emerald-500/20 text-emerald-400 text-xs rounded-xl border border-emerald-500/30 flex items-center gap-1.5 font-medium";
+                dot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse";
+                text.innerText = message;
+            } else {
+                badge.className = "px-3 py-1.5 bg-rose-500/20 text-rose-400 text-xs rounded-xl border border-rose-500/30 flex items-center gap-1.5 font-medium";
+                dot.className = "w-2 h-2 rounded-full bg-rose-400";
+                text.innerText = message;
             }
         }
 
