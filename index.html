@@ -31,17 +31,17 @@
         }
     </style>
 </head>
-<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased h-screen overflow-hidden flex flex-col p-2 sm:p-3 space-y-2.5 transition-colors duration-300">
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased h-screen overflow-hidden flex flex-col p-2 sm:p-3 space-y-2 transition-colors duration-300">
 
-    <!-- Top Bar / Header Compact -->
-    <header class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 flex justify-between items-center shadow-sm shrink-0">
+    <!-- Top Bar / Header -->
+    <header class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 flex justify-between items-center shadow-sm shrink-0">
         <div class="flex items-center space-x-2.5">
             <div class="bg-cyan-500 p-1.5 rounded-lg text-slate-950 font-bold shadow">
                 <i class="fa-solid fa-network-wired text-sm"></i>
             </div>
             <div>
                 <h1 class="text-sm font-bold tracking-wide text-slate-900 dark:text-slate-100 leading-tight">Network Control Center</h1>
-                <p class="text-[10px] text-slate-500 dark:text-slate-400">MikroTik CCR2004 • Multi-WAN & 22 VLANs Monitoring</p>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400">SMK Negeri 1 Purbalingga • Infrastructure Monitoring</p>
             </div>
         </div>
         <!-- Action Buttons -->
@@ -62,108 +62,130 @@
         </div>
     </header>
 
-    <!-- Stat Cards Grid Compact -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 shrink-0">
-        <!-- Online Devices -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-2 rounded-xl shadow-sm flex items-center justify-between">
-            <div>
-                <p class="text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Online Devices</p>
-                <h3 id="stat-devices" class="text-base font-extrabold text-cyan-600 dark:text-cyan-400 leading-tight">1 / 1</h3>
-                <p class="text-[9px] text-emerald-600 dark:text-emerald-400 font-medium"><i class="fa-solid fa-check mr-0.5"></i> Healthy</p>
+    <!-- 1. MIKROTIK CORE & WAN AREA (SEKSI ATAS) -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 shrink-0">
+        <!-- Stat Cards Grid -->
+        <div class="grid grid-cols-2 gap-2">
+            <!-- Online Devices -->
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2.5 py-1.5 rounded-xl shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-[9px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Online Devices</p>
+                    <h3 id="stat-devices" class="text-sm font-extrabold text-cyan-600 dark:text-cyan-400 leading-tight">1 / 1</h3>
+                    <p class="text-[8px] text-emerald-600 dark:text-emerald-400 font-medium"><i class="fa-solid fa-check mr-0.5"></i> Healthy</p>
+                </div>
+                <div class="p-1.5 bg-cyan-500/10 rounded-lg text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
+                    <i class="fa-solid fa-server text-xs"></i>
+                </div>
             </div>
-            <div class="p-2 bg-cyan-500/10 rounded-lg text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
-                <i class="fa-solid fa-server text-sm"></i>
+            <!-- Active Clients -->
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2.5 py-1.5 rounded-xl shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-[9px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Active Clients</p>
+                    <h3 id="stat-clients" class="text-sm font-extrabold text-emerald-600 dark:text-emerald-400 leading-tight">0</h3>
+                    <p class="text-[8px] text-slate-500 dark:text-slate-400">DHCP Leases</p>
+                </div>
+                <div class="p-1.5 bg-emerald-500/10 rounded-lg text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                    <i class="fa-solid fa-users text-xs"></i>
+                </div>
+            </div>
+            <!-- Core CPU Load -->
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2.5 py-1.5 rounded-xl shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-[9px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">CPU Load</p>
+                    <h3 id="stat-cpu" class="text-sm font-extrabold text-amber-600 dark:text-amber-400 leading-tight">0%</h3>
+                    <p id="stat-core-name" class="text-[8px] text-slate-500 dark:text-slate-400 font-mono">CCR2004</p>
+                </div>
+                <div class="p-1.5 bg-amber-500/10 rounded-lg text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                    <i class="fa-solid fa-microchip text-xs"></i>
+                </div>
+            </div>
+            <!-- Total Combined WAN Bandwidth -->
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2.5 py-1.5 rounded-xl shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-[9px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Bandwidth</p>
+                    <h3 id="stat-bandwidth-total" class="text-sm font-extrabold text-purple-600 dark:text-purple-400 leading-tight">0 Mbps</h3>
+                    <p class="text-[8px] text-slate-500 dark:text-slate-400 flex gap-1 font-mono">
+                        <span id="stat-rx" class="text-cyan-600 dark:text-cyan-400"><i class="fa-solid fa-arrow-down"></i> 0</span>
+                        <span id="stat-tx" class="text-purple-600 dark:text-purple-400"><i class="fa-solid fa-arrow-up"></i> 0</span>
+                    </p>
+                </div>
+                <div class="p-1.5 bg-purple-500/10 rounded-lg text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                    <i class="fa-solid fa-globe text-xs"></i>
+                </div>
             </div>
         </div>
-        <!-- Active Clients -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-2 rounded-xl shadow-sm flex items-center justify-between">
-            <div>
-                <p class="text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Active Clients</p>
-                <h3 id="stat-clients" class="text-base font-extrabold text-emerald-600 dark:text-emerald-400 leading-tight">0</h3>
-                <p class="text-[9px] text-slate-500 dark:text-slate-400">DHCP Leases</p>
-            </div>
-            <div class="p-2 bg-emerald-500/10 rounded-lg text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                <i class="fa-solid fa-users text-sm"></i>
-            </div>
-        </div>
-        <!-- Core CPU Load -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-2 rounded-xl shadow-sm flex items-center justify-between">
-            <div>
-                <p class="text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Core CPU Load</p>
-                <h3 id="stat-cpu" class="text-base font-extrabold text-amber-600 dark:text-amber-400 leading-tight">0%</h3>
-                <p id="stat-core-name" class="text-[9px] text-slate-500 dark:text-slate-400 font-mono">CCR2004</p>
-            </div>
-            <div class="p-2 bg-amber-500/10 rounded-lg text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                <i class="fa-solid fa-microchip text-sm"></i>
-            </div>
-        </div>
-        <!-- Total Combined WAN Bandwidth -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-2 rounded-xl shadow-sm flex items-center justify-between">
-            <div>
-                <p class="text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Bandwidth</p>
-                <h3 id="stat-bandwidth-total" class="text-base font-extrabold text-purple-600 dark:text-purple-400 leading-tight">0 Mbps</h3>
-                <p class="text-[9px] text-slate-500 dark:text-slate-400 flex gap-1.5 font-mono">
-                    <span id="stat-rx" class="text-cyan-600 dark:text-cyan-400"><i class="fa-solid fa-arrow-down"></i> 0</span>
-                    <span id="stat-tx" class="text-purple-600 dark:text-purple-400"><i class="fa-solid fa-arrow-up"></i> 0</span>
-                </p>
-            </div>
-            <div class="p-2 bg-purple-500/10 rounded-lg text-purple-600 dark:text-purple-400 border border-purple-500/20">
-                <i class="fa-solid fa-globe text-sm"></i>
-            </div>
-        </div>
-    </div>
 
-    <!-- WAN Gateways Live Status Compact -->
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 shadow-sm shrink-0">
-        <div class="flex justify-between items-center mb-1.5">
-            <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-xs"><i class="fa-solid fa-globe text-cyan-600 dark:text-cyan-400 mr-1.5"></i> WAN Gateways Status & Bandwidth</h3>
-            <span class="text-[10px] text-slate-400 font-mono">Live Link State</span>
-        </div>
-        <div id="wan-cards-container" class="flex flex-nowrap gap-2 overflow-x-auto custom-scrollbar pb-0.5">
-            <div class="text-[11px] text-slate-400">Loading WAN interfaces...</div>
-        </div>
-    </div>
-
-    <!-- Middle Row: Traffic Chart & AP Distribution -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-2.5 shrink-0 min-h-0">
-        <!-- Gateway Traffic Monitor -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2.5 rounded-xl shadow-sm lg:col-span-2 flex flex-col justify-between">
+        <!-- WAN Traffic Line Chart -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded-xl shadow-sm lg:col-span-2 flex flex-col justify-between">
             <div class="flex justify-between items-center mb-1">
-                <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-xs"><i class="fa-solid fa-chart-area text-cyan-600 dark:text-cyan-400 mr-1.5"></i> WAN Aggregate Traffic Monitor</h3>
-                <div class="flex items-center space-x-3 text-[10px] text-slate-500 dark:text-slate-400">
+                <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-xs"><i class="fa-solid fa-chart-area text-cyan-600 dark:text-cyan-400 mr-1.5"></i> MikroTik WAN Traffic Trend</h3>
+                <div class="flex items-center space-x-3 text-[9px] text-slate-500 dark:text-slate-400">
                     <span class="flex items-center gap-1"><span class="w-2 h-1 bg-cyan-500 rounded"></span> Down (Rx)</span>
                     <span class="flex items-center gap-1"><span class="w-2 h-1 bg-purple-500 rounded"></span> Up (Tx)</span>
                 </div>
             </div>
-            <div class="relative w-full h-32 sm:h-36">
+            <div class="relative w-full h-20 sm:h-24">
                 <canvas id="trafficChart"></canvas>
-            </div>
-        </div>
-
-        <!-- UniFi AP Distribution -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2.5 rounded-xl shadow-sm flex flex-col justify-between">
-            <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-xs mb-1"><i class="fa-solid fa-wifi text-cyan-600 dark:text-cyan-400 mr-1.5"></i> UniFi AP Distribution</h3>
-            <div class="relative w-full h-24 sm:h-28 flex justify-center items-center">
-                <canvas id="apChart"></canvas>
-            </div>
-            <div id="ap-legend" class="grid grid-cols-2 gap-1 text-[9px] text-slate-600 dark:text-slate-300 mt-1 pt-1 border-t border-slate-200 dark:border-slate-800">
-                <div class="text-slate-400">Waiting AP...</div>
             </div>
         </div>
     </div>
 
-    <!-- VLAN Segments Breakdown (Fits Exactly 2 Rows x 11 Cards) -->
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 shadow-sm flex-1 min-h-0 flex flex-col justify-between overflow-hidden">
-        <div class="flex justify-between items-center mb-1.5 shrink-0">
+    <!-- WAN Gateways Horizontal List -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1.5 shadow-sm shrink-0">
+        <div id="wan-cards-container" class="flex flex-nowrap gap-2 overflow-x-auto custom-scrollbar">
+            <div class="text-[10px] text-slate-400">Loading WAN gateways...</div>
+        </div>
+    </div>
+
+    <!-- 2. VLAN SEGMENTS AREA (SEKSI TENGAH: 2 BARIS x 11 KARTU) -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1.5 shadow-sm flex-1 min-h-0 flex flex-col justify-between overflow-hidden">
+        <div class="flex justify-between items-center mb-1 shrink-0">
             <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-xs"><i class="fa-solid fa-sitemap text-cyan-600 dark:text-cyan-400 mr-1.5"></i> VLAN Segments Breakdown</h3>
-            <span id="vlan-count-badge" class="px-2 py-0.5 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-[10px] rounded-md font-mono font-bold border border-cyan-500/20">
+            <span id="vlan-count-badge" class="px-2 py-0.5 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-[9px] rounded font-mono font-bold border border-cyan-500/20">
                 22 Active VLANs
             </span>
         </div>
-        <!-- Grid 11 Kolom Presisi (2 Baris) Pas dalam 1 Layar -->
         <div class="flex-1 min-h-0 overflow-x-auto custom-scrollbar">
-            <div id="vlan-cards-container" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-11 gap-1.5 min-w-[1000px] xl:min-w-0">
-                <div class="text-[10px] text-slate-400 p-1">Loading VLAN metrics...</div>
+            <div id="vlan-cards-container" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-11 gap-1.5 min-w-[950px] xl:min-w-0">
+                <div class="text-[9px] text-slate-400 p-1">Loading VLAN metrics...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. SWITCH & UNIFI AP DISTRIBUTION AREA (SEKSI BAWAH) -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 shrink-0">
+        <!-- Switch Status (Placeholder / EdgeSwitch & UDM Pro) -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded-xl shadow-sm flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <div class="p-2 bg-indigo-500/10 rounded-lg text-indigo-500 border border-indigo-500/20">
+                    <i class="fa-solid fa-network-wired text-xs"></i>
+                </div>
+                <div>
+                    <h4 class="text-[11px] font-bold text-slate-800 dark:text-slate-200">EdgeSwitch & USW</h4>
+                    <p class="text-[9px] text-slate-500 dark:text-slate-400">Core Switches Link Active</p>
+                </div>
+            </div>
+            <span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded text-[9px] font-bold">STP OK</span>
+        </div>
+
+        <!-- UniFi AP Distribution (Doughnut Chart) -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded-xl shadow-sm lg:col-span-2 flex items-center justify-between space-x-3">
+            <div class="flex items-center space-x-2 shrink-0">
+                <div class="p-2 bg-cyan-500/10 rounded-lg text-cyan-500 border border-cyan-500/20">
+                    <i class="fa-solid fa-wifi text-xs"></i>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-xs">UniFi AP Distribution</h3>
+                    <p class="text-[9px] text-slate-500 dark:text-slate-400">Connected Clients per AP</p>
+                </div>
+            </div>
+            <!-- Chart Mini -->
+            <div class="relative w-16 h-16 shrink-0">
+                <canvas id="apChart"></canvas>
+            </div>
+            <!-- Legend Area -->
+            <div id="ap-legend" class="grid grid-cols-3 gap-1.5 text-[9px] text-slate-600 dark:text-slate-300 flex-grow font-mono">
+                <div class="text-slate-400">Waiting AP...</div>
             </div>
         </div>
     </div>
@@ -295,7 +317,7 @@
 
             const keys = Object.keys(wanMap);
             if (!keys.length) {
-                container.innerHTML = `<div class="text-[11px] text-slate-400 p-1">No active WAN metrics detected.</div>`;
+                container.innerHTML = `<div class="text-[10px] text-slate-400 p-1">No active WAN metrics detected.</div>`;
                 return;
             }
 
@@ -314,16 +336,16 @@
                 }
 
                 const statusBadge = isUp 
-                    ? `<span class="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded text-[9px] font-semibold flex items-center gap-1"><span class="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></span> UP</span>`
-                    : `<span class="px-1.5 py-0.5 bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded text-[9px] font-semibold flex items-center gap-1"><span class="w-1 h-1 rounded-full bg-rose-500"></span> DOWN</span>`;
+                    ? `<span class="px-1 py-0.5 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded text-[8px] font-semibold flex items-center gap-0.5"><span class="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></span> UP</span>`
+                    : `<span class="px-1 py-0.5 bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded text-[8px] font-semibold flex items-center gap-0.5"><span class="w-1 h-1 rounded-full bg-rose-500"></span> DOWN</span>`;
 
                 container.innerHTML += `
-                    <div class="flex-1 min-w-[150px] bg-slate-50 dark:bg-slate-950/70 border ${isUp ? 'border-slate-200 dark:border-slate-800' : 'border-rose-500/50'} px-2.5 py-1.5 rounded-lg flex flex-col justify-between">
+                    <div class="flex-1 min-w-[130px] bg-slate-50 dark:bg-slate-950/70 border ${isUp ? 'border-slate-200 dark:border-slate-800' : 'border-rose-500/50'} px-2 py-1 rounded-lg flex flex-col justify-between">
                         <div class="flex justify-between items-center mb-0.5">
-                            <span class="font-bold text-[11px] text-cyan-600 dark:text-cyan-400 font-mono truncate">${wanName}</span>
+                            <span class="font-bold text-[10px] text-cyan-600 dark:text-cyan-400 font-mono truncate">${wanName}</span>
                             ${statusBadge}
                         </div>
-                        <div class="space-y-0.5 text-[10px] font-mono">
+                        <div class="space-y-0.5 text-[9px] font-mono">
                             <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>Down:</span> <span class="text-cyan-600 dark:text-cyan-400 font-semibold">${formatSpeed(rx)}</span></div>
                             <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>Up:</span> <span class="text-purple-600 dark:text-purple-400 font-semibold">${formatSpeed(tx)}</span></div>
                         </div>
@@ -351,11 +373,10 @@
             document.getElementById('vlan-count-badge').innerText = `${list.length} Active VLANs`;
 
             if (!list.length) {
-                container.innerHTML = `<div class="text-[10px] text-slate-400 p-1">No active VLAN metrics detected.</div>`;
+                container.innerHTML = `<div class="text-[9px] text-slate-400 p-1">No active VLAN metrics detected.</div>`;
                 return;
             }
 
-            // Urutkan VLAN dari Total Bandwidth Tertinggi ke Terendah
             list.sort((a, b) => {
                 const totalA = parseFloat(a.RxMbps || 0) + parseFloat(a.TxMbps || 0);
                 const totalB = parseFloat(b.RxMbps || 0) + parseFloat(b.TxMbps || 0);
@@ -364,18 +385,18 @@
 
             list.forEach((v, idx) => {
                 const vlanName = v.VLANName;
-                const rx = parseFloat(v.RxMbps || 0); // Klien Download
-                const tx = parseFloat(v.TxMbps || 0); // Klien Upload
+                const rx = parseFloat(v.RxMbps || 0);
+                const tx = parseFloat(v.TxMbps || 0);
                 
                 const theme = COLOR_PALETTE[idx % COLOR_PALETTE.length];
 
                 container.innerHTML += `
-                    <div class="bg-slate-50 dark:bg-slate-950/80 border ${theme.border} px-2 py-1.5 rounded-lg flex flex-col justify-between shadow-xs">
+                    <div class="bg-slate-50 dark:bg-slate-950/80 border ${theme.border} px-1.5 py-1 rounded-lg flex flex-col justify-between shadow-xs">
                         <div class="flex justify-between items-center mb-0.5">
-                            <span class="font-bold text-[10px] ${theme.text} font-mono truncate" title="${vlanName}">${vlanName}</span>
-                            <span class="w-1.5 h-1.5 rounded-full ${theme.badge} animate-pulse shrink-0"></span>
+                            <span class="font-bold text-[9px] ${theme.text} font-mono truncate" title="${vlanName}">${vlanName}</span>
+                            <span class="w-1 h-1 rounded-full ${theme.badge} animate-pulse shrink-0"></span>
                         </div>
-                        <div class="space-y-0.5 text-[9px] font-mono">
+                        <div class="space-y-0.5 text-[8px] font-mono">
                             <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>D:</span> <span class="${theme.text} font-semibold">${formatSpeed(rx)}</span></div>
                             <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>U:</span> <span class="text-slate-700 dark:text-slate-300 font-semibold">${formatSpeed(tx)}</span></div>
                         </div>
@@ -411,16 +432,16 @@
                 data: {
                     labels: trafficHistoryLabels,
                     datasets: [
-                        { label: 'Download (Rx)', data: trafficHistoryRx, borderColor: '#06b6d4', backgroundColor: 'rgba(6, 182, 212, 0.1)', borderWidth: 1.5, fill: true, tension: 0.3, pointRadius: 2 },
-                        { label: 'Upload (Tx)', data: trafficHistoryTx, borderColor: '#a855f7', backgroundColor: 'rgba(168, 85, 247, 0.1)', borderWidth: 1.5, fill: true, tension: 0.3, pointRadius: 2 }
+                        { label: 'Download (Rx)', data: trafficHistoryRx, borderColor: '#06b6d4', backgroundColor: 'rgba(6, 182, 212, 0.1)', borderWidth: 1.5, fill: true, tension: 0.3, pointRadius: 1.5 },
+                        { label: 'Upload (Tx)', data: trafficHistoryTx, borderColor: '#a855f7', backgroundColor: 'rgba(168, 85, 247, 0.1)', borderWidth: 1.5, fill: true, tension: 0.3, pointRadius: 1.5 }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 9 } } },
-                        x: { grid: { display: false }, ticks: { color: tickColor, font: { size: 9 } } }
+                        y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 8 } } },
+                        x: { grid: { display: false }, ticks: { color: tickColor, font: { size: 8 } } }
                     },
                     plugins: { legend: { display: false } }
                 }
@@ -459,7 +480,7 @@
             labels.forEach((label, idx) => {
                 legendDiv.innerHTML += `
                     <div class="flex items-center gap-1 truncate">
-                        <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${colors[idx % colors.length]}"></span> 
+                        <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: ${colors[idx % colors.length]}"></span> 
                         <span class="truncate">${label} (${counts[idx]})</span>
                     </div>
                 `;
