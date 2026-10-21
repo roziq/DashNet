@@ -1,4 +1,173 @@
-<!-- Script Logic -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Control Center</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col p-4 md:p-6 space-y-6">
+
+    <!-- Top Bar / Header -->
+    <header class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row justify-between items-center shadow-lg gap-4">
+        <div class="flex items-center space-x-3">
+            <div class="bg-cyan-500 p-3 rounded-xl text-slate-950 font-bold shadow-md">
+                <i class="fa-solid fa-network-wired text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-wide">Network Control Center</h1>
+                <p class="text-xs text-slate-400">Integrated MikroTik, VLANs, UDM Pro & EdgeSwitch Management</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-3 flex-wrap">
+            <span id="db-status-badge" class="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 text-xs rounded-xl border border-emerald-500/30 flex items-center gap-1.5 font-medium">
+                <span id="db-status-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span id="db-status-text">Database Connected</span>
+            </span>
+            <button onclick="fetchData()" class="px-3.5 py-1.5 bg-cyan-600 hover:bg-cyan-500 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 text-slate-950 shadow">
+                <i class="fa-solid fa-rotate"></i> Refresh Data
+            </button>
+        </div>
+    </header>
+
+    <!-- Stat Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Online Devices -->
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Online Devices</p>
+                <h3 id="stat-devices" class="text-3xl font-extrabold mt-1 text-cyan-400">1 / 1</h3>
+                <p class="text-[11px] text-emerald-400 mt-1 font-medium"><i class="fa-solid fa-check mr-1"></i> Infrastructure Healthy</p>
+            </div>
+            <div class="p-3.5 bg-cyan-500/10 rounded-xl text-cyan-400 border border-cyan-500/20">
+                <i class="fa-solid fa-server text-xl"></i>
+            </div>
+        </div>
+        <!-- Active Clients -->
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Active Clients</p>
+                <h3 id="stat-clients" class="text-3xl font-extrabold mt-1 text-emerald-400">0</h3>
+                <p class="text-[11px] text-slate-400 mt-1">Total Active DHCP Leases</p>
+            </div>
+            <div class="p-3.5 bg-emerald-500/10 rounded-xl text-emerald-400 border border-emerald-500/20">
+                <i class="fa-solid fa-users text-xl"></i>
+            </div>
+        </div>
+        <!-- Core CPU Load -->
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Core CPU Load</p>
+                <h3 id="stat-cpu" class="text-3xl font-extrabold mt-1 text-amber-400">0%</h3>
+                <p id="stat-core-name" class="text-[11px] text-slate-400 mt-1 font-mono">MikroTik RouterOS</p>
+            </div>
+            <div class="p-3.5 bg-amber-500/10 rounded-xl text-amber-400 border border-amber-500/20">
+                <i class="fa-solid fa-microchip text-xl"></i>
+            </div>
+        </div>
+        <!-- Total Bandwidth (ether1) -->
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Bandwidth (ether1)</p>
+                <h3 id="stat-bandwidth-total" class="text-3xl font-extrabold mt-1 text-purple-400">0 Mbps</h3>
+                <p class="text-[11px] text-slate-400 mt-1 flex gap-2 font-mono">
+                    <span id="stat-rx" class="text-cyan-400"><i class="fa-solid fa-arrow-down"></i> 0 Mbps</span>
+                    <span id="stat-tx" class="text-purple-400"><i class="fa-solid fa-arrow-up"></i> 0 Mbps</span>
+                </p>
+            </div>
+            <div class="p-3.5 bg-purple-500/10 rounded-xl text-purple-400 border border-purple-500/20">
+                <i class="fa-solid fa-chart-line text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts & VLAN Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Gateway Traffic Monitor (ether1 Trunk) -->
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm lg:col-span-2 flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h3 class="font-semibold text-slate-200 text-sm"><i class="fa-solid fa-chart-area text-cyan-400 mr-2"></i> Gateway Traffic Monitor (ether1 Trunk)</h3>
+                    <p class="text-xs text-slate-500">Live Traffic Accumulation across all VLANs</p>
+                </div>
+                <span class="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 text-[10px] rounded-lg border border-emerald-500/30 font-semibold flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Live
+                </span>
+            </div>
+            <div class="flex items-center space-x-6 text-xs text-slate-400 mb-2">
+                <span class="flex items-center gap-1.5"><span class="w-3 h-1 bg-cyan-400 rounded"></span> Download (Rx Mbps)</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-1 bg-purple-400 rounded"></span> Upload (Tx Mbps)</span>
+            </div>
+            <div class="relative flex-grow h-64">
+                <canvas id="trafficChart"></canvas>
+            </div>
+        </div>
+
+        <!-- UniFi AP Distribution -->
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm flex flex-col justify-between">
+            <div>
+                <h3 class="font-semibold text-slate-200 text-sm mb-1"><i class="fa-solid fa-wifi text-cyan-400 mr-2"></i> UniFi AP Distribution</h3>
+                <p class="text-xs text-slate-500 mb-4">Connected Clients per Access Point</p>
+                <div class="relative h-48 flex justify-center items-center">
+                    <canvas id="apChart"></canvas>
+                </div>
+            </div>
+            <div id="ap-legend" class="grid grid-cols-2 gap-2 text-[11px] text-slate-300 mt-4 pt-4 border-t border-slate-800">
+                <div class="text-slate-500">Waiting for AP data...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VLAN Segments Live Traffic Breakdown -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-slate-800">
+            <h3 class="font-semibold text-slate-200 text-sm"><i class="fa-solid fa-sitemap text-cyan-400 mr-2"></i> VLAN Segments Live Traffic Breakdown</h3>
+            <p class="text-xs text-slate-500">Real-time Bandwidth Usage per Segment on Parent Interface ether1</p>
+        </div>
+        <div class="p-4">
+            <div id="vlan-cards-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div class="text-xs text-slate-500 p-4">Loading VLAN segment metrics...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory Table -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-slate-800 flex justify-between items-center">
+            <div>
+                <h3 class="font-semibold text-slate-200 text-sm"><i class="fa-solid fa-server text-cyan-400 mr-2"></i> Network Devices Inventory</h3>
+                <p class="text-xs text-slate-500">Registered Routers, EdgeSwitch, and APs synced with Google Sheets</p>
+            </div>
+            <div class="flex items-center space-x-2">
+                <input type="text" id="search-input" onkeyup="filterInventory()" placeholder="Search IP / Device..." class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-cyan-500">
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-950/50 text-slate-400 text-[11px] uppercase tracking-wider border-b border-slate-800">
+                        <th class="p-3.5">Device Name</th>
+                        <th class="p-3.5">Brand / Model</th>
+                        <th class="p-3.5">IP Address</th>
+                        <th class="p-3.5">Location</th>
+                        <th class="p-3.5">Status</th>
+                        <th class="p-3.5">Uptime</th>
+                        <th class="p-3.5">Active Clients</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body" class="divide-y divide-slate-800/60 text-xs text-slate-300">
+                    <tr><td colspan="7" class="p-6 text-center text-slate-500">Loading inventory from Google Sheets...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Script Logic -->
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbx4Yx18S7GJQUU0WpWfIgVoRPxk-yKKe9MM8HmXN3IjLufLMnNQTQXohdIs4-6h5b1izw/exec";
         
@@ -50,16 +219,13 @@
                 return;
             }
 
-            // Ambil data baris terakhir (terbaru) dari mikrotik
             const latestDev = devices[devices.length - 1];
-            const activeClients = parseInt(latestDev.ActiveLeases || latestDev.active_leases || latestDev.ActiveClients || latestDev.active_clients || 969);
+            const activeClients = parseInt(latestDev.ActiveLeases || latestDev.active_leases || latestDev.ActiveClients || latestDev.active_clients || 0);
             const cpuLoad = latestDev.CpuLoad || latestDev.cpu_load || '0%';
 
-            // Update Statistik di Kartu Atas
             document.getElementById('stat-clients').innerText = activeClients;
             document.getElementById('stat-cpu').innerText = cpuLoad;
             document.getElementById('stat-core-name').innerText = latestDev.DeviceName || 'MikroTik';
-            document.getElementById('stat-devices').innerText = `1 / 1`;
 
             const uniqueDevices = {};
             devices.forEach(d => { uniqueDevices[d.DeviceName] = d; });
@@ -67,12 +233,11 @@
 
             list.forEach(d => {
                 const clients = parseInt(d.ActiveLeases || d.active_leases || d.ActiveClients || d.active_clients || activeClients);
-                let brandBadge = 'bg-cyan-500/10 text-cyan-400';
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-800/40 transition">
                         <td class="p-3.5 font-medium text-slate-200">${d.DeviceName || 'CCR2004|SMEGA'}</td>
-                        <td class="p-3.5"><span class="px-2 py-0.5 ${brandBadge} rounded-md text-[11px]">MikroTik RouterOS</span></td>
+                        <td class="p-3.5"><span class="px-2 py-0.5 bg-cyan-500/10 text-cyan-400 rounded-md text-[11px]">MikroTik RouterOS</span></td>
                         <td class="p-3.5 font-mono text-slate-400">192.168.88.1</td>
                         <td class="p-3.5 text-slate-400">Server Room</td>
                         <td class="p-3.5"><span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded-md text-[11px] font-semibold">Online</span></td>
@@ -217,3 +382,5 @@
         fetchData();
         setInterval(fetchData, 30000);
     </script>
+</body>
+</html>
