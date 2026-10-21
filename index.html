@@ -21,15 +21,15 @@
             </div>
             <div>
                 <h1 class="text-xl font-bold tracking-wide">Network Control Center</h1>
-                <p class="text-xs text-slate-400">Integrated MikroTik & UniFi Management via Google Sheets API</p>
+                <p class="text-xs text-slate-400">Integrated MikroTik, VLANs, UDM Pro & EdgeSwitch Management</p>
             </div>
         </div>
         <div class="flex items-center space-x-3 flex-wrap">
             <span class="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 text-xs rounded-xl border border-emerald-500/30 flex items-center gap-1.5 font-medium">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Sync Sheets
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Sync Active
             </span>
             <button onclick="fetchData()" class="px-3.5 py-1.5 bg-cyan-600 hover:bg-cyan-500 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 text-slate-950">
-                <i class="fa-solid fa-plus"></i> Add Device
+                <i class="fa-solid fa-rotate"></i> Refresh Data
             </button>
         </div>
     </header>
@@ -42,7 +42,7 @@
             </div>
             <div>
                 <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Google Sheets Web App API URL</h3>
-                <p class="text-xs text-slate-500">Paste your Apps Script Web App URL for live two-way database synchronization</p>
+                <p class="text-xs text-slate-500">Live Database Endpoint URL</p>
             </div>
         </div>
         <div class="flex items-center space-x-2 w-full md:w-1/2">
@@ -60,8 +60,8 @@
         <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm flex items-center justify-between">
             <div>
                 <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Online Devices</p>
-                <h3 id="stat-devices" class="text-3xl font-extrabold mt-1 text-cyan-400">4 / 4</h3>
-                <p class="text-[11px] text-emerald-400 mt-1 font-medium"><i class="fa-solid fa-check mr-1"></i> All Routers & APs Healthy</p>
+                <h3 id="stat-devices" class="text-3xl font-extrabold mt-1 text-cyan-400">0 / 0</h3>
+                <p class="text-[11px] text-emerald-400 mt-1 font-medium"><i class="fa-solid fa-check mr-1"></i> Infrastructure Healthy</p>
             </div>
             <div class="p-3.5 bg-cyan-500/10 rounded-xl text-cyan-400 border border-cyan-500/20">
                 <i class="fa-solid fa-server text-xl"></i>
@@ -71,8 +71,8 @@
         <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm flex items-center justify-between">
             <div>
                 <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Active Clients</p>
-                <h3 id="stat-clients" class="text-3xl font-extrabold mt-1 text-emerald-400">128</h3>
-                <p class="text-[11px] text-slate-400 mt-1">82 Wi-Fi (UniFi) / 46 Ethernet (LAN)</p>
+                <h3 id="stat-clients" class="text-3xl font-extrabold mt-1 text-emerald-400">0</h3>
+                <p class="text-[11px] text-slate-400 mt-1">Total Active DHCP Leases</p>
             </div>
             <div class="p-3.5 bg-emerald-500/10 rounded-xl text-emerald-400 border border-emerald-500/20">
                 <i class="fa-solid fa-users text-xl"></i>
@@ -82,21 +82,21 @@
         <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm flex items-center justify-between">
             <div>
                 <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Core CPU Load</p>
-                <h3 id="stat-cpu" class="text-3xl font-extrabold mt-1 text-amber-400">24%</h3>
-                <p class="text-[11px] text-slate-400 mt-1 font-mono">MikroTik CCR1009-7G-1C-1S+</p>
+                <h3 id="stat-cpu" class="text-3xl font-extrabold mt-1 text-amber-400">0%</h3>
+                <p id="stat-core-name" class="text-[11px] text-slate-400 mt-1 font-mono">MikroTik RouterOS</p>
             </div>
             <div class="p-3.5 bg-amber-500/10 rounded-xl text-amber-400 border border-amber-500/20">
                 <i class="fa-solid fa-microchip text-xl"></i>
             </div>
         </div>
-        <!-- Current Bandwidth -->
+        <!-- Total Bandwidth (ether1) -->
         <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm flex items-center justify-between">
             <div>
-                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Current Bandwidth</p>
-                <h3 class="text-3xl font-extrabold mt-1 text-purple-400">142 Mbps</h3>
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Bandwidth (ether1)</p>
+                <h3 id="stat-bandwidth-total" class="text-3xl font-extrabold mt-1 text-purple-400">0 Mbps</h3>
                 <p class="text-[11px] text-slate-400 mt-1 flex gap-2 font-mono">
-                    <span class="text-cyan-400"><i class="fa-solid fa-arrow-down"></i> 118 Mbps</span>
-                    <span class="text-purple-400"><i class="fa-solid fa-arrow-up"></i> 24 Mbps</span>
+                    <span id="stat-rx" class="text-cyan-400"><i class="fa-solid fa-arrow-down"></i> 0 Mbps</span>
+                    <span id="stat-tx" class="text-purple-400"><i class="fa-solid fa-arrow-up"></i> 0 Mbps</span>
                 </p>
             </div>
             <div class="p-3.5 bg-purple-500/10 rounded-xl text-purple-400 border border-purple-500/20">
@@ -105,14 +105,14 @@
         </div>
     </div>
 
-    <!-- Charts Section -->
+    <!-- Charts & VLAN Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Gateway Traffic Monitor -->
+        <!-- Gateway Traffic Monitor (ether1 Trunk) -->
         <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm lg:col-span-2 flex flex-col">
             <div class="flex justify-between items-center mb-4">
                 <div>
-                    <h3 class="font-semibold text-slate-200 text-sm"><i class="fa-solid fa-chart-area text-cyan-400 mr-2"></i> Gateway Traffic Monitor (Primary ISP)</h3>
-                    <p class="text-xs text-slate-500">Live Traffic Interface Monitoring (Ether1 MikroTik CCR)</p>
+                    <h3 class="font-semibold text-slate-200 text-sm"><i class="fa-solid fa-chart-area text-cyan-400 mr-2"></i> Gateway Traffic Monitor (ether1 Trunk)</h3>
+                    <p class="text-xs text-slate-500">Live Traffic Accumulation across all VLANs</p>
                 </div>
                 <span class="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 text-[10px] rounded-lg border border-emerald-500/30 font-semibold flex items-center gap-1">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Live
@@ -136,30 +136,34 @@
                     <canvas id="apChart"></canvas>
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-300 mt-4 pt-4 border-t border-slate-800">
-                <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-cyan-500"></span> AP-Lobby-UniFi</div>
-                <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> AP-MeetingRoom</div>
-                <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> AP-Warehouse</div>
-                <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-pink-500"></span> AP-Outdoor-UniFi</div>
+            <div id="ap-legend" class="grid grid-cols-2 gap-2 text-[11px] text-slate-300 mt-4 pt-4 border-t border-slate-800">
+                <div class="text-slate-500">Waiting for AP data...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VLAN Segments Live Traffic Breakdown -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-slate-800">
+            <h3 class="font-semibold text-slate-200 text-sm"><i class="fa-solid fa-sitemap text-cyan-400 mr-2"></i> VLAN Segments Live Traffic Breakdown</h3>
+            <p class="text-xs text-slate-500">Real-time Bandwidth Usage per Segment on Parent Interface ether1</p>
+        </div>
+        <div class="p-4">
+            <div id="vlan-cards-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div class="text-xs text-slate-500 p-4">Loading VLAN segment metrics...</div>
             </div>
         </div>
     </div>
 
     <!-- Inventory Table -->
     <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-sm overflow-hidden">
-        <div class="p-4 border-b border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-3">
+        <div class="p-4 border-b border-slate-800 flex justify-between items-center">
             <div>
                 <h3 class="font-semibold text-slate-200 text-sm"><i class="fa-solid fa-server text-cyan-400 mr-2"></i> Network Devices Inventory</h3>
-                <p class="text-xs text-slate-500">Registered Routers, Switches, and Access Points synced with Google Sheets</p>
+                <p class="text-xs text-slate-500">Registered Routers, EdgeSwitch, and APs synced with Google Sheets</p>
             </div>
-            <div class="flex items-center space-x-2 w-full sm:w-auto">
-                <input type="text" placeholder="Search IP / Device Name..." class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-cyan-500">
-                <select class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-300 focus:outline-none">
-                    <option>All Brands</option>
-                    <option>MikroTik</option>
-                    <option>UniFi</option>
-                    <option>EdgeSwitch</option>
-                </select>
+            <div class="flex items-center space-x-2">
+                <input type="text" id="search-input" onkeyup="filterInventory()" placeholder="Search IP / Device..." class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-cyan-500">
             </div>
         </div>
         <div class="overflow-x-auto">
@@ -172,7 +176,7 @@
                         <th class="p-3.5">Location</th>
                         <th class="p-3.5">Status</th>
                         <th class="p-3.5">Uptime</th>
-                        <th class="p-3.5">Actions</th>
+                        <th class="p-3.5">Active Clients</th>
                     </tr>
                 </thead>
                 <tbody id="table-body" class="divide-y divide-slate-800/60 text-xs text-slate-300">
@@ -184,100 +188,185 @@
 
     <!-- Script Logic -->
     <script>
-        const API_URL = document.getElementById('api-url').value;
+        let trafficChartInstance = null;
+        let apChartInstance = null;
 
         async function fetchData() {
+            const apiUrl = document.getElementById('api-url').value;
             try {
-                const res = await fetch(API_URL);
+                const res = await fetch(apiUrl);
                 const json = await res.json();
                 
-                if (json.status === "success" && json.devices) {
-                    const devices = json.devices;
-                    if(devices.length > 0) {
-                        const latest = devices[devices.length - 1];
-                        document.getElementById('stat-clients').innerText = latest.ActiveClients || '128';
-                        document.getElementById('stat-cpu').innerText = latest.CpuLoad || '24%';
-                    }
-
-                    const tbody = document.getElementById('table-body');
-                    tbody.innerHTML = '';
-                    
-                    [...devices].reverse().forEach(d => {
-                        tbody.innerHTML += `
-                            <tr class="hover:bg-slate-800/40 transition">
-                                <td class="p-3.5 font-medium text-slate-200">${d.DeviceName || 'Router-CCR'}</td>
-                                <td class="p-3.5"><span class="px-2 py-0.5 bg-cyan-500/10 text-cyan-400 rounded-md text-[11px]">MikroTik RouterOS</span></td>
-                                <td class="p-3.5 font-mono text-slate-400">192.168.88.1</td>
-                                <td class="p-3.5 text-slate-400">Main Server Room</td>
-                                <td class="p-3.5"><span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded-md text-[11px] font-semibold">${d.Status || 'Online'}</span></td>
-                                <td class="p-3.5 text-slate-400 font-mono text-[11px]">${d.Uptime || '-'}</td>
-                                <td class="p-3.5 text-cyan-400 cursor-pointer hover:underline">Manage</td>
-                            </tr>
-                        `;
-                    });
+                if (json.status === "success") {
+                    updateInventoryTable(json.devices || []);
+                    updateTrafficChart(json.traffic || []);
+                    updateVlanCards(json.vlans || []);
+                    updateApDistributionChart(json.ap_distribution || []);
                 }
             } catch (err) {
-                console.error(err);
-                document.getElementById('table-body').innerHTML = `<tr><td colspan="7" class="p-6 text-center text-rose-400">Failed to connect to Google Sheets API backend.</td></tr>`;
+                console.error("Fetch Error:", err);
             }
         }
 
-        // Initialize Charts
-        const trafficCtx = document.getElementById('trafficChart').getContext('2d');
-        new Chart(trafficCtx, {
-            type: 'line',
-            data: {
-                labels: ['12:15', '12:20', '12:25', '12:30', '12:31', '12:34', '12:37'],
-                datasets: [
-                    {
-                        label: 'Download',
-                        data: [100, 125, 110, 115, 112, 118, 112],
-                        borderColor: '#06b6d4',
-                        backgroundColor: 'rgba(6, 182, 212, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.3
-                    },
-                    {
-                        label: 'Upload',
-                        data: [20, 25, 18, 22, 20, 24, 21],
-                        borderColor: '#a855f7',
-                        backgroundColor: 'rgba(168, 85, 247, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.3
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#64748b' } },
-                    x: { grid: { display: false }, ticks: { color: '#64748b' } }
-                },
-                plugins: { legend: { display: false } }
-            }
-        });
+        function updateInventoryTable(devices) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
 
-        const apCtx = document.getElementById('apChart').getContext('2d');
-        new Chart(apCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Lobby', 'Meeting Room', 'Warehouse', 'Outdoor'],
-                datasets: [{
-                    data: [35, 25, 20, 20],
-                    backgroundColor: ['#06b6d4', '#6366f1', '#a855f7', '#ec4899'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                cutout: '75%'
+            if (!devices.length) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-500">No registered devices found.</td></tr>`;
+                return;
             }
-        });
+
+            const uniqueDevices = {};
+            devices.forEach(d => { uniqueDevices[d.DeviceName] = d; });
+            const list = Object.values(uniqueDevices);
+            document.getElementById('stat-devices').innerText = `${list.length} / ${list.length}`;
+
+            let totalClients = 0;
+            list.forEach(d => {
+                if (d.ActiveClients) totalClients += parseInt(d.ActiveClients) || 0;
+                document.getElementById('stat-cpu').innerText = d.CpuLoad || '0%';
+                document.getElementById('stat-core-name').innerText = d.DeviceName || 'MikroTik';
+
+                let brandBadge = 'bg-cyan-500/10 text-cyan-400';
+                if ((d.Brand || '').toLowerCase().includes('unifi')) brandBadge = 'bg-indigo-500/10 text-indigo-400';
+                if ((d.Brand || '').toLowerCase().includes('edge')) brandBadge = 'bg-purple-500/10 text-purple-400';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-800/40 transition">
+                        <td class="p-3.5 font-medium text-slate-200">${d.DeviceName || 'Device'}</td>
+                        <td class="p-3.5"><span class="px-2 py-0.5 ${brandBadge} rounded-md text-[11px]">${d.Brand || 'MikroTik RouterOS'}</span></td>
+                        <td class="p-3.5 font-mono text-slate-400">${d.IPAddress || '-'}</td>
+                        <td class="p-3.5 text-slate-400">${d.Location || 'Server Room'}</td>
+                        <td class="p-3.5"><span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded-md text-[11px] font-semibold">${d.Status || 'Online'}</span></td>
+                        <td class="p-3.5 text-slate-400 font-mono text-[11px]">${d.Uptime || '-'}</td>
+                        <td class="p-3.5 font-semibold text-emerald-400">${d.ActiveClients || 0}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('stat-clients').innerText = totalClients;
+        }
+
+        function updateTrafficChart(trafficData) {
+            const chartData = trafficData.slice(-10);
+            const labels = chartData.map(t => t.Timestamp ? new Date(t.Timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '');
+            const rxValues = chartData.map(t => parseFloat(t.RxMbps) || 0);
+            const txValues = chartData.map(t => parseFloat(t.TxMbps) || 0);
+
+            if (chartData.length > 0) {
+                const latestRx = rxValues[rxValues.length - 1];
+                const latestTx = txValues[txValues.length - 1];
+                document.getElementById('stat-rx').innerHTML = `<i class="fa-solid fa-arrow-down"></i> ${latestRx.toFixed(1)} Mbps`;
+                document.getElementById('stat-tx').innerHTML = `<i class="fa-solid fa-arrow-up"></i> ${latestTx.toFixed(1)} Mbps`;
+                document.getElementById('stat-bandwidth-total').innerText = `${(latestRx + latestTx).toFixed(1)} Mbps`;
+            }
+
+            const ctx = document.getElementById('trafficChart').getContext('2d');
+            if (trafficChartInstance) trafficChartInstance.destroy();
+
+            trafficChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Download', data: rxValues, borderColor: '#06b6d4', backgroundColor: 'rgba(6, 182, 212, 0.1)', borderWidth: 2, fill: true, tension: 0.3 },
+                        { label: 'Upload', data: txValues, borderColor: '#a855f7', backgroundColor: 'rgba(168, 85, 247, 0.1)', borderWidth: 2, fill: true, tension: 0.3 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#64748b' } },
+                        x: { grid: { display: false }, ticks: { color: '#64748b' } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function updateVlanCards(vlanData) {
+            const vlanMap = {};
+            vlanData.forEach(item => {
+                if (item.VLANName) vlanMap[item.VLANName] = item;
+            });
+
+            const container = document.getElementById('vlan-cards-container');
+            container.innerHTML = '';
+
+            const keys = Object.keys(vlanMap);
+            if (!keys.length) {
+                container.innerHTML = `<div class="text-xs text-slate-500 p-2">No active VLAN metrics detected in database.</div>`;
+                return;
+            }
+
+            keys.forEach(vlanName => {
+                const v = vlanMap[vlanName];
+                const rx = parseFloat(v.RxMbps || 0).toFixed(1);
+                const tx = parseFloat(v.TxMbps || 0).toFixed(1);
+
+                container.innerHTML += `
+                    <div class="bg-slate-950/70 border border-slate-800 p-4 rounded-xl flex flex-col justify-between">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold text-xs text-cyan-400 font-mono">${vlanName}</span>
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        </div>
+                        <div class="space-y-1 text-xs font-mono">
+                            <div class="flex justify-between text-slate-400"><span>Rx (Down):</span> <span class="text-cyan-400 font-semibold">${rx} Mbps</span></div>
+                            <div class="flex justify-between text-slate-400"><span>Tx (Up):</span> <span class="text-purple-400 font-semibold">${tx} Mbps</span></div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function updateApDistributionChart(apData) {
+            const apMap = {};
+            apData.forEach(item => {
+                if (item.APName) apMap[item.APName] = parseInt(item.ClientCount) || 0;
+            });
+
+            const labels = Object.keys(apMap).length ? Object.keys(apMap) : ['No AP Data'];
+            const counts = Object.values(apMap).length ? Object.values(apMap) : [0];
+            const colors = ['#06b6d4', '#6366f1', '#a855f7', '#ec4899', '#10b981'];
+
+            const ctx = document.getElementById('apChart').getContext('2d');
+            if (apChartInstance) apChartInstance.destroy();
+
+            apChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{ data: counts, backgroundColor: colors.slice(0, labels.length), borderWidth: 0 }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    cutout: '75%'
+                }
+            });
+
+            const legendDiv = document.getElementById('ap-legend');
+            legendDiv.innerHTML = '';
+            labels.forEach((label, idx) => {
+                legendDiv.innerHTML += `
+                    <div class="flex items-center gap-1.5 truncate">
+                        <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${colors[idx % colors.length]}"></span> 
+                        <span class="truncate">${label} (${counts[idx]})</span>
+                    </div>
+                `;
+            });
+        }
+
+        function filterInventory() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const rows = document.querySelectorAll('#table-body tr');
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+        }
 
         fetchData();
         setInterval(fetchData, 30000);
