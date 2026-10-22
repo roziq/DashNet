@@ -432,12 +432,12 @@
             const container = document.getElementById('switch-container');
             if (!container) return;
 
-            // 1. Konfigurasi bawaan dengan URUTAN PERSIS: CCR -> EDGE -> UDM -> ADGUARD
+            // 1. Konfigurasi bawaan dengan URUTAN: CCR -> EDGE -> UDM -> ADGUARD beserta URL IP-nya
             const coreDefaults = {
-                "CCR2004 Core Router": { Model: "MikroTik RouterOS", IP: "10.99.1.1" },
-                "EdgeSwitch 8 150W": { Model: "ES-8-150W", IP: "10.99.1.2" },
-                "UniFi Dream Machine Pro": { Model: "UDM Pro", IP: "10.99.1.5" },
-                "AdGuard Home DNS": { Model: "Debian Server", IP: "192.168.16.254" }
+                "CCR2004 Core Router": { Model: "MikroTik RouterOS", IP: "10.99.1.1", URL: "http://10.99.1.1" },
+                "EdgeSwitch 8 150W": { Model: "ES-8-150W", IP: "10.99.1.2", URL: "http://10.99.1.2" },
+                "UniFi Dream Machine Pro": { Model: "UDM Pro", IP: "10.99.1.5", URL: "https://10.99.1.5" },
+                "AdGuard Home DNS": { Model: "Debian Server", IP: "192.168.16.254", URL: "http://192.168.16.254" }
             };
 
             const dbMap = {};
@@ -448,7 +448,6 @@
                 });
             }
 
-            // Urutan wajib di bagian atas
             const targetNames = [
                 "CCR2004 Core Router", 
                 "EdgeSwitch 8 150W", 
@@ -456,7 +455,6 @@
                 "AdGuard Home DNS"
             ];
             
-            // Tambahkan switch distribusi lainnya di bawahnya (jika ada)
             if (switchData) {
                 switchData.forEach(item => {
                     const name = item.SwitchName || item.switch_name;
@@ -465,6 +463,45 @@
                     }
                 });
             }
+
+            container.innerHTML = '';
+
+            targetNames.forEach(name => {
+                const dbItem = dbMap[name] || {};
+                const defaultConfig = coreDefaults[name] || {};
+                
+                const swName = name;
+                const swModel = dbItem.Model || dbItem.model || defaultConfig.Model || 'Network Switch';
+                const swIP = defaultConfig.IP || dbItem.IP || '';
+                // Tautan URL menggunakan IP default atau kustom, mengarah ke tab baru (target="_blank")
+                const swURL = defaultConfig.URL || (swIP ? `http://${swIP}` : '#');
+                
+                const rawStatus = dbItem.Status || dbItem.status || "ONLINE";
+                const isOnline = String(rawStatus).toUpperCase() === "ONLINE";
+                
+                const badgeClass = isOnline 
+                    ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400" 
+                    : "bg-rose-500/20 text-rose-600 dark:text-rose-400";
+                
+                container.innerHTML += `
+                    <a href="${swURL}" target="_blank" rel="noopener noreferrer" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-cyan-500 dark:hover:border-cyan-400 px-2 py-1 rounded-xl shadow-sm flex items-center justify-between transition group">
+                        <div class="flex items-center space-x-2 overflow-hidden pr-2">
+                            <div class="p-1 bg-indigo-500/10 rounded-lg text-indigo-500 border border-indigo-500/20 text-[10px] shrink-0 group-hover:bg-cyan-500/10 group-hover:text-cyan-500 transition">
+                                <i class="fa-solid fa-network-wired"></i>
+                            </div>
+                            <div class="overflow-hidden">
+                                <h4 class="text-[10px] font-bold text-slate-800 dark:text-slate-200 leading-tight truncate group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition" title="${swName}">${swName}</h4>
+                                <p class="text-[9px] text-slate-500 dark:text-slate-400 font-mono flex items-center gap-1.5">
+                                    <span>${swModel}</span>
+                                    ${swIP ? `<span class="text-cyan-600 dark:text-cyan-400 font-semibold">• ${swIP} <i class="fa-solid fa-arrow-up-right-from-square text-[8px] opacity-70"></i></span>` : ''}
+                                </p>
+                            </div>
+                        </div>
+                        <span class="px-2 py-0.5 ${badgeClass} rounded text-[9px] font-bold uppercase shrink-0">${isOnline ? 'ONLINE' : 'OFFLINE'}</span>
+                    </a>
+                `;
+            });
+        }
 
             container.innerHTML = '';
 
