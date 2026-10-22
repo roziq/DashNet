@@ -154,7 +154,7 @@
 
     <!-- 3. SWITCH & UNIFI AP DISTRIBUTION AREA -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-2.5 shrink-0">
-        <!-- Switch Status Dinamis (Bisa di-scroll jika banyak) -->
+        <!-- Switch Status Dinamis -->
         <div class="flex flex-col max-h-[160px] overflow-y-auto custom-scrollbar pr-1 space-y-1.5" id="switch-container">
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2.5 rounded-xl shadow-sm flex items-center justify-between">
                 <div class="text-xs text-slate-400">Loading switches...</div>
@@ -403,13 +403,16 @@
             if (!container) return;
 
             if (!switchData || switchData.length === 0) {
-                container.innerHTML = `<div class="text-xs text-slate-400 p-1">No switch data found.</div>`;
+                container.innerHTML = `<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2.5 rounded-xl shadow-sm text-xs text-slate-400">No switch data found.</div>`;
                 return;
             }
 
             container.innerHTML = '';
             switchData.forEach(sw => {
-                const isOnline = (sw.Status || "").toUpperCase() === "ONLINE";
+                const swName = sw.SwitchName || sw.switch_name || 'Switch';
+                const swModel = sw.Model || sw.model || 'UniFi Switch';
+                const isOnline = (sw.Status || sw.status || "").toUpperCase() === "ONLINE";
+                
                 const badgeClass = isOnline 
                     ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400" 
                     : "bg-rose-500/20 text-rose-600 dark:text-rose-400";
@@ -421,11 +424,11 @@
                                 <i class="fa-solid fa-network-wired"></i>
                             </div>
                             <div>
-                                <h4 class="text-xs md:text-sm font-bold text-slate-800 dark:text-slate-200 truncate max-w-[160px]" title="${sw.SwitchName}">${sw.SwitchName}</h4>
-                                <p class="text-[11px] text-slate-500 dark:text-slate-400 font-mono">${sw.Model}</p>
+                                <h4 class="text-xs md:text-sm font-bold text-slate-800 dark:text-slate-200 truncate max-w-[160px]" title="${swName}">${swName}</h4>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 font-mono">${swModel}</p>
                             </div>
                         </div>
-                        <span class="px-2.5 py-1 ${badgeClass} rounded text-[10px] font-bold uppercase">${sw.Status}</span>
+                        <span class="px-2.5 py-1 ${badgeClass} rounded text-[10px] font-bold uppercase">${isOnline ? 'ONLINE' : 'OFFLINE'}</span>
                     </div>
                 `;
             });
