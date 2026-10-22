@@ -33,7 +33,7 @@
         #vlan-cards-container {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 0.375rem;
+            gap: 0.35rem;
         }
         @media (min-width: 640px) { #vlan-cards-container { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
         @media (min-width: 768px) { #vlan-cards-container { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
@@ -41,11 +41,11 @@
         @media (min-width: 1280px) { #vlan-cards-container { grid-template-columns: repeat(8, minmax(0, 1fr)); } }
     </style>
 </head>
-<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased min-h-screen lg:h-screen overflow-y-auto lg:overflow-hidden flex flex-col p-2 sm:p-3 space-y-2 transition-colors duration-300">
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased min-h-screen lg:h-screen overflow-y-auto lg:overflow-hidden flex flex-col p-2.5 space-y-2 transition-colors duration-300">
 
     <!-- Top Bar / Header -->
-    <header class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1.5 sm:px-3.5 sm:py-2 flex justify-between items-center shadow-sm shrink-0">
-        <div class="flex items-center space-x-2 sm:space-x-3">
+    <header class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 sm:px-3.5 sm:py-2 flex justify-between items-center shadow-sm shrink-0">
+        <div class="flex items-center space-x-2.5">
             <div class="bg-cyan-500 p-1.5 sm:p-2 rounded-lg text-slate-950 font-bold shadow">
                 <i class="fa-solid fa-network-wired text-xs sm:text-sm"></i>
             </div>
@@ -59,18 +59,18 @@
         </div>
         
         <!-- Action Buttons -->
-        <div class="flex items-center space-x-1.5 sm:space-x-2">
-            <button onclick="toggleTheme()" class="px-2 py-1 sm:px-2.5 sm:py-1.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-[10px] sm:text-xs font-semibold transition flex items-center gap-1 border border-slate-300 dark:border-slate-700">
+        <div class="flex items-center space-x-2">
+            <button onclick="toggleTheme()" class="px-2.5 py-1 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-[10px] sm:text-xs font-semibold transition flex items-center gap-1 border border-slate-300 dark:border-slate-700">
                 <i id="theme-icon" class="fa-solid fa-moon text-cyan-400"></i>
                 <span id="theme-text" class="hidden xs:inline">Dark</span>
             </button>
 
-            <span id="db-status-badge" class="px-2 py-1 sm:px-2.5 sm:py-1.5 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] sm:text-xs rounded-lg border border-emerald-500/30 flex items-center gap-1 font-medium">
+            <span id="db-status-badge" class="px-2.5 py-1 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] sm:text-xs rounded-lg border border-emerald-500/30 flex items-center gap-1 font-medium">
                 <span id="db-status-dot" class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>
                 <span id="db-status-text" class="hidden xs:inline">Connected</span>
             </span>
             
-            <button onclick="fetchData()" class="px-2.5 py-1 sm:px-3 sm:py-1.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-lg text-[10px] sm:text-xs font-semibold transition flex items-center gap-1 shadow">
+            <button onclick="fetchData()" class="px-3 py-1 bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-lg text-[10px] sm:text-xs font-semibold transition flex items-center gap-1 shadow">
                 <i class="fa-solid fa-rotate"></i> <span class="hidden sm:inline">Refresh</span>
             </button>
         </div>
@@ -132,44 +132,44 @@
                     <span class="flex items-center gap-1"><span class="w-2 h-1 bg-purple-500 rounded"></span> Up</span>
                 </div>
             </div>
-            <div class="relative w-full h-20 sm:h-24 lg:h-28">
+            <div class="relative w-full h-20 sm:h-24">
                 <canvas id="trafficChart"></canvas>
             </div>
         </div>
     </div>
 
     <!-- WAN Gateways Horizontal List -->
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1.5 shadow-sm shrink-0">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 shadow-sm shrink-0">
         <div id="wan-cards-container" class="flex flex-nowrap gap-2 overflow-x-auto custom-scrollbar pb-0.5">
             <div class="text-[10px] text-slate-400">Loading WAN gateways...</div>
         </div>
     </div>
 
-    <!-- 2. VLAN SEGMENTS AREA (Dibuat flex-1 dan scrollable agar tidak ada space kosong berlebih) -->
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-2 shadow-sm flex-1 min-h-0 flex flex-col justify-between overflow-hidden">
-        <div class="flex justify-between items-center mb-1 shrink-0">
+    <!-- 2. VLAN SEGMENTS AREA (Tinggi flex disesuaikan agar proporsional dan naik) -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 shadow-sm flex flex-col shrink-0 max-h-[210px] overflow-hidden">
+        <div class="flex justify-between items-center mb-1.5 shrink-0">
             <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-xs"><i class="fa-solid fa-sitemap text-cyan-600 dark:text-cyan-400 mr-1.5"></i> VLAN Segments Breakdown</h3>
             <span id="vlan-count-badge" class="px-2 py-0.5 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-[9px] sm:text-xs rounded font-mono font-bold border border-cyan-500/20">
                 0 Active VLANs
             </span>
         </div>
-        <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1">
+        <div class="overflow-y-auto custom-scrollbar pr-1">
             <div id="vlan-cards-container">
                 <div class="text-[10px] text-slate-400 p-1 col-span-full">Loading VLAN metrics...</div>
             </div>
         </div>
     </div>
 
-    <!-- 3. SWITCH & UNIFI AP DISTRIBUTION AREA -->
+    <!-- 3. SWITCH & UNIFI AP DISTRIBUTION AREA (Dipastikan naik ke atas dengan rapi) -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 shrink-0">
         <!-- Switch Status -->
-        <div class="flex flex-col space-y-1 max-h-32 overflow-y-auto custom-scrollbar pr-1" id="switch-container">
+        <div class="flex flex-col space-y-1 max-h-28 overflow-y-auto custom-scrollbar pr-1" id="switch-container">
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded-xl shadow-sm flex items-center justify-between">
                 <div class="text-[10px] text-slate-400">Loading switches...</div>
             </div>
         </div>
 
-        <!-- UniFi AP Distribution Chart (Font Desktop proporsional: text-xs) -->
+        <!-- UniFi AP Distribution Chart -->
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2.5 rounded-xl shadow-sm lg:col-span-2 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div class="flex items-center space-x-2.5 w-full sm:w-auto shrink-0">
                 <div class="p-2 bg-cyan-500/10 rounded-lg text-cyan-500 border border-cyan-500/20 text-sm">
@@ -182,11 +182,10 @@
             </div>
             
             <div class="flex flex-col sm:flex-row items-center justify-between gap-3 w-full sm:w-auto flex-grow">
-                <div class="relative w-20 h-20 shrink-0">
+                <div class="relative w-16 h-16 sm:w-18 sm:h-18 shrink-0">
                     <canvas id="apChart"></canvas>
                 </div>
-                <!-- Legenda AP: Ukuran font pas/proporsional di desktop (text-xs) -->
-                <div id="ap-legend" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-x-4 gap-y-1 text-xs text-slate-700 dark:text-slate-200 font-mono max-h-28 overflow-y-auto custom-scrollbar pr-2 w-full">
+                <div id="ap-legend" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-x-4 gap-y-0.5 text-xs text-slate-700 dark:text-slate-200 font-mono max-h-24 overflow-y-auto custom-scrollbar pr-2 w-full">
                     <div class="text-slate-400 text-xs">Waiting AP...</div>
                 </div>
             </div>
@@ -291,11 +290,11 @@
             const text = document.getElementById('db-status-text');
 
             if (isConnected) {
-                badge.className = "px-2 py-1 sm:px-2.5 sm:py-1.5 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] sm:text-xs rounded-lg border border-emerald-500/30 flex items-center gap-1 font-medium";
+                badge.className = "px-2.5 py-1 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] sm:text-xs rounded-lg border border-emerald-500/30 flex items-center gap-1 font-medium";
                 dot.className = "w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse";
                 text.innerText = message;
             } else {
-                badge.className = "px-2 py-1 sm:px-2.5 sm:py-1.5 bg-rose-500/10 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-[10px] sm:text-xs rounded-lg border border-rose-500/30 flex items-center gap-1 font-medium";
+                badge.className = "px-2.5 py-1 bg-rose-500/10 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-[10px] sm:text-xs rounded-lg border border-rose-500/30 flex items-center gap-1 font-medium";
                 dot.className = "w-1.5 h-1.5 rounded-full bg-rose-500 dark:bg-rose-400";
                 text.innerText = message;
             }
