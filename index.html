@@ -154,9 +154,9 @@
 
     <!-- 3. SWITCH & UNIFI AP DISTRIBUTION AREA -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-2.5 shrink-0">
-        <!-- Switch Status Dinamis -->
-        <div class="flex flex-col max-h-[160px] overflow-y-auto custom-scrollbar pr-1 space-y-1.5" id="switch-container">
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2.5 rounded-xl shadow-sm flex items-center justify-between">
+        <!-- Switch Status (Font diperkecil & padding ringkas agar muat tanpa scroll) -->
+        <div class="flex flex-col space-y-1.5" id="switch-container">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded-xl shadow-sm flex items-center justify-between">
                 <div class="text-xs text-slate-400">Loading switches...</div>
             </div>
         </div>
@@ -403,7 +403,7 @@
             if (!container) return;
 
             if (!switchData || switchData.length === 0) {
-                container.innerHTML = `<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2.5 rounded-xl shadow-sm text-xs text-slate-400">No switch data found.</div>`;
+                container.innerHTML = `<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded-xl shadow-sm text-[11px] text-slate-400">No switch data found.</div>`;
                 return;
             }
 
@@ -417,18 +417,19 @@
                     ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400" 
                     : "bg-rose-500/20 text-rose-600 dark:text-rose-400";
                 
+                // Font dan padding diperkecil (text-[11px], py-1.5) agar pas tanpa scroll
                 container.innerHTML += `
-                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2.5 rounded-xl shadow-sm flex items-center justify-between">
-                        <div class="flex items-center space-x-2.5">
-                            <div class="p-2.5 bg-indigo-500/10 rounded-lg text-indigo-500 border border-indigo-500/20 text-sm">
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2.5 py-1.5 rounded-xl shadow-sm flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-1.5 bg-indigo-500/10 rounded-lg text-indigo-500 border border-indigo-500/20 text-xs">
                                 <i class="fa-solid fa-network-wired"></i>
                             </div>
                             <div>
-                                <h4 class="text-xs md:text-sm font-bold text-slate-800 dark:text-slate-200 truncate max-w-[160px]" title="${swName}">${swName}</h4>
-                                <p class="text-[11px] text-slate-500 dark:text-slate-400 font-mono">${swModel}</p>
+                                <h4 class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate max-w-[170px]" title="${swName}">${swName}</h4>
+                                <p class="text-[9px] text-slate-500 dark:text-slate-400 font-mono">${swModel}</p>
                             </div>
                         </div>
-                        <span class="px-2.5 py-1 ${badgeClass} rounded text-[10px] font-bold uppercase">${isOnline ? 'ONLINE' : 'OFFLINE'}</span>
+                        <span class="px-2 py-0.5 ${badgeClass} rounded text-[9px] font-bold uppercase">${isOnline ? 'ONLINE' : 'OFFLINE'}</span>
                     </div>
                 `;
             });
