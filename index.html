@@ -30,14 +30,15 @@
             border-radius: 4px;
         }
 
+        /* Grid VLAN: Di layar besar (1280px ke atas) dibuat 8 kolom agar pas 3 baris tanpa scroll */
         #vlan-cards-container {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 0.35rem;
+            gap: 0.25rem;
         }
         @media (min-width: 640px) { #vlan-cards-container { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-        @media (min-width: 768px) { #vlan-cards-container { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-        @media (min-width: 1024px) { #vlan-cards-container { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+        @media (min-width: 768px) { #vlan-cards-container { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+        @media (min-width: 1024px) { #vlan-cards-container { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
         @media (min-width: 1280px) { #vlan-cards-container { grid-template-columns: repeat(8, minmax(0, 1fr)); } }
     </style>
 </head>
@@ -145,15 +146,15 @@
         </div>
     </div>
 
-    <!-- 2. VLAN SEGMENTS AREA (Tinggi disesuaikan proporsional pas) -->
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 shadow-sm flex flex-col shrink-0 max-h-[175px] overflow-hidden">
-        <div class="flex justify-between items-center mb-1.5 shrink-0">
+    <!-- 2. VLAN SEGMENTS AREA (3 Baris penuh tanpa scroll) -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 shadow-sm flex flex-col shrink-0">
+        <div class="flex justify-between items-center mb-1 shrink-0">
             <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-xs"><i class="fa-solid fa-sitemap text-cyan-600 dark:text-cyan-400 mr-1.5"></i> VLAN Segments Breakdown</h3>
             <span id="vlan-count-badge" class="px-2 py-0.5 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-[9px] sm:text-xs rounded font-mono font-bold border border-cyan-500/20">
                 0 Active VLANs
             </span>
         </div>
-        <div class="overflow-y-auto custom-scrollbar pr-1">
+        <div>
             <div id="vlan-cards-container">
                 <div class="text-[10px] text-slate-400 p-1 col-span-full">Loading VLAN metrics...</div>
             </div>
@@ -395,7 +396,7 @@
                 const theme = COLOR_PALETTE[idx % COLOR_PALETTE.length];
 
                 container.innerHTML += `
-                    <div class="bg-slate-50 dark:bg-slate-950/80 border ${theme.border} px-2 py-1.5 rounded-lg flex flex-col justify-between shadow-xs">
+                    <div class="bg-slate-50 dark:bg-slate-950/80 border ${theme.border} px-2 py-1 rounded-lg flex flex-col justify-between shadow-xs">
                         <div class="flex justify-between items-center mb-0.5">
                             <span class="font-bold text-[10px] sm:text-xs ${theme.text} font-mono truncate" title="${vlanName}">${vlanName}</span>
                             <span class="w-1.5 h-1.5 rounded-full ${theme.badge} animate-pulse shrink-0"></span>
