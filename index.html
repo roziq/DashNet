@@ -432,9 +432,10 @@
             const container = document.getElementById('switch-container');
             if (!container) return;
 
-            // Konfigurasi bawaan untuk Core Devices & IP Address
+            // 1. Konfigurasi bawaan dengan URUTAN PERSIS: CCR -> EDGE -> UDM -> ADGUARD
             const coreDefaults = {
                 "CCR2004 Core Router": { Model: "MikroTik RouterOS", IP: "10.99.1.1" },
+                "EdgeSwitch 8 150W": { Model: "ES-8-150W", IP: "10.99.1.2" },
                 "UniFi Dream Machine Pro": { Model: "UDM Pro", IP: "10.99.1.5" },
                 "AdGuard Home DNS": { Model: "Debian Server", IP: "192.168.16.254" }
             };
@@ -447,8 +448,15 @@
                 });
             }
 
-            const targetNames = ["CCR2004 Core Router", "UniFi Dream Machine Pro", "AdGuard Home DNS"];
+            // Urutan wajib di bagian atas
+            const targetNames = [
+                "CCR2004 Core Router", 
+                "EdgeSwitch 8 150W", 
+                "UniFi Dream Machine Pro", 
+                "AdGuard Home DNS"
+            ];
             
+            // Tambahkan switch distribusi lainnya di bawahnya (jika ada)
             if (switchData) {
                 switchData.forEach(item => {
                     const name = item.SwitchName || item.switch_name;
@@ -468,6 +476,7 @@
                 const swModel = dbItem.Model || dbItem.model || defaultConfig.Model || 'Network Switch';
                 const swIP = defaultConfig.IP || dbItem.IP || '';
                 
+                // Status diambil dinamis dari hasil ping database
                 const rawStatus = dbItem.Status || dbItem.status || "ONLINE";
                 const isOnline = String(rawStatus).toUpperCase() === "ONLINE";
                 
