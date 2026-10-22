@@ -144,7 +144,7 @@
         </div>
     </div>
 
-    <!-- 2. VLAN SEGMENTS AREA (3 Baris penuh tanpa scroll) -->
+    <!-- 2. VLAN SEGMENTS AREA -->
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 shadow-sm flex flex-col shrink-0">
         <div class="flex justify-between items-center mb-1 shrink-0">
             <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-xs"><i class="fa-solid fa-sitemap text-cyan-600 dark:text-cyan-400 mr-1.5"></i> VLAN Segments Breakdown</h3>
@@ -161,7 +161,7 @@
 
     <!-- 3. SWITCH & UNIFI AP DISTRIBUTION AREA -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 shrink-0">
-        <!-- Switch Status -->
+        <!-- Switch & Core Status -->
         <div class="flex flex-col space-y-1" id="switch-container">
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded-xl shadow-sm flex items-center justify-between">
                 <div class="text-[10px] text-slate-400">Loading switches...</div>
@@ -300,7 +300,6 @@
         }
 
         function updateInventorySummary(devices, switches, apDist) {
-            // 1. Hitung total infrastruktur
             let routerTotal = devices.length > 0 ? 1 : 0;
             let routerOnline = routerTotal;
 
@@ -315,7 +314,6 @@
 
             document.getElementById('stat-devices').innerText = `${onlineInfr} / ${totalInfr}`;
 
-            // 2. Ambil Active Clients dari data devices terbaru (kolom ActiveClients/ActiveLeases)
             if (devices.length > 0) {
                 const latestDev = devices[devices.length - 1];
                 const activeClients = parseInt(
@@ -328,7 +326,7 @@
 
                 document.getElementById('stat-clients').innerText = activeClients;
                 document.getElementById('stat-cpu').innerText = typeof cpuLoad === 'number' ? (cpuLoad * 100).toFixed(0) + '%' : cpuLoad;
-                document.getElementById('stat-core-name').innerText = latestDev.DeviceName || 'CCR2004|SMEGA';
+                document.getElementById('stat-core-name').innerText = latestDev.DeviceName || 'CCR2004';
             }
         }
 
@@ -434,24 +432,44 @@
             const container = document.getElementById('switch-container');
             if (!container) return;
 
-            if (!switchData || switchData.length === 0) {
-                container.innerHTML = `<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded-xl shadow-sm text-[10px] text-slate-400">No switch data found.</div>`;
-                return;
+            // Konfigurasi bawaan untuk Core Devices & IP Address
+            const coreDefaults = {
+                "CCR2004 Core Router": { Model: "MikroTik RouterOS", IP: "10.99.1.1" },
+                "UniFi Dream Machine Pro": { Model: "UDM Pro", IP: "10.99.1.5" },
+                "AdGuard Home DNS": { Model: "Debian Server", IP: "192.168.16.254" }
+            };
+
+            const dbMap = {};
+            if (switchData && switchData.length > 0) {
+                switchData.forEach(item => {
+                    const name = item.SwitchName || item.switch_name;
+                    if (name) dbMap[name] = item;
+                });
             }
 
-            switchData.sort((a, b) => {
-                const nameA = (a.SwitchName || "").toLowerCase();
-                const nameB = (b.SwitchName || "").toLowerCase();
-                if (nameA.includes("edgeswitch")) return -1;
-                if (nameB.includes("edgeswitch")) return 1;
-                return 0;
-            });
+            const targetNames = ["CCR2004 Core Router", "UniFi Dream Machine Pro", "AdGuard Home DNS"];
+            
+            if (switchData) {
+                switchData.forEach(item => {
+                    const name = item.SwitchName || item.switch_name;
+                    if (name && !targetNames.includes(name)) {
+                        targetNames.push(name);
+                    }
+                });
+            }
 
             container.innerHTML = '';
-            switchData.forEach(sw => {
-                const swName = sw.SwitchName || 'Switch';
-                const swModel = sw.Model || 'UniFi Switch';
-                const isOnline = (sw.Status || "").toUpperCase() === "ONLINE";
+
+            targetNames.forEach(name => {
+                const dbItem = dbMap[name] || {};
+                const defaultConfig = coreDefaults[name] || {};
+                
+                const swName = name;
+                const swModel = dbItem.Model || dbItem.model || defaultConfig.Model || 'Network Switch';
+                const swIP = defaultConfig.IP || dbItem.IP || '';
+                
+                const rawStatus = dbItem.Status || dbItem.status || "ONLINE";
+                const isOnline = String(rawStatus).toUpperCase() === "ONLINE";
                 
                 const badgeClass = isOnline 
                     ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400" 
@@ -464,8 +482,11 @@
                                 <i class="fa-solid fa-network-wired"></i>
                             </div>
                             <div class="overflow-hidden">
-                                <h4 class="text-[10px] font-bold text-slate-800 dark:text-slate-200 leading-tight" title="${swName}">${swName}</h4>
-                                <p class="text-[9px] text-slate-500 dark:text-slate-400 font-mono">${swModel}</p>
+                                <h4 class="text-[10px] font-bold text-slate-800 dark:text-slate-200 leading-tight truncate" title="${swName}">${swName}</h4>
+                                <p class="text-[9px] text-slate-500 dark:text-slate-400 font-mono flex items-center gap-1.5">
+                                    <span>${swModel}</span>
+                                    ${swIP ? `<span class="text-cyan-600 dark:text-cyan-400 font-semibold">• ${swIP}</span>` : ''}
+                                </p>
                             </div>
                         </div>
                         <span class="px-2 py-0.5 ${badgeClass} rounded text-[9px] font-bold uppercase shrink-0">${isOnline ? 'ONLINE' : 'OFFLINE'}</span>
