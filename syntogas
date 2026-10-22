@@ -1,0 +1,109 @@
+<?php
+require_once 'vendor/autoload.php';
+
+$controllerurl  = 'https://10.99.1.5';
+$apikey         = 'ZxXul8o28XhsUlkdoFZgv3Dzc7Ko63sX';
+$site           = 'default';
+
+// 1. Ambil daftar Devices (Access Point, Switch, Gateway)
+$url_devices = $controllerurl . '/proxy/network/api/s/' . $site . '/stat/device';
+$ch_dev = curl_init();
+curl_setopt($ch_dev, CURLOPT_URL, $url_devices);
+curl_setopt($ch_dev, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch_dev, CURLOPT_HTTPHEADER, [
+    'X-API-KEY: ' . $apikey,
+    'Accept: application/json'
+]);
+curl_setopt($ch_dev, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch_dev, CURLOPT_SSL_VERIFYHOST, false);
+$response_dev = curl_exec($ch_dev);
+curl_close($ch_dev);
+
+$data_dev = json_decode($response_dev, true);
+$devices = $data_dev['data'] ?? [];
+
+$ap_names = [];
+$switch_list = [];
+
+foreach ($devices as $dev) {
+    // Tangkap MAC address dari berbagai kemungkinan key (macAddress atau mac)
+    $mac = isset($dev['macAddress']) ? strtolower(trim($dev['macAddress'])) : (isset($dev['mac']) ? strtolower(trim($dev['mac'])) : '');
+    $name = $dev['name'] ?? ($dev['model'] ?? 'Unknown Device');
+    $state = $dev['state'] ?? 'ONLINE'; 
+    $features = $dev['features'] ?? [];
+
+    $is_switch = in_array('switching', $features) || strpos(strtolower($dev['model'] ?? ''), 'us') !== false;
+
+    if ($is_switch) {
+        $switch_list[] = [
+            'SwitchName' => $name,
+            'Model'      => $dev['model'] ?? 'Switch',
+            'Status'     => ($state == 1 || $state === 'ONLINE') ? 'ONLINE' : 'OFFLINE'
+        ];
+    }
+
+    // Pastikan mendeteksi Access Point dengan benar
+    $is_ap = in_array('accessPoint', $features) || isset($dev['radio_table']) || strpos(strtolower($dev['model'] ?? ''), 'ac') !== false || strpos(strtolower($dev['model'] ?? ''), 'u6') !== false;
+
+    if ($mac && $is_ap) {
+        $ap_names[$mac] = $name;
+    }
+}
+
+// 2. Ambil daftar Client aktif
+$url_sta = $controllerurl . '/proxy/network/api/s/' . $site . '/stat/sta';
+$ch_sta = curl_init();
+curl_setopt($ch_sta, CURLOPT_URL, $url_sta);
+curl_setopt($ch_sta, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch_sta, CURLOPT_HTTPHEADER, [
+    'X-API-KEY: ' . $apikey,
+    'Accept: application/json'
+]);
+curl_setopt($ch_sta, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch_sta, CURLOPT_SSL_VERIFYHOST, false);
+$response_sta = curl_exec($ch_sta);
+curl_close($ch_sta);
+
+$data_sta = json_decode($response_sta, true);
+$clients = $data_sta['data'] ?? [];
+
+$ap_counts = [];
+foreach ($clients as $client) {
+    // Cek ap_to hoáº·c ap_mac dari data client UniFi
+    $ap_mac = isset($client['ap_mac']) ? strtolower(trim($client['ap_mac'])) : '';
+    
+    if ($ap_mac && isset($ap_names[$ap_mac])) {
+        $apName = $ap_names[$ap_mac];
+    } else {
+        $is_wired = ($client['type'] ?? '') === 'WIRED' || ($client['is_wired'] ?? false);
+        $apName = $is_wired ? 'WIRED / LAN' : 'Other AP / Unassigned';
+    }
+    $ap_counts[$apName] = ($ap_counts[$apName] ?? 0) + 1;
+}
+
+$formatted_ap_data = [];
+foreach ($ap_counts as $ap => $count) {
+    $formatted_ap_data[] = [
+        'APName' => $ap, 
+        'ClientCount' => $count
+    ];
+}
+
+// 3. Kirim data gabungan ke Google Apps Script via POST
+$gas_url = 'https://script.google.com/macros/s/AKfycbx4Yx18S7GJQUU0WpWfIgVoRPxk-yKKe9MM8HmXN3IjLufLMnNQTQXohdIs4-6h5b1izw/exec';
+$payload = json_encode([
+    'type' => 'network_sync',
+    'ap_data' => $formatted_ap_data,
+    'switch_data' => $switch_list
+]);
+
+$ch_gas = curl_init($gas_url);
+curl_setopt($ch_gas, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch_gas, CURLOPT_CUSTOMREQUEST, "POST");
+curl_setopt($ch_gas, CURLOPT_POSTFIELDS, $payload);
+curl_setopt($ch_gas, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+$result_gas = curl_exec($ch_gas);
+curl_close($ch_gas);
+
+echo "Sync selesai: " . $result_gas;
+?>
