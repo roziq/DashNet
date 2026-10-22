@@ -1,0 +1,63 @@
+# ==========================================================
+# MIKROTIK SCRIPT: send_metrics_to_sheets (MULTI-WAN SUPPORT)
+# ==========================================================
+
+:local baseUrl "https://script.google.com/macros/s/AKfycbx4Yx18S7GJQUU0WpWfIgVoRPxk-yKKe9MM8HmXN3IjLufLMnNQTQXohdIs4-6h5b1izw/exec"
+
+# 1. Ambil Parameter System MikroTik
+:local devName [/system identity get name]
+:local cpuLoad [/system resource get cpu-load]
+:local uptime [/system resource get uptime]
+:local activeLeases 0
+
+:foreach i in=[/ip dhcp-server lease find where status=bound] do={
+    :set activeLeases ($activeLeases + 1)
+}
+
+# 2. Kirim Metrics Utama Router
+:local mainUrl "$baseUrl\?type=mikrotik&device_name=$devName&cpu_load=$cpuLoad%25&uptime=$uptime&active_leases=$activeLeases"
+/tool fetch url=$mainUrl mode=https output=none
+
+# 3. Loop Semua Interface Anggota List WAN (WAN1, WAN2, WAN3, dst.)
+:foreach w in=[/interface list member find list=WAN] do={
+    :local wanInt [/interface list member get $w interface]
+    :local isRunning [/interface get [find name=$wanInt] running]
+    :local status "Down"
+    :if ($isRunning = true) do={ :set status "UP" }
+    
+    :local rxWan 0
+    :local txWan 0
+    /interface monitor-traffic interface=$wanInt once do={
+        :set rxWan ($"rx-bits-per-second" / 1000000)
+        :set txWan ($"tx-bits-per-second" / 1000000)
+    }
+    
+    :local wanUrl "$baseUrl\?type=wan_traffic&wan_name=$wanInt&status=$status&rx_mbps=$rxWan&tx_mbps=$txWan"
+    /tool fetch url=$wanUrl mode=https output=none
+}
+
+# 4. Loop Semua Interface VLAN untuk Kirim Traffic per-VLAN
+:foreach vlan in=[/interface vlan find] do={
+    :local vlanName [/interface vlan get $vlan name]
+    :local rxVlan 0
+    :local txVlan 0
+    
+    /interface monitor-traffic interface=$vlanName once do={
+        :set rxVlan ($"rx-bits-per-second" / 1000000)
+        :set txVlan ($"tx-bits-per-second" / 1000000)
+    }
+    
+    :local vlanUrl "$baseUrl\?type=vlan_traffic&vlan_name=$vlanName&rx_mbps=$rxVlan&tx_mbps=$txVlan"
+    /tool fetch url=$vlanUrl mode=https output=none
+}
+
+# 5. Cek Status Ping EdgeSwitch 8 150W (IP: 10.99.1.2)
+:local esIp "10.99.1.2"
+:local esStatus "OFFLINE"
+
+:if ([/ping $esIp count=2 interval=200ms] > 0) do={
+    :set esStatus "ONLINE"
+}
+
+:local esUrl "$baseUrl\?type=switch_ping&switch_name=EdgeSwitch%208%20150W&model=ES-8-150W&status=$esStatus"
+/tool fetch url=$esUrl mode=https output=none
