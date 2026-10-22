@@ -159,7 +159,7 @@
         </div>
     </div>
 
-    <!-- 3. SWITCH & UNIFI AP DISTRIBUTION AREA (Tanpa Scroll) -->
+    <!-- 3. SWITCH & UNIFI AP DISTRIBUTION AREA -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 shrink-0">
         <!-- Switch Status -->
         <div class="flex flex-col space-y-1" id="switch-container">
@@ -300,7 +300,7 @@
         }
 
         function updateInventorySummary(devices, switches, apDist) {
-            // Hitung total perangkat riil (Router + Switch + AP)
+            // 1. Hitung total infrastruktur
             let routerTotal = devices.length > 0 ? 1 : 0;
             let routerOnline = routerTotal;
 
@@ -315,13 +315,19 @@
 
             document.getElementById('stat-devices').innerText = `${onlineInfr} / ${totalInfr}`;
 
+            // 2. Ambil Active Clients dari data devices terbaru (kolom ActiveClients/ActiveLeases)
             if (devices.length > 0) {
                 const latestDev = devices[devices.length - 1];
-                const activeClients = parseInt(latestDev.ActiveLeases || 0);
-                const cpuLoad = latestDev.CpuLoad || '0%';
+                const activeClients = parseInt(
+                    latestDev.ActiveClients || 
+                    latestDev.ActiveLeases || 
+                    latestDev.active_leases || 
+                    latestDev.active_clients || 0
+                );
+                const cpuLoad = latestDev.CpuLoad || latestDev.cpu_load || '0%';
 
                 document.getElementById('stat-clients').innerText = activeClients;
-                document.getElementById('stat-cpu').innerText = cpuLoad;
+                document.getElementById('stat-cpu').innerText = typeof cpuLoad === 'number' ? (cpuLoad * 100).toFixed(0) + '%' : cpuLoad;
                 document.getElementById('stat-core-name').innerText = latestDev.DeviceName || 'CCR2004|SMEGA';
             }
         }
