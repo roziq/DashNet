@@ -154,8 +154,8 @@
 
     <!-- 3. SWITCH & UNIFI AP DISTRIBUTION AREA -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-2.5 shrink-0">
-        <!-- Switch Status (Font diperkecil & padding ringkas agar muat tanpa scroll) -->
-        <div class="flex flex-col space-y-1.5" id="switch-container">
+        <!-- Switch Status (Nama switch ditulis lengkap tanpa terpotong dan muat tanpa scroll) -->
+        <div class="flex flex-col space-y-1" id="switch-container">
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded-xl shadow-sm flex items-center justify-between">
                 <div class="text-xs text-slate-400">Loading switches...</div>
             </div>
@@ -417,19 +417,19 @@
                     ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400" 
                     : "bg-rose-500/20 text-rose-600 dark:text-rose-400";
                 
-                // Font dan padding diperkecil (text-[11px], py-1.5) agar pas tanpa scroll
+                // Nama switch ditulis lengkap (tanpa truncate, menggunakan text-[10px] & leading-tight agar muat sempurna)
                 container.innerHTML += `
-                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2.5 py-1.5 rounded-xl shadow-sm flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <div class="p-1.5 bg-indigo-500/10 rounded-lg text-indigo-500 border border-indigo-500/20 text-xs">
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2 py-1 rounded-xl shadow-sm flex items-center justify-between">
+                        <div class="flex items-center space-x-2 overflow-hidden pr-2">
+                            <div class="p-1 bg-indigo-500/10 rounded-lg text-indigo-500 border border-indigo-500/20 text-[10px] shrink-0">
                                 <i class="fa-solid fa-network-wired"></i>
                             </div>
-                            <div>
-                                <h4 class="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate max-w-[170px]" title="${swName}">${swName}</h4>
+                            <div class="overflow-hidden">
+                                <h4 class="text-[10px] font-bold text-slate-800 dark:text-slate-200 leading-tight" title="${swName}">${swName}</h4>
                                 <p class="text-[9px] text-slate-500 dark:text-slate-400 font-mono">${swModel}</p>
                             </div>
                         </div>
-                        <span class="px-2 py-0.5 ${badgeClass} rounded text-[9px] font-bold uppercase">${isOnline ? 'ONLINE' : 'OFFLINE'}</span>
+                        <span class="px-2 py-0.5 ${badgeClass} rounded text-[9px] font-bold uppercase shrink-0">${isOnline ? 'ONLINE' : 'OFFLINE'}</span>
                     </div>
                 `;
             });
