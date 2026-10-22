@@ -29,37 +29,6 @@
             background: #06b6d4;
             border-radius: 4px;
         }
-
-        /* Grid VLAN Responsif: Vertikal 2 kolom di HP, banyak kolom di desktop */
-        #vlan-cards-container {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 0.375rem;
-        }
-        
-        @media (min-width: 640px) {
-            #vlan-cards-container {
-                grid-template-columns: repeat(4, minmax(0, 1fr));
-            }
-        }
-        
-        @media (min-width: 768px) {
-            #vlan-cards-container {
-                grid-template-columns: repeat(6, minmax(0, 1fr));
-            }
-        }
-        
-        @media (min-width: 1024px) {
-            #vlan-cards-container {
-                grid-template-columns: repeat(8, minmax(0, 1fr));
-            }
-        }
-        
-        @media (min-width: 1280px) {
-            #vlan-cards-container {
-                grid-template-columns: repeat(11, minmax(0, 1fr));
-            }
-        }
     </style>
 </head>
 <body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased h-screen overflow-hidden flex flex-col p-2 sm:p-3 space-y-2 transition-colors duration-300">
@@ -93,7 +62,7 @@
         </div>
     </header>
 
-    <!-- 1. MIKROTIK CORE & WAN AREA (SEKSI ATAS) -->
+    <!-- 1. MIKROTIK CORE & WAN AREA -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 shrink-0">
         <!-- Stat Cards Grid -->
         <div class="grid grid-cols-2 gap-2">
@@ -113,7 +82,7 @@
                 <div>
                     <p class="text-[9px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Active Clients</p>
                     <h3 id="stat-clients" class="text-sm font-extrabold text-emerald-600 dark:text-emerald-400 leading-tight">0</h3>
-                    <p class="text-[8px] text-slate-500 dark:text-slate-400">UDM Pro Clients</p>
+                    <p class="text-[8px] text-slate-500 dark:text-slate-400">DHCP Leases</p>
                 </div>
                 <div class="p-1.5 bg-emerald-500/10 rounded-lg text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                     <i class="fa-solid fa-users text-xs"></i>
@@ -123,8 +92,8 @@
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2.5 py-1.5 rounded-xl shadow-sm flex items-center justify-between">
                 <div>
                     <p class="text-[9px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">CPU Load</p>
-                    <h3 id="stat-cpu" class="text-sm font-extrabold text-amber-600 dark:text-amber-400 leading-tight">5%</h3>
-                    <p id="stat-core-name" class="text-[8px] text-slate-500 dark:text-slate-400 font-mono">UDM Pro</p>
+                    <h3 id="stat-cpu" class="text-sm font-extrabold text-amber-600 dark:text-amber-400 leading-tight">0%</h3>
+                    <p id="stat-core-name" class="text-[8px] text-slate-500 dark:text-slate-400 font-mono">CCR2004</p>
                 </div>
                 <div class="p-1.5 bg-amber-500/10 rounded-lg text-amber-600 dark:text-amber-400 border border-amber-500/20">
                     <i class="fa-solid fa-microchip text-xs"></i>
@@ -149,7 +118,7 @@
         <!-- WAN Traffic Line Chart -->
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded-xl shadow-sm lg:col-span-2 flex flex-col justify-between">
             <div class="flex justify-between items-center mb-1">
-                <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-xs"><i class="fa-solid fa-chart-area text-cyan-600 dark:text-cyan-400 mr-1.5"></i> Network Traffic Trend</h3>
+                <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-xs"><i class="fa-solid fa-chart-area text-cyan-600 dark:text-cyan-400 mr-1.5"></i> MikroTik WAN Traffic Trend</h3>
                 <div class="flex items-center space-x-3 text-[9px] text-slate-500 dark:text-slate-400">
                     <span class="flex items-center gap-1"><span class="w-2 h-1 bg-cyan-500 rounded"></span> Down (Rx)</span>
                     <span class="flex items-center gap-1"><span class="w-2 h-1 bg-purple-500 rounded"></span> Up (Tx)</span>
@@ -164,23 +133,21 @@
     <!-- WAN Gateways Horizontal List -->
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1.5 shadow-sm shrink-0">
         <div id="wan-cards-container" class="flex flex-nowrap gap-2 overflow-x-auto custom-scrollbar">
-            <div class="text-[10px] text-slate-400">Main Gateway Online (UDM Pro)</div>
+            <div class="text-[10px] text-slate-400">Loading WAN gateways...</div>
         </div>
     </div>
 
     <!-- 2. VLAN SEGMENTS AREA -->
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1.5 shadow-sm flex-1 min-h-0 flex flex-col justify-between overflow-hidden">
         <div class="flex justify-between items-center mb-1 shrink-0">
-            <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-                <i class="fa-solid fa-sitemap text-cyan-600 dark:text-cyan-400 mr-1.5"></i> VLAN Segments Breakdown
-            </h3>
+            <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-xs"><i class="fa-solid fa-sitemap text-cyan-600 dark:text-cyan-400 mr-1.5"></i> VLAN Segments Breakdown</h3>
             <span id="vlan-count-badge" class="px-2 py-0.5 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-[9px] rounded font-mono font-bold border border-cyan-500/20">
-                Active Segments
+                0 Active VLANs
             </span>
         </div>
-        <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1">
-            <div id="vlan-cards-container">
-                <div class="text-[9px] text-slate-400 p-1 col-span-2">Loading VLAN metrics...</div>
+        <div class="flex-1 min-h-0 overflow-x-auto custom-scrollbar">
+            <div id="vlan-cards-container" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-11 gap-1.5 min-w-[950px] xl:min-w-0">
+                <div class="text-[9px] text-slate-400 p-1">Loading VLAN metrics...</div>
             </div>
         </div>
     </div>
@@ -194,11 +161,11 @@
                     <i class="fa-solid fa-network-wired text-xs"></i>
                 </div>
                 <div>
-                    <h4 class="text-[11px] font-bold text-slate-800 dark:text-slate-200">UniFi Switches & APs</h4>
-                    <p class="text-[9px] text-slate-500 dark:text-slate-400">Topology Link Active</p>
+                    <h4 class="text-[11px] font-bold text-slate-800 dark:text-slate-200">EdgeSwitch & USW</h4>
+                    <p class="text-[9px] text-slate-500 dark:text-slate-400">Core Switches Link Active</p>
                 </div>
             </div>
-            <span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded text-[9px] font-bold">ONLINE</span>
+            <span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded text-[9px] font-bold">STP OK</span>
         </div>
 
         <!-- UniFi AP Distribution (Doughnut Chart) -->
@@ -239,7 +206,13 @@
             { border: 'border-emerald-500/40', text: 'text-emerald-600 dark:text-emerald-400', badge: 'bg-emerald-500' },
             { border: 'border-purple-500/40', text: 'text-purple-600 dark:text-purple-400', badge: 'bg-purple-500' },
             { border: 'border-amber-500/40', text: 'text-amber-600 dark:text-amber-400', badge: 'bg-amber-500' },
-            { border: 'border-rose-500/40', text: 'text-rose-600 dark:text-rose-400', badge: 'bg-rose-500' }
+            { border: 'border-rose-500/40', text: 'text-rose-600 dark:text-rose-400', badge: 'bg-rose-500' },
+            { border: 'border-pink-500/40', text: 'text-pink-600 dark:text-pink-400', badge: 'bg-pink-500' },
+            { border: 'border-teal-500/40', text: 'text-teal-600 dark:text-teal-400', badge: 'bg-teal-500' },
+            { border: 'border-sky-500/40', text: 'text-sky-600 dark:text-sky-400', badge: 'bg-sky-500' },
+            { border: 'border-violet-500/40', text: 'text-violet-600 dark:text-violet-400', badge: 'bg-violet-500' },
+            { border: 'border-lime-500/40', text: 'text-lime-600 dark:text-lime-400', badge: 'bg-lime-500' },
+            { border: 'border-orange-500/40', text: 'text-orange-600 dark:text-orange-400', badge: 'bg-orange-500' }
         ];
 
         function initTheme() {
@@ -257,8 +230,10 @@
             const isDark = document.documentElement.classList.toggle('dark');
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
             updateThemeUI(isDark);
-            if (window.lastApData) {
-                updateApDistributionChart(window.lastApData);
+            if (window.lastJsonData) {
+                updateWanCards(window.lastJsonData.wans || []);
+                updateVlanCards(window.lastJsonData.vlans || []);
+                updateApDistributionChart(window.lastJsonData.ap_distribution || []);
             }
         }
 
@@ -274,17 +249,28 @@
             }
         }
 
+        function formatSpeed(mbpsVal) {
+            const val = parseFloat(mbpsVal || 0);
+            if (val === 0) return "0 Mbps";
+            if (val < 1.0) {
+                const kbps = (val * 1000).toFixed(0);
+                return `${kbps} K`;
+            }
+            return `${val.toFixed(1)} M`;
+        }
+
         async function fetchData() {
             try {
                 const res = await fetch(API_URL);
                 const json = await res.json();
+                window.lastJsonData = json;
                 
-                if (json && json.data) {
-                    window.lastApData = json.data;
+                if (json.status === "success") {
                     setDatabaseStatus(true);
-                    updateInventorySummary(json.data);
-                    updateApDistributionChart(json.data);
-                    updateTrafficChart(12.5, 4.2); // Simulasi trafik stabil
+                    updateInventorySummary(json.devices || []);
+                    updateWanCards(json.wans || []);
+                    updateVlanCards(json.vlans || []);
+                    updateApDistributionChart(json.ap_distribution || []);
                 } else {
                     setDatabaseStatus(false, "API Error");
                 }
@@ -310,30 +296,110 @@
             }
         }
 
-        function updateInventorySummary(apData) {
-            let totalClients = 0;
-            apData.forEach(item => {
-                totalClients += Number(item.ClientCount || 0);
+        function updateInventorySummary(devices) {
+            if (!devices.length) return;
+            const latestDev = devices[devices.length - 1];
+            const activeClients = parseInt(latestDev.ActiveLeases || latestDev.active_leases || latestDev.ActiveClients || latestDev.active_clients || 0);
+            const cpuLoad = latestDev.CpuLoad || latestDev.cpu_load || '0%';
+
+            document.getElementById('stat-clients').innerText = activeClients;
+            document.getElementById('stat-cpu').innerText = typeof cpuLoad === 'number' ? (cpuLoad * 100).toFixed(0) + '%' : cpuLoad;
+            document.getElementById('stat-core-name').innerText = latestDev.DeviceName || 'MikroTik';
+        }
+
+        function updateWanCards(wanData) {
+            const wanMap = {};
+            wanData.forEach(item => {
+                if (item.WANName) wanMap[item.WANName] = item;
             });
 
-            document.getElementById('stat-clients').innerText = totalClients.toLocaleString('id-ID');
-            document.getElementById('stat-devices').innerText = `${apData.length} APs`;
-            
-            // Render simulasi vlan dari data AP agar bagian tengah tetap hidup
-            const vlanContainer = document.getElementById('vlan-cards-container');
-            vlanContainer.innerHTML = '';
-            document.getElementById('vlan-count-badge').innerText = `${apData.length} Locations Active`;
+            const container = document.getElementById('wan-cards-container');
+            container.innerHTML = '';
 
-            apData.forEach((item, idx) => {
+            const keys = Object.keys(wanMap);
+            if (!keys.length) {
+                container.innerHTML = `<div class="text-[10px] text-slate-400 p-1">No active WAN metrics detected.</div>`;
+                return;
+            }
+
+            let totalRx = 0;
+            let totalTx = 0;
+
+            keys.forEach(wanName => {
+                const w = wanMap[wanName];
+                const rx = parseFloat(w.RxMbps || 0);
+                const tx = parseFloat(w.TxMbps || 0);
+                const isUp = (w.Status || "UP").toUpperCase() === "UP";
+
+                if (isUp) {
+                    totalRx += rx;
+                    totalTx += tx;
+                }
+
+                const statusBadge = isUp 
+                    ? `<span class="px-1 py-0.5 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded text-[8px] font-semibold flex items-center gap-0.5"><span class="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></span> UP</span>`
+                    : `<span class="px-1 py-0.5 bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded text-[8px] font-semibold flex items-center gap-0.5"><span class="w-1 h-1 rounded-full bg-rose-500"></span> DOWN</span>`;
+
+                container.innerHTML += `
+                    <div class="flex-1 min-w-[130px] bg-slate-50 dark:bg-slate-950/70 border ${isUp ? 'border-slate-200 dark:border-slate-800' : 'border-rose-500/50'} px-2 py-1 rounded-lg flex flex-col justify-between">
+                        <div class="flex justify-between items-center mb-0.5">
+                            <span class="font-bold text-[10px] text-cyan-600 dark:text-cyan-400 font-mono truncate">${wanName}</span>
+                            ${statusBadge}
+                        </div>
+                        <div class="space-y-0.5 text-[9px] font-mono">
+                            <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>Down:</span> <span class="text-cyan-600 dark:text-cyan-400 font-semibold">${formatSpeed(rx)}</span></div>
+                            <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>Up:</span> <span class="text-purple-600 dark:text-purple-400 font-semibold">${formatSpeed(tx)}</span></div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('stat-rx').innerHTML = `<i class="fa-solid fa-arrow-down"></i> ${totalRx.toFixed(1)}M`;
+            document.getElementById('stat-tx').innerHTML = `<i class="fa-solid fa-arrow-up"></i> ${totalTx.toFixed(1)}M`;
+            document.getElementById('stat-bandwidth-total').innerText = `${(totalRx + totalTx).toFixed(1)} Mbps`;
+
+            updateTrafficChart(totalRx, totalTx);
+        }
+
+        function updateVlanCards(vlanData) {
+            const vlanMap = {};
+            vlanData.forEach(item => {
+                if (item.VLANName) vlanMap[item.VLANName] = item;
+            });
+
+            const container = document.getElementById('vlan-cards-container');
+            container.innerHTML = '';
+
+            const list = Object.values(vlanMap);
+            document.getElementById('vlan-count-badge').innerText = `${list.length} Active VLANs`;
+
+            if (!list.length) {
+                container.innerHTML = `<div class="text-[9px] text-slate-400 p-1">No active VLAN metrics detected.</div>`;
+                return;
+            }
+
+            list.sort((a, b) => {
+                const totalA = parseFloat(a.RxMbps || 0) + parseFloat(a.TxMbps || 0);
+                const totalB = parseFloat(b.RxMbps || 0) + parseFloat(b.TxMbps || 0);
+                return totalB - totalA;
+            });
+
+            list.forEach((v, idx) => {
+                const vlanName = v.VLANName;
+                const rx = parseFloat(v.RxMbps || 0);
+                const tx = parseFloat(v.TxMbps || 0);
+                
                 const theme = COLOR_PALETTE[idx % COLOR_PALETTE.length];
-                vlanContainer.innerHTML += `
+
+                container.innerHTML += `
                     <div class="bg-slate-50 dark:bg-slate-950/80 border ${theme.border} px-1.5 py-1 rounded-lg flex flex-col justify-between shadow-xs">
                         <div class="flex justify-between items-center mb-0.5">
-                            <span class="font-bold text-[9px] ${theme.text} font-mono truncate" title="${item.APName}">${item.APName}</span>
+                            <span class="font-bold text-[9px] ${theme.text} font-mono truncate" title="${vlanName}">${vlanName}</span>
                             <span class="w-1 h-1 rounded-full ${theme.badge} animate-pulse shrink-0"></span>
                         </div>
                         <div class="space-y-0.5 text-[8px] font-mono">
-                            <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>Clients:</span> <span class="${theme.text} font-semibold">${item.ClientCount}</span></div>
+                            <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>D:</span> <span class="${theme.text} font-semibold">${formatSpeed(rx)}</span></div>
+                            <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>U:</span> <span class="text-slate-700 dark:text-slate-300 font-semibold">${formatSpeed(tx)}</span></div>
                         </div>
                     </div>
                 `;
@@ -384,9 +450,14 @@
         }
 
         function updateApDistributionChart(apData) {
-            const labels = apData.map(item => item.APName);
-            const counts = apData.map(item => Number(item.ClientCount || 0));
-            const colors = ['#06b6d4', '#6366f1', '#a855f7', '#ec4899', '#10b981', '#f59e0b'];
+            const apMap = {};
+            apData.forEach(item => {
+                if (item.APName) apMap[item.APName] = parseInt(item.ClientCount) || 0;
+            });
+
+            const labels = Object.keys(apMap).length ? Object.keys(apMap) : ['No AP Data'];
+            const counts = Object.values(apMap).length ? Object.values(apMap) : [0];
+            const colors = ['#06b6d4', '#6366f1', '#a855f7', '#ec4899', '#10b981', '#f59e0b', '#3b82f6'];
 
             const ctx = document.getElementById('apChart').getContext('2d');
             if (apChartInstance) apChartInstance.destroy();
@@ -395,7 +466,7 @@
                 type: 'doughnut',
                 data: {
                     labels: labels,
-                    datasets: [{ data: counts, backgroundColor: colors, borderWidth: 0 }]
+                    datasets: [{ data: counts, backgroundColor: colors.slice(0, labels.length), borderWidth: 0 }]
                 },
                 options: {
                     responsive: true,
@@ -408,14 +479,12 @@
             const legendDiv = document.getElementById('ap-legend');
             legendDiv.innerHTML = '';
             labels.forEach((label, idx) => {
-                if(idx < 6) { // Batasi legend agar tetap ringkas di UI
-                    legendDiv.innerHTML += `
-                        <div class="flex items-center gap-1 truncate">
-                            <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: ${colors[idx % colors.length]}"></span> 
-                            <span class="truncate">${label} (${counts[idx]})</span>
-                        </div>
-                    `;
-                }
+                legendDiv.innerHTML += `
+                    <div class="flex items-center gap-1 truncate">
+                        <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: ${colors[idx % colors.length]}"></span> 
+                        <span class="truncate">${label} (${counts[idx]})</span>
+                    </div>
+                `;
             });
         }
 
