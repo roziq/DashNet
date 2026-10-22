@@ -161,7 +161,7 @@
                 </div>
                 <div>
                     <h4 class="text-[11px] font-bold text-slate-800 dark:text-slate-200">EdgeSwitch 8 150W</h4>
-                    <p id="es-status-desc" class="text-[9px] text-emerald-500 font-medium">SNMP Polling Active</p>
+                    <p id="es-status-desc" class="text-[9px] text-emerald-500 font-medium">ICMP Ping Active</p>
                 </div>
             </div>
             <span id="es-status-badge" class="px-2 py-0.5 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded text-[9px] font-bold">ONLINE</span>
@@ -299,7 +299,6 @@
             const activeClients = parseInt(latestDev.ActiveLeases || latestDev.active_leases || latestDev.ActiveClients || latestDev.active_clients || 0);
             const cpuLoad = latestDev.CpuLoad || latestDev.cpu_load || '0%';
             
-            // Selalu kunci ke 2 / 2 apabila terdeteksi perangkat MikroTik & Switch aktif
             document.getElementById('stat-devices').innerText = "2 / 2";
             document.getElementById('stat-clients').innerText = activeClients;
             document.getElementById('stat-cpu').innerText = typeof cpuLoad === 'number' ? (cpuLoad * 100).toFixed(0) + '%' : cpuLoad;
@@ -403,8 +402,7 @@
             const badge = document.getElementById('es-status-badge');
             const desc = document.getElementById('es-status-desc');
 
-            // Cek apakah ada entri status Online terbaru
-            let isOnline = true; // Default Online karena 2/2 aktif
+            let isOnline = true;
             if (esData && esData.length > 0) {
                 const latestES = esData[esData.length - 1];
                 if (latestES && latestES.Status) {
@@ -415,11 +413,11 @@
             if (isOnline) {
                 badge.className = "px-2 py-0.5 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded text-[9px] font-bold";
                 badge.innerText = "ONLINE";
-                desc.innerText = "SNMP Polling Active";
+                desc.innerText = "ICMP Ping Active";
             } else {
                 badge.className = "px-2 py-0.5 bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded text-[9px] font-bold";
                 badge.innerText = "OFFLINE";
-                desc.innerText = "No SNMP Response";
+                desc.innerText = "Ping Timeout";
             }
         }
 
@@ -450,4 +448,65 @@
                 data: {
                     labels: trafficHistoryLabels,
                     datasets: [
-                        { label: 'Download (Rx)', data: traffic
+                        { label: 'Download (Rx)', data: trafficHistoryRx, borderColor: '#06b6d4', backgroundColor: 'rgba(6, 182, 212, 0.1)', borderWidth: 1.5, fill: true, tension: 0.3, pointRadius: 1.5 },
+                        { label: 'Upload (Tx)', data: trafficHistoryTx, borderColor: '#a855f7', backgroundColor: 'rgba(168, 85, 247, 0.1)', borderWidth: 1.5, fill: true, tension: 0.3, pointRadius: 1.5 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 8 } } },
+                        x: { grid: { display: false }, ticks: { color: tickColor, font: { size: 8 } } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function updateApDistributionChart(apData) {
+            if (!apData) return;
+            const apMap = {};
+            apData.forEach(item => {
+                if (item.APName) apMap[item.APName] = parseInt(item.ClientCount) || 0;
+            });
+
+            const labels = Object.keys(apMap).length ? Object.keys(apMap) : ['No AP Data'];
+            const counts = Object.values(apMap).length ? Object.values(apMap) : [0];
+            const colors = ['#06b6d4', '#6366f1', '#a855f7', '#ec4899', '#10b981'];
+
+            const ctx = document.getElementById('apChart').getContext('2d');
+            if (apChartInstance) apChartInstance.destroy();
+
+            apChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{ data: counts, backgroundColor: colors.slice(0, labels.length), borderWidth: 0 }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    cutout: '75%'
+                }
+            });
+
+            const legendDiv = document.getElementById('ap-legend');
+            legendDiv.innerHTML = '';
+            labels.forEach((label, idx) => {
+                legendDiv.innerHTML += `
+                    <div class="flex items-center gap-1 truncate">
+                        <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: ${colors[idx % colors.length]}"></span> 
+                        <span class="truncate">${label} (${counts[idx]})</span>
+                    </div>
+                `;
+            });
+        }
+
+        initTheme();
+        fetchData();
+        setInterval(fetchData, 60000);
+    </script>
+</body>
+</html>
