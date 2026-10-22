@@ -14,7 +14,6 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Custom Scrollbar Ringkas */
         .custom-scrollbar::-webkit-scrollbar {
             height: 4px;
             width: 4px;
@@ -30,7 +29,6 @@
             border-radius: 4px;
         }
 
-        /* Grid VLAN: 8 kolom agar pas 3 baris tanpa scroll */
         #vlan-cards-container {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -83,7 +81,7 @@
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2.5 py-1.5 rounded-xl shadow-sm flex items-center justify-between">
                 <div>
                     <p class="text-[9px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Online Devices</p>
-                    <h3 id="stat-devices" class="text-xs sm:text-base font-extrabold text-cyan-600 dark:text-cyan-400 leading-tight mt-0.5">1 / 1</h3>
+                    <h3 id="stat-devices" class="text-xs sm:text-base font-extrabold text-cyan-600 dark:text-cyan-400 leading-tight mt-0.5">0 / 0</h3>
                     <p class="text-[8px] text-emerald-600 dark:text-emerald-400 font-medium mt-0.5"><i class="fa-solid fa-check mr-0.5"></i> Healthy</p>
                 </div>
                 <div class="p-1.5 bg-cyan-500/10 rounded-lg text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 text-xs">
@@ -161,16 +159,16 @@
         </div>
     </div>
 
-    <!-- 3. SWITCH & UNIFI AP DISTRIBUTION AREA (Tanpa Scroll, Tampil Terbuka Penuh) -->
+    <!-- 3. SWITCH & UNIFI AP DISTRIBUTION AREA (Tanpa Scroll) -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 shrink-0">
-        <!-- Switch Status (Tanpa scroll, flex kolom langsung rapi) -->
+        <!-- Switch Status -->
         <div class="flex flex-col space-y-1" id="switch-container">
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded-xl shadow-sm flex items-center justify-between">
                 <div class="text-[10px] text-slate-400">Loading switches...</div>
             </div>
         </div>
 
-        <!-- UniFi AP Distribution Chart (Tanpa scroll, legenda tampil terbuka penuh) -->
+        <!-- UniFi AP Distribution Chart -->
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded-xl shadow-sm lg:col-span-2 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div class="flex items-center space-x-2.5 w-full sm:w-auto shrink-0">
                 <div class="p-1.5 bg-cyan-500/10 rounded-lg text-cyan-500 border border-cyan-500/20 text-xs">
@@ -186,7 +184,6 @@
                 <div class="relative w-16 h-16 shrink-0">
                     <canvas id="apChart"></canvas>
                 </div>
-                <!-- Legenda AP: Tanpa max-height & tanpa scroll-y, langsung tampil terbuka penuh -->
                 <div id="ap-legend" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-x-4 gap-y-0.5 text-[11px] text-slate-700 dark:text-slate-200 font-mono w-full">
                     <div class="text-slate-400 text-xs">Waiting AP...</div>
                 </div>
@@ -272,7 +269,7 @@
                 
                 if (json.status === "success") {
                     setDatabaseStatus(true);
-                    updateInventorySummary(json.devices || []);
+                    updateInventorySummary(json.devices || [], json.switches || [], json.ap_distribution || []);
                     updateWanCards(json.wans || []);
                     updateVlanCards(json.vlans || []);
                     updateSwitchCards(json.switches || []);
@@ -302,15 +299,31 @@
             }
         }
 
-        function updateInventorySummary(devices) {
-            if (!devices.length) return;
-            const latestDev = devices[devices.length - 1];
-            const activeClients = parseInt(latestDev.ActiveLeases || latestDev.active_leases || latestDev.ActiveClients || latestDev.active_clients || 0);
-            const cpuLoad = latestDev.CpuLoad || latestDev.cpu_load || '0%';
+        function updateInventorySummary(devices, switches, apDist) {
+            // Hitung total perangkat riil (Router + Switch + AP)
+            let routerTotal = devices.length > 0 ? 1 : 0;
+            let routerOnline = routerTotal;
 
-            document.getElementById('stat-clients').innerText = activeClients;
-            document.getElementById('stat-cpu').innerText = typeof cpuLoad === 'number' ? (cpuLoad * 100).toFixed(0) + '%' : cpuLoad;
-            document.getElementById('stat-core-name').innerText = latestDev.DeviceName || 'MikroTik';
+            let switchTotal = switches.length;
+            let switchOnline = switches.filter(s => String(s.Status || "").toUpperCase() === "ONLINE").length;
+
+            let apTotal = apDist.length;
+            let apOnline = apDist.filter(a => parseInt(a.ClientCount || 0) >= 0).length;
+
+            let totalInfr = routerTotal + switchTotal + apTotal;
+            let onlineInfr = routerOnline + switchOnline + apOnline;
+
+            document.getElementById('stat-devices').innerText = `${onlineInfr} / ${totalInfr}`;
+
+            if (devices.length > 0) {
+                const latestDev = devices[devices.length - 1];
+                const activeClients = parseInt(latestDev.ActiveLeases || 0);
+                const cpuLoad = latestDev.CpuLoad || '0%';
+
+                document.getElementById('stat-clients').innerText = activeClients;
+                document.getElementById('stat-cpu').innerText = cpuLoad;
+                document.getElementById('stat-core-name').innerText = latestDev.DeviceName || 'CCR2004|SMEGA';
+            }
         }
 
         function updateWanCards(wanData) {
@@ -420,10 +433,9 @@
                 return;
             }
 
-            // Urutkan EdgeSwitch 8 150W di posisi teratas
             switchData.sort((a, b) => {
-                const nameA = (a.SwitchName || a.switch_name || "").toLowerCase();
-                const nameB = (b.SwitchName || b.switch_name || "").toLowerCase();
+                const nameA = (a.SwitchName || "").toLowerCase();
+                const nameB = (b.SwitchName || "").toLowerCase();
                 if (nameA.includes("edgeswitch")) return -1;
                 if (nameB.includes("edgeswitch")) return 1;
                 return 0;
@@ -431,9 +443,9 @@
 
             container.innerHTML = '';
             switchData.forEach(sw => {
-                const swName = sw.SwitchName || sw.switch_name || 'Switch';
-                const swModel = sw.Model || sw.model || 'UniFi Switch';
-                const isOnline = (sw.Status || sw.status || "").toUpperCase() === "ONLINE";
+                const swName = sw.SwitchName || 'Switch';
+                const swModel = sw.Model || 'UniFi Switch';
+                const isOnline = (sw.Status || "").toUpperCase() === "ONLINE";
                 
                 const badgeClass = isOnline 
                     ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400" 
