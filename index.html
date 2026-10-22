@@ -168,24 +168,24 @@
             </div>
         </div>
 
-        <!-- UniFi AP Distribution Chart -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 sm:p-2.5 rounded-xl shadow-sm lg:col-span-2 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3">
-            <div class="flex items-center space-x-2 shrink-0 w-full sm:w-auto justify-between sm:justify-start">
-                <div class="flex items-center space-x-2">
-                    <div class="p-1.5 sm:p-2 bg-cyan-500/10 rounded-lg text-cyan-500 border border-cyan-500/20 text-xs">
-                        <i class="fa-solid fa-wifi"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-xs">UniFi AP Distribution</h3>
-                        <p class="text-[9px] text-slate-500 dark:text-slate-400">Connected Clients per AP</p>
-                    </div>
+        <!-- UniFi AP Distribution Chart (Di HP: Legenda tersusun vertikal ke bawah, 1 baris 1 AP) -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2.5 rounded-xl shadow-sm lg:col-span-2 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center space-x-2.5 w-full sm:w-auto shrink-0">
+                <div class="p-2 bg-cyan-500/10 rounded-lg text-cyan-500 border border-cyan-500/20 text-sm">
+                    <i class="fa-solid fa-wifi"></i>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-xs md:text-sm">UniFi AP Distribution</h3>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400">Connected Clients per AP</p>
                 </div>
             </div>
-            <div class="flex items-center space-x-3 w-full sm:w-auto justify-around">
-                <div class="relative w-16 h-16 sm:w-20 sm:h-20 shrink-0">
+            
+            <div class="flex items-center justify-around sm:justify-end gap-4 w-full sm:w-auto">
+                <div class="relative w-20 h-20 shrink-0">
                     <canvas id="apChart"></canvas>
                 </div>
-                <div id="ap-legend" class="grid grid-cols-2 sm:grid-cols-3 gap-1 text-[9px] sm:text-[10px] text-slate-600 dark:text-slate-300 flex-grow font-mono">
+                <!-- Legenda AP: Di HP jadi 1 kolom (1 baris 1 AP), di Desktop/Tablet jadi grid 3 kolom -->
+                <div id="ap-legend" class="flex flex-col sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-1.5 text-[10px] text-slate-600 dark:text-slate-300 font-mono max-h-24 overflow-y-auto custom-scrollbar pr-1 w-full sm:w-auto">
                     <div class="text-slate-400 text-xs">Waiting AP...</div>
                 </div>
             </div>
@@ -528,8 +528,8 @@
             legendDiv.innerHTML = '';
             labels.forEach((label, idx) => {
                 legendDiv.innerHTML += `
-                    <div class="flex items-center gap-1 truncate">
-                        <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: ${colors[idx % colors.length]}"></span> 
+                    <div class="flex items-center gap-1.5 truncate py-0.5">
+                        <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${colors[idx % colors.length]}"></span> 
                         <span class="truncate">${label} (${counts[idx]})</span>
                     </div>
                 `;
