@@ -145,29 +145,31 @@
         </div>
     </div>
 
-    <!-- 2. VLAN SEGMENTS AREA -->
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-2 shadow-sm shrink-0 lg:flex-1 lg:min-h-0 flex flex-col justify-between overflow-hidden">
+    <!-- 2. VLAN SEGMENTS AREA (Dibuat flex-1 dan scrollable agar tidak ada space kosong berlebih) -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-2 shadow-sm flex-1 min-h-0 flex flex-col justify-between overflow-hidden">
         <div class="flex justify-between items-center mb-1 shrink-0">
             <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-xs"><i class="fa-solid fa-sitemap text-cyan-600 dark:text-cyan-400 mr-1.5"></i> VLAN Segments Breakdown</h3>
             <span id="vlan-count-badge" class="px-2 py-0.5 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-[9px] sm:text-xs rounded font-mono font-bold border border-cyan-500/20">
                 0 Active VLANs
             </span>
         </div>
-        <div id="vlan-cards-container">
-            <div class="text-[10px] text-slate-400 p-1 col-span-full">Loading VLAN metrics...</div>
+        <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1">
+            <div id="vlan-cards-container">
+                <div class="text-[10px] text-slate-400 p-1 col-span-full">Loading VLAN metrics...</div>
+            </div>
         </div>
     </div>
 
     <!-- 3. SWITCH & UNIFI AP DISTRIBUTION AREA -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 shrink-0">
         <!-- Switch Status -->
-        <div class="flex flex-col space-y-1" id="switch-container">
+        <div class="flex flex-col space-y-1 max-h-32 overflow-y-auto custom-scrollbar pr-1" id="switch-container">
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded-xl shadow-sm flex items-center justify-between">
                 <div class="text-[10px] text-slate-400">Loading switches...</div>
             </div>
         </div>
 
-        <!-- UniFi AP Distribution Chart (Font Diperbesar untuk Desktop: md:text-sm lg:text-base) -->
+        <!-- UniFi AP Distribution Chart (Font Desktop proporsional: text-xs) -->
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2.5 rounded-xl shadow-sm lg:col-span-2 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div class="flex items-center space-x-2.5 w-full sm:w-auto shrink-0">
                 <div class="p-2 bg-cyan-500/10 rounded-lg text-cyan-500 border border-cyan-500/20 text-sm">
@@ -183,8 +185,8 @@
                 <div class="relative w-20 h-20 shrink-0">
                     <canvas id="apChart"></canvas>
                 </div>
-                <!-- Legenda AP: Di HP tetap proporsional (xs), di Tablet/Desktop lebih besar (md:text-sm lg:text-base) -->
-                <div id="ap-legend" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-x-4 gap-y-1 text-xs md:text-sm lg:text-base text-slate-700 dark:text-slate-200 font-mono max-h-32 overflow-y-auto custom-scrollbar pr-2 w-full">
+                <!-- Legenda AP: Ukuran font pas/proporsional di desktop (text-xs) -->
+                <div id="ap-legend" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-x-4 gap-y-1 text-xs text-slate-700 dark:text-slate-200 font-mono max-h-28 overflow-y-auto custom-scrollbar pr-2 w-full">
                     <div class="text-slate-400 text-xs">Waiting AP...</div>
                 </div>
             </div>
@@ -527,9 +529,9 @@
             legendDiv.innerHTML = '';
             labels.forEach((label, idx) => {
                 legendDiv.innerHTML += `
-                    <div class="flex items-center gap-2 py-0.5">
-                        <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${colors[idx % colors.length]}"></span> 
-                        <span class="truncate font-semibold">${label} (${counts[idx]})</span>
+                    <div class="flex items-center gap-1.5 py-0.5">
+                        <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${colors[idx % colors.length]}"></span> 
+                        <span class="truncate font-medium text-xs">${label} (${counts[idx]})</span>
                     </div>
                 `;
             });
