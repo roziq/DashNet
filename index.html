@@ -30,22 +30,28 @@
             border-radius: 4px;
         }
 
-        /* Grid VLAN Responsif: Vertikal 2 kolom di HP, banyak kolom di desktop */
+        /* Responsive Grid VLAN: 1 Kartu 1 Baris di HP, Bertambah Kolom di Layar Lebar */
         #vlan-cards-container {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 0.375rem;
+            grid-template-columns: 1fr; /* 1 Kartu Per Baris di HP */
+            gap: 0.5rem;
         }
         
+        @media (min-width: 500px) {
+            #vlan-cards-container {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
         @media (min-width: 640px) {
             #vlan-cards-container {
-                grid-template-columns: repeat(4, minmax(0, 1fr));
+                grid-template-columns: repeat(3, minmax(0, 1fr));
             }
         }
         
         @media (min-width: 768px) {
             #vlan-cards-container {
-                grid-template-columns: repeat(6, minmax(0, 1fr));
+                grid-template-columns: repeat(5, minmax(0, 1fr));
             }
         }
         
@@ -62,7 +68,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased h-screen overflow-hidden flex flex-col p-2 sm:p-3 space-y-2 transition-colors duration-300">
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased min-h-screen sm:h-screen overflow-y-auto sm:overflow-hidden flex flex-col p-2 sm:p-3 space-y-2 transition-colors duration-300">
 
     <!-- Top Bar / Header -->
     <header class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 flex justify-between items-center shadow-sm shrink-0">
@@ -168,9 +174,9 @@
         </div>
     </div>
 
-    <!-- 2. VLAN SEGMENTS AREA (VERSI RESPONSIVE / RAMAH HP) -->
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1.5 shadow-sm flex-1 min-h-0 flex flex-col justify-between overflow-hidden">
-        <div class="flex justify-between items-center mb-1 shrink-0">
+    <!-- 2. VLAN SEGMENTS AREA (1 KARTU 1 BARIS DI HP, SCROLL VERTIKAL ELEGAN) -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1.5 shadow-sm flex-1 min-h-[220px] sm:min-h-0 flex flex-col justify-between overflow-hidden">
+        <div class="flex justify-between items-center mb-1.5 shrink-0">
             <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-xs">
                 <i class="fa-solid fa-sitemap text-cyan-600 dark:text-cyan-400 mr-1.5"></i> VLAN Segments Breakdown
             </h3>
@@ -178,10 +184,10 @@
                 0 Active VLANs
             </span>
         </div>
-        <!-- Scroll vertikal yang halus di perangkat mobile & desktop -->
+        <!-- Scroll Vertikal -->
         <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1">
             <div id="vlan-cards-container">
-                <div class="text-[9px] text-slate-400 p-1 col-span-2">Loading VLAN metrics...</div>
+                <div class="text-[9px] text-slate-400 p-1">Loading VLAN metrics...</div>
             </div>
         </div>
     </div>
@@ -407,7 +413,7 @@
             document.getElementById('vlan-count-badge').innerText = `${list.length} Active VLANs`;
 
             if (!list.length) {
-                container.innerHTML = `<div class="text-[9px] text-slate-400 p-1 col-span-2">No active VLAN metrics detected.</div>`;
+                container.innerHTML = `<div class="text-[9px] text-slate-400 p-1">No active VLAN metrics detected.</div>`;
                 return;
             }
 
@@ -425,14 +431,14 @@
                 const theme = COLOR_PALETTE[idx % COLOR_PALETTE.length];
 
                 container.innerHTML += `
-                    <div class="bg-slate-50 dark:bg-slate-950/80 border ${theme.border} px-1.5 py-1 rounded-lg flex flex-col justify-between shadow-xs">
-                        <div class="flex justify-between items-center mb-0.5">
-                            <span class="font-bold text-[9px] ${theme.text} font-mono truncate" title="${vlanName}">${vlanName}</span>
-                            <span class="w-1 h-1 rounded-full ${theme.badge} animate-pulse shrink-0"></span>
+                    <div class="bg-slate-50 dark:bg-slate-950/80 border ${theme.border} px-2.5 py-1.5 rounded-lg flex justify-between items-center shadow-xs">
+                        <div class="flex items-center gap-1.5 truncate">
+                            <span class="w-1.5 h-1.5 rounded-full ${theme.badge} animate-pulse shrink-0"></span>
+                            <span class="font-bold text-[10px] sm:text-[9px] ${theme.text} font-mono truncate" title="${vlanName}">${vlanName}</span>
                         </div>
-                        <div class="space-y-0.5 text-[8px] font-mono">
-                            <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>D:</span> <span class="${theme.text} font-semibold">${formatSpeed(rx)}</span></div>
-                            <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>U:</span> <span class="text-slate-700 dark:text-slate-300 font-semibold">${formatSpeed(tx)}</span></div>
+                        <div class="flex items-center gap-3 sm:gap-2 text-[9px] sm:text-[8px] font-mono shrink-0">
+                            <div class="flex items-center gap-1 text-slate-500 dark:text-slate-400"><span class="text-[8px] opacity-75">D:</span> <span class="${theme.text} font-semibold">${formatSpeed(rx)}</span></div>
+                            <div class="flex items-center gap-1 text-slate-500 dark:text-slate-400"><span class="text-[8px] opacity-75">U:</span> <span class="text-slate-700 dark:text-slate-300 font-semibold">${formatSpeed(tx)}</span></div>
                         </div>
                     </div>
                 `;
