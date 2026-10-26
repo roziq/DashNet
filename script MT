@@ -1,8 +1,12 @@
 # ==========================================================
-# MIKROTIK SCRIPT: send_metrics_to_sheets (MULTI-WAN SUPPORT)
+# MIKROTIK SCRIPT: Multi-WAN, Traffic VLAN, & Ping Core/Switches
 # ==========================================================
 
 :local baseUrl "https://script.google.com/macros/s/AKfycbx4Yx18S7GJQUU0WpWfIgVoRPxk-yKKe9MM8HmXN3IjLufLMnNQTQXohdIs4-6h5b1izw/exec"
+
+# KONFIGURASI TELEGRAM BOT (Ganti dengan Token & Chat ID Anda)
+:local tgToken "8824713458:AAGTVVgl5MJUwTVfokR-_nc3K3ARmTf5Hfg"
+:local tgChatId "-5151868916"
 
 # 1. Ambil Parameter System MikroTik
 :local devName [/system identity get name]
@@ -15,7 +19,7 @@
 }
 
 # 2. Kirim Metrics Utama Router
-:local mainUrl "$baseUrl\?type=mikrotik&device_name=$devName&cpu_load=$cpuLoad%25&uptime=$uptime&active_leases=$activeLeases"
+:local mainUrl "$baseUrl?type=mikrotik&device_name=$devName&cpu_load=$cpuLoad&uptime=$uptime&active_leases=$activeLeases"
 /tool fetch url=$mainUrl mode=https output=none
 
 # 3. Loop Semua Interface Anggota List WAN (WAN1, WAN2, WAN3, dst.)
@@ -32,7 +36,7 @@
         :set txWan ($"tx-bits-per-second" / 1000000)
     }
     
-    :local wanUrl "$baseUrl\?type=wan_traffic&wan_name=$wanInt&status=$status&rx_mbps=$rxWan&tx_mbps=$txWan"
+    :local wanUrl "$baseUrl?type=wan_traffic&wan_name=$wanInt&status=$status&rx_mbps=$rxWan&tx_mbps=$txWan"
     /tool fetch url=$wanUrl mode=https output=none
 }
 
@@ -47,17 +51,35 @@
         :set txVlan ($"tx-bits-per-second" / 1000000)
     }
     
-    :local vlanUrl "$baseUrl\?type=vlan_traffic&vlan_name=$vlanName&rx_mbps=$rxVlan&tx_mbps=$txVlan"
+    :local vlanUrl "$baseUrl?type=vlan_traffic&vlan_name=$vlanName&rx_mbps=$rxVlan&tx_mbps=$txVlan"
     /tool fetch url=$vlanUrl mode=https output=none
 }
 
-# 5. Cek Status Ping EdgeSwitch 8 150W (IP: 10.99.1.2)
-:local esIp "10.99.1.2"
-:local esStatus "OFFLINE"
+# 5. PING KELOMPOK CORE DEVICES & SWITCHES (Menggunakan Array Loop)
+:local switchUrl "$baseUrl?type=switch_ping"
 
-:if ([/ping $esIp count=2 interval=200ms] > 0) do={
-    :set esStatus "ONLINE"
+# Daftar Perangkat (IP | Nama | Model) - Tambahkan di sini jika ada Switch baru
+:local ipList {"192.168.16.1"; "10.99.1.5"; "192.168.16.254"}
+:local nameList {"CCR2004_Core_Router"; "UniFi_Dream_Machine_Pro"; "AdGuard_Home_DNS"}
+:local modelList {"MikroTik_RouterOS"; "UDM_Pro"; "Debian_Server"}
+
+:for i from=0 to=([:len $ipList] - 1) do={
+    :local ip [:pick $ipList $i]
+    :local devNamePing [:pick $nameList $i]
+    :local devModel [:pick $modelList $i]
+    :local status "OFFLINE"
+    
+    :if ([/ping $ip count=2 interval=200ms] > 0) do={ 
+        :set status "ONLINE" 
+    }
+    
+    :local pingUrl "$switchUrl&switch_name=$devNamePing&model=$devModel&status=$status"
+    /tool fetch url=$pingUrl mode=https output=none
+
+    # Kirim alert ke Telegram HANYA JIKA perangkat berstatus OFFLINE
+    :if ($status = "OFFLINE") do={
+        :local message "⚠️ *WARNING: Perangkat Offline!*%0A- Nama: $devNamePing%0A- Model: $devModel%0A- IP: $ip%0A- Router: $devName"
+        :local tgUrl "https://api.telegram.org/bot$tgToken/sendMessage?chat_id=$tgChatId&text=$message&parse_mode=Markdown"
+        /tool fetch url=$tgUrl mode=https output=none
+    }
 }
-
-:local esUrl "$baseUrl\?type=switch_ping&switch_name=EdgeSwitch%208%20150W&model=ES-8-150W&status=$esStatus"
-/tool fetch url=$esUrl mode=https output=none
