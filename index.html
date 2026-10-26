@@ -325,7 +325,6 @@
                 const cpuLoad = latestDev.CpuLoad || latestDev.cpu_load || '0%';
 
                 document.getElementById('stat-clients').innerText = activeClients;
-                //document.getElementById('stat-cpu').innerText = typeof cpuLoad === 'number' ? (cpuLoad * 100).toFixed(0) + '%' : cpuLoad;
                 document.getElementById('stat-cpu').innerText = typeof cpuLoad === 'number' ? cpuLoad + '%' : cpuLoad;
                 document.getElementById('stat-core-name').innerText = latestDev.DeviceName || 'CCR2004';
             }
