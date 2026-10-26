@@ -428,89 +428,89 @@
             });
         }
 
-        function updateSwitchCards(switchData) {
-            const container = document.getElementById('switch-container');
-            if (!container) return;
+       function updateSwitchCards(switchData) {
+    const container = document.getElementById('switch-container');
+    if (!container) return;
 
-            // 1. Konfigurasi bawaan dengan URUTAN PERSIS & mapping kunci bersih
-            const coreDefaults = {
-                "CCR2004_Core_Router": { DisplayName: "CCR2004 Core Router", Model: "MikroTik RouterOS", IP: "10.99.1.1" },
-                "EdgeSwitch_8_150W": { DisplayName: "EdgeSwitch 8 150W", Model: "ES-8-150W", IP: "10.99.1.2" },
-                "UniFi_Dream_Machine_Pro": { DisplayName: "UniFi Dream Machine Pro", Model: "UDM Pro", IP: "10.99.1.5" },
-                "AdGuard_Home_DNS": { DisplayName: "AdGuard Home DNS", Model: "Debian Server", IP: "192.168.16.254" }
-            };
+    // 1. Konfigurasi bawaan dengan kunci ber-underscore agar cocok dengan data MikroTik
+    const coreDefaults = {
+        "CCR2004_Core_Router": { DisplayName: "CCR2004 Core Router", Model: "MikroTik RouterOS", IP: "10.99.1.1" },
+        "EdgeSwitch_8_150W": { DisplayName: "EdgeSwitch 8 150W", Model: "ES-8-150W", IP: "10.99.1.2" },
+        "UniFi_Dream_Machine_Pro": { DisplayName: "UniFi Dream Machine Pro", Model: "UDM Pro", IP: "10.99.1.5" },
+        "AdGuard_Home_DNS": { DisplayName: "AdGuard Home DNS", Model: "Debian Server", IP: "192.168.16.254" }
+    };
 
-            // Mapping kunci dengan menyamakan format underscore dan spasi (di-normalize ke underscore)
-            const dbMap = {};
-            if (switchData && switchData.length > 0) {
-                switchData.forEach(item => {
-                    const rawName = item.SwitchName || item.switch_name;
-                    if (rawName) {
-                        const cleanKey = String(rawName).trim().replace(/\s+/g, '_');
-                        dbMap[cleanKey] = item;
-                    }
-                });
+    const dbMap = {};
+    if (switchData && switchData.length > 0) {
+        switchData.forEach(item => {
+            const rawName = item.SwitchName || item.switch_name;
+            if (rawName) {
+                const cleanKey = String(rawName).trim().replace(/\s+/g, '_');
+                dbMap[cleanKey] = item;
             }
+        });
+    }
 
-            // Urutan wajib perangkat core (menggunakan kunci ber-underscore agar cocok dengan skrip MikroTik)
-            const targetKeys = [
-                "CCR2004_Core_Router", 
-                "EdgeSwitch_8_150W", 
-                "UniFi_Dream_Machine_Pro", 
-                "AdGuard_Home_DNS"
-            ];
-            
-            // Tambahkan switch distribusi lainnya yang ada di DB jika belum masuk target
-            if (switchData) {
-                switchData.forEach(item => {
-                    const rawName = item.SwitchName || item.switch_name;
-                    if (rawName) {
-                        const cleanKey = String(rawName).trim().replace(/\s+/g, '_');
-                        if (!targetKeys.includes(cleanKey)) {
-                            targetKeys.push(cleanKey);
-                        }
-                    }
-                });
+    const targetKeys = [
+        "CCR2004_Core_Router", 
+        "EdgeSwitch_8_150W", 
+        "UniFi_Dream_Machine_Pro", 
+        "AdGuard_Home_DNS"
+    ];
+    
+    if (switchData) {
+        switchData.forEach(item => {
+            const rawName = item.SwitchName || item.switch_name;
+            if (rawName) {
+                const cleanKey = String(rawName).trim().replace(/\s+/g, '_');
+                if (!targetKeys.includes(cleanKey)) {
+                    targetKeys.push(cleanKey);
+                }
             }
+        });
+    }
 
-            container.innerHTML = '';
+    container.innerHTML = '';
 
-            targetKeys.forEach(key => {
-                const dbItem = dbMap[key] || {};
-                const defaultConfig = coreDefaults[key] || {};
-                
-                // Tampilan nama yang rapi (mengganti underscore dengan spasi untuk tampilan UI)
-                const swName = defaultConfig.DisplayName || dbItem.SwitchName || dbItem.switch_name || key.replace(/_/g, ' ');
-                const swModel = (dbItem.Model || dbItem.model || defaultConfig.Model || 'Network Switch').replace(/_/g, ' ');
-                const swIP = defaultConfig.IP || dbItem.IP || '';
-                
-                // Status diambil dinamis dari hasil ping database
-                const rawStatus = dbItem.Status || dbItem.status || "ONLINE";
-                const isOnline = String(rawStatus).toUpperCase() === "ONLINE";
-                
-                const badgeClass = isOnline 
-                    ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400" 
-                    : "bg-rose-500/20 text-rose-600 dark:text-rose-400";
-                
-                container.innerHTML += `
-                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2 py-1 rounded-xl shadow-sm flex items-center justify-between">
-                        <div class="flex items-center space-x-2 overflow-hidden pr-2">
-                            <div class="p-1 bg-indigo-500/10 rounded-lg text-indigo-500 border border-indigo-500/20 text-[10px] shrink-0">
-                                <i class="fa-solid fa-network-wired"></i>
-                            </div>
-                            <div class="overflow-hidden">
-                                <h4 class="text-[10px] font-bold text-slate-800 dark:text-slate-200 leading-tight truncate" title="${swName}">${swName}</h4>
-                                <p class="text-[9px] text-slate-500 dark:text-slate-400 font-mono flex items-center gap-1.5">
-                                    <span>${swModel}</span>
-                                    ${swIP ? `<span class="text-cyan-600 dark:text-cyan-400 font-semibold">• ${swIP}</span>` : ''}
-                                </p>
-                            </div>
-                        </div>
-                        <span class="px-2 py-0.5 ${badgeClass} rounded text-[9px] font-bold uppercase shrink-0">${isOnline ? 'ONLINE' : 'OFFLINE'}</span>
-                    </div>
-                `;
-            });
+    targetKeys.forEach(key => {
+        const dbItem = dbMap[key] || {};
+        const defaultConfig = coreDefaults[key] || {};
+        
+        const swName = defaultConfig.DisplayName || dbItem.SwitchName || dbItem.switch_name || key.replace(/_/g, ' ');
+        const swModel = (dbItem.Model || dbItem.model || defaultConfig.Model || 'Network Switch').replace(/_/g, ' ');
+        const swIP = defaultConfig.IP || dbItem.IP || '';
+        
+        // KHUSUS CCR: Karena skrip dijalankan dari CCR itu sendiri, 
+        // kita bisa memaksa statusnya selalu ONLINE atau membaca hasil dari database dengan benar
+        let rawStatus = dbItem.Status || dbItem.status || "ONLINE";
+        if (key === "CCR2004_Core_Router") {
+            rawStatus = "ONLINE"; // Paksa ONLINE karena router ini yang mengeksekusi skrip
         }
+        
+        const isOnline = String(rawStatus).toUpperCase() === "ONLINE";
+        const badgeClass = isOnline 
+            ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400" 
+            : "bg-rose-500/20 text-rose-600 dark:text-rose-400";
+        
+        container.innerHTML += `
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2 py-1 rounded-xl shadow-sm flex items-center justify-between">
+                <div class="flex items-center space-x-2 overflow-hidden pr-2">
+                    <div class="p-1 bg-indigo-500/10 rounded-lg text-indigo-500 border border-indigo-500/20 text-[10px] shrink-0">
+                        <i class="fa-solid fa-network-wired"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <h4 class="text-[10px] font-bold text-slate-800 dark:text-slate-200 leading-tight truncate" title="${swName}">${swName}</h4>
+                        <p class="text-[9px] text-slate-500 dark:text-slate-400 font-mono flex items-center gap-1.5">
+                            <span>${swModel}</span>
+                            ${swIP ? `<span class="text-cyan-600 dark:text-cyan-400 font-semibold">• ${swIP}</span>` : ''}
+                        </p>
+                    </div>
+                </div>
+                <span class="px-2 py-0.5 ${badgeClass} rounded text-[9px] font-bold uppercase shrink-0">${isOnline ? 'ONLINE' : 'OFFLINE'}</span>
+            </div>
+        `;
+    });
+}
 
         function updateTrafficChart(latestRx, latestTx) {
             const currentTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
