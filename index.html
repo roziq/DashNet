@@ -376,8 +376,11 @@
                 const isOnline = String(status).toUpperCase() === "ONLINE";
                 const badgeClass = isOnline ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400" : "bg-rose-500/20 text-rose-600 dark:text-rose-400";
 
+                const clickAction = ip ? `onclick="window.open('http://${ip}', '_blank')"` : '';
+                const cursorStyle = ip ? 'cursor-pointer hover:border-cyan-500 transition' : '';
+
                 container.innerHTML += `
-                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2 py-1 rounded-lg shadow-sm flex items-center justify-between gap-2">
+                    <div ${clickAction} class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2 py-1 rounded-lg shadow-sm flex items-center justify-between gap-2 ${cursorStyle}" title="${ip ? 'Buka http://' + ip : 'Tidak ada IP'}">
                         <div class="flex items-center gap-2 overflow-hidden">
                             <div class="p-1 bg-indigo-500/10 rounded text-indigo-500 border border-indigo-500/20 text-[0.75rem] shrink-0"><i class="fa-solid fa-network-wired"></i></div>
                             <div class="overflow-hidden">
