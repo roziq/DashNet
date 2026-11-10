@@ -8,71 +8,53 @@
     <script>tailwind.config = { darkMode: 'class' }</script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* Standar Tipografi Profesional NOC */
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .font-mono { font-family: 'JetBrains Mono', monospace; }
-
-        /* Satu layar penuh: semua ukuran memakai rem, dan rem mengikuti TINGGI + LEBAR layar */
+        /* Satu layar penuh: semua ukuran memakai rem, dan rem mengikuti TINGGI + LEBAR layar,
+           jadi isi selalu muat tanpa scroll. Naikkan 1.8vh / 0.95vw untuk font lebih besar
+           (kalau ada bagian yang terpotong, turunkan lagi). */
         html { font-size: clamp(9px, min(1.8vh, 0.95vw), 24px); height: 100%; }
         body { height: 100%; overflow: hidden; }
 
-        /* HP / layar sempit: izinkan scroll */
+        /* HP / layar sempit: satu layar tidak mungkin, izinkan scroll */
         @media (max-width: 1023px) {
             html { font-size: 14px; }
             body { height: auto; min-height: 100%; overflow-y: auto; }
         }
 
         .custom-scrollbar::-webkit-scrollbar { height: 4px; width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #0ea5e9; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 4px; }
 
-        /* Efek Glow & Panel Kelas Profesional */
-        .noc-card {
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(51, 65, 85, 0.4);
-        }
-        .light .noc-card {
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(226, 232, 240, 0.8);
-        }
-        
-        .noc-card-sub {
-            background: rgba(30, 41, 59, 0.4);
-            border: 1px solid rgba(51, 65, 85, 0.3);
-        }
-        .light .noc-card-sub {
-            background: rgba(248, 250, 252, 1);
-            border: 1px solid rgba(226, 232, 240, 1);
+        #vlan-cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+            gap: 0.35rem;
+            align-content: start;
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans antialiased flex flex-col p-2 gap-1.5 transition-colors duration-300">
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased flex flex-col p-2 gap-1.5 transition-colors duration-300">
 
     <!-- Header -->
-    <header class="noc-card rounded-xl px-3 py-1.5 flex justify-between items-center shadow-lg shrink-0">
+    <header class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 flex justify-between items-center shadow-sm shrink-0">
         <div class="flex items-center gap-2.5">
-            <div class="bg-gradient-to-br from-cyan-400 to-blue-600 p-1.5 rounded-lg text-slate-950 font-bold shadow-md shadow-cyan-500/20">
-                <i class="fa-solid fa-network-wired text-[1rem]"></i>
-            </div>
+            <div class="bg-cyan-500 p-1.5 rounded-lg text-slate-950 font-bold shadow"><i class="fa-solid fa-network-wired text-[1rem]"></i></div>
             <div>
-                <h1 class="text-[1.1rem] font-bold tracking-tight text-slate-900 dark:text-slate-50 leading-tight">Network Control Center</h1>
-                <p class="text-[0.75rem] text-slate-400 font-medium leading-tight">SMK Negeri 1 Purbalingga • Enterprise Infrastructure</p>
+                <h1 class="text-[1.1rem] font-bold tracking-wide text-slate-900 dark:text-slate-100 leading-tight">Network Control Center</h1>
+                <p class="text-[0.75rem] text-slate-500 dark:text-slate-400 leading-tight">SMK Negeri 1 Purbalingga • Infrastructure</p>
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <span id="clock" class="text-[0.9rem] font-mono font-semibold text-cyan-400 mr-1 tracking-wider"></span>
-            <button onclick="toggleTheme()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-[0.8rem] font-semibold transition flex items-center gap-1.5 border border-slate-700">
+            <span id="clock" class="text-[0.9rem] font-mono text-slate-500 dark:text-slate-400 mr-1"></span>
+            <button onclick="toggleTheme()" class="px-2.5 py-1 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-[0.8rem] font-semibold transition flex items-center gap-1.5 border border-slate-300 dark:border-slate-700">
                 <i id="theme-icon" class="fa-solid fa-moon text-cyan-400"></i><span id="theme-text">Dark</span>
             </button>
-            <span id="db-status-badge" class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-[0.8rem] rounded-lg border border-emerald-500/30 flex items-center gap-1.5 font-medium">
-                <span id="db-status-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span id="db-status-text">Connected</span>
+            <span id="db-status-badge" class="px-2.5 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[0.8rem] rounded-lg border border-emerald-500/30 flex items-center gap-1.5 font-medium">
+                <span id="db-status-dot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span id="db-status-text">Connected</span>
             </span>
-            <button onclick="fetchData()" class="px-2.5 py-1 bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-lg text-[0.8rem] font-bold transition flex items-center gap-1.5 shadow-lg shadow-cyan-500/20">
+            <button onclick="fetchData()" class="px-2.5 py-1 bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-lg text-[0.8rem] font-semibold transition flex items-center gap-1.5 shadow">
                 <i class="fa-solid fa-rotate"></i> Refresh
             </button>
-            <button onclick="toggleFullscreen()" title="Fullscreen (tombol F)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-[0.8rem] font-semibold transition flex items-center gap-1.5 border border-slate-700">
+            <button onclick="toggleFullscreen()" title="Fullscreen (tombol F)" class="px-2.5 py-1 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-[0.8rem] font-semibold transition flex items-center gap-1.5 border border-slate-300 dark:border-slate-700">
                 <i id="fs-icon" class="fa-solid fa-expand"></i>
             </button>
         </div>
@@ -81,49 +63,49 @@
     <!-- 1. CORE & WAN TREND -->
     <div class="grid grid-cols-3 gap-1.5 shrink-0">
         <div class="grid grid-cols-2 gap-1.5">
-            <div class="noc-card px-2.5 py-1.5 rounded-xl shadow-sm flex items-center justify-between">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2.5 py-1.5 rounded-xl shadow-sm flex items-center justify-between">
                 <div>
-                    <p class="text-[0.7rem] font-bold text-slate-400 uppercase tracking-wider">Online Devices</p>
-                    <h3 id="stat-devices" class="text-[1.5rem] font-mono font-extrabold text-cyan-400 leading-tight">0 / 0</h3>
-                    <p class="text-[0.7rem] text-emerald-400 font-semibold"><i class="fa-solid fa-check mr-0.5"></i> Healthy</p>
+                    <p class="text-[0.7rem] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Online Devices</p>
+                    <h3 id="stat-devices" class="text-[1.5rem] font-extrabold text-cyan-600 dark:text-cyan-400 leading-tight">0 / 0</h3>
+                    <p class="text-[0.7rem] text-emerald-600 dark:text-emerald-400 font-medium"><i class="fa-solid fa-check mr-0.5"></i> Healthy</p>
                 </div>
-                <div class="p-1.5 bg-cyan-500/10 rounded-lg text-cyan-400 border border-cyan-500/20 text-[1rem]"><i class="fa-solid fa-server"></i></div>
+                <div class="p-1.5 bg-cyan-500/10 rounded-lg text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 text-[1rem]"><i class="fa-solid fa-server"></i></div>
             </div>
-            <div class="noc-card px-2.5 py-1.5 rounded-xl shadow-sm flex items-center justify-between">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2.5 py-1.5 rounded-xl shadow-sm flex items-center justify-between">
                 <div>
-                    <p class="text-[0.7rem] font-bold text-slate-400 uppercase tracking-wider">Active Clients</p>
-                    <h3 id="stat-clients" class="text-[1.5rem] font-mono font-extrabold text-emerald-400 leading-tight">0</h3>
-                    <p class="text-[0.7rem] text-slate-400">Klien aktif (ARP)</p>
+                    <p class="text-[0.7rem] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Active Clients</p>
+                    <h3 id="stat-clients" class="text-[1.5rem] font-extrabold text-emerald-600 dark:text-emerald-400 leading-tight">0</h3>
+                    <p class="text-[0.7rem] text-slate-500 dark:text-slate-400">Klien aktif (ARP)</p>
                 </div>
-                <div class="p-1.5 bg-emerald-500/10 rounded-lg text-emerald-400 border border-emerald-500/20 text-[1rem]"><i class="fa-solid fa-users"></i></div>
+                <div class="p-1.5 bg-emerald-500/10 rounded-lg text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[1rem]"><i class="fa-solid fa-users"></i></div>
             </div>
-            <div class="noc-card px-2.5 py-1.5 rounded-xl shadow-sm flex items-center justify-between">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2.5 py-1.5 rounded-xl shadow-sm flex items-center justify-between">
                 <div>
-                    <p class="text-[0.7rem] font-bold text-slate-400 uppercase tracking-wider">CPU Load</p>
-                    <h3 id="stat-cpu" class="text-[1.5rem] font-mono font-extrabold text-amber-400 leading-tight">0%</h3>
-                    <p id="stat-core-name" class="text-[0.7rem] text-slate-400 font-mono">CCR2004</p>
+                    <p class="text-[0.7rem] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">CPU Load</p>
+                    <h3 id="stat-cpu" class="text-[1.5rem] font-extrabold text-amber-600 dark:text-amber-400 leading-tight">0%</h3>
+                    <p id="stat-core-name" class="text-[0.7rem] text-slate-500 dark:text-slate-400 font-mono">CCR2004</p>
                 </div>
-                <div class="p-1.5 bg-amber-500/10 rounded-lg text-amber-400 border border-amber-500/20 text-[1rem]"><i class="fa-solid fa-microchip"></i></div>
+                <div class="p-1.5 bg-amber-500/10 rounded-lg text-amber-600 dark:text-amber-400 border border-amber-500/20 text-[1rem]"><i class="fa-solid fa-microchip"></i></div>
             </div>
-            <div class="noc-card px-2.5 py-1.5 rounded-xl shadow-sm flex items-center justify-between">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2.5 py-1.5 rounded-xl shadow-sm flex items-center justify-between">
                 <div>
-                    <p class="text-[0.7rem] font-bold text-slate-400 uppercase tracking-wider">Total Bandwidth</p>
-                    <h3 id="stat-bandwidth-total" class="text-[1.5rem] font-mono font-extrabold text-purple-400 leading-tight">0 Mbps</h3>
-                    <p class="text-[0.7rem] text-slate-400 flex gap-2 font-mono">
-                        <span id="stat-rx" class="text-cyan-400"><i class="fa-solid fa-arrow-down"></i> 0</span>
-                        <span id="stat-tx" class="text-purple-400"><i class="fa-solid fa-arrow-up"></i> 0</span>
+                    <p class="text-[0.7rem] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Bandwidth</p>
+                    <h3 id="stat-bandwidth-total" class="text-[1.5rem] font-extrabold text-purple-600 dark:text-purple-400 leading-tight">0 Mbps</h3>
+                    <p class="text-[0.7rem] text-slate-500 dark:text-slate-400 flex gap-2 font-mono">
+                        <span id="stat-rx" class="text-cyan-600 dark:text-cyan-400"><i class="fa-solid fa-arrow-down"></i> 0</span>
+                        <span id="stat-tx" class="text-purple-600 dark:text-purple-400"><i class="fa-solid fa-arrow-up"></i> 0</span>
                     </p>
                 </div>
-                <div class="p-1.5 bg-purple-500/10 rounded-lg text-purple-400 border border-purple-500/20 text-[1rem]"><i class="fa-solid fa-globe"></i></div>
+                <div class="p-1.5 bg-purple-500/10 rounded-lg text-purple-600 dark:text-purple-400 border border-purple-500/20 text-[1rem]"><i class="fa-solid fa-globe"></i></div>
             </div>
         </div>
 
-        <div class="noc-card px-3 py-2 rounded-xl shadow-sm col-span-2 flex flex-col overflow-hidden">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-2 rounded-xl shadow-sm col-span-2 flex flex-col overflow-hidden">
             <div class="flex justify-between items-center mb-1 shrink-0">
-                <h3 class="font-bold text-slate-200 text-[0.9rem] flex items-center gap-1.5"><i class="fa-solid fa-chart-area text-cyan-400"></i> WAN Traffic Trend</h3>
-                <div class="flex items-center gap-3 text-[0.75rem] text-slate-400 font-mono">
-                    <span class="flex items-center gap-1"><span class="w-3 h-1.5 bg-cyan-400 rounded"></span> Down</span>
-                    <span class="flex items-center gap-1"><span class="w-3 h-1.5 bg-purple-400 rounded"></span> Up</span>
+                <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-[0.9rem]"><i class="fa-solid fa-chart-area text-cyan-600 dark:text-cyan-400 mr-1.5"></i> WAN Traffic Trend</h3>
+                <div class="flex items-center gap-3 text-[0.75rem] text-slate-500 dark:text-slate-400">
+                    <span class="flex items-center gap-1"><span class="w-3 h-1.5 bg-cyan-500 rounded"></span> Down</span>
+                    <span class="flex items-center gap-1"><span class="w-3 h-1.5 bg-purple-500 rounded"></span> Up</span>
                 </div>
             </div>
             <div class="relative w-full h-[5.5rem]"><canvas id="trafficChart"></canvas></div>
@@ -131,39 +113,39 @@
     </div>
 
     <!-- WAN list -->
-    <div class="noc-card rounded-xl px-2.5 py-1.5 shadow-sm shrink-0">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1.5 shadow-sm shrink-0">
         <div id="wan-cards-container" class="flex gap-1.5">
-            <div class="text-[0.8rem] text-slate-400 font-mono">Loading WAN gateways...</div>
+            <div class="text-[0.8rem] text-slate-400">Loading WAN gateways...</div>
         </div>
     </div>
 
-    <!-- 2. VLAN -->
-    <div class="noc-card rounded-xl px-2.5 py-1.5 shadow-sm flex flex-col flex-1 min-h-0 overflow-hidden">
+    <!-- 2. VLAN (mengisi sisa tinggi layar) -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1.5 shadow-sm flex flex-col flex-1 min-h-0 overflow-hidden">
         <div class="flex justify-between items-center mb-1 shrink-0">
-            <h3 class="font-bold text-slate-200 text-[0.9rem] flex items-center gap-1.5"><i class="fa-solid fa-sitemap text-cyan-400"></i> VLAN Segments Breakdown</h3>
-            <span id="vlan-count-badge" class="px-2 py-0.5 bg-cyan-500/10 text-cyan-400 text-[0.7rem] rounded font-mono font-bold border border-cyan-500/20">0 Active VLANs</span>
+            <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-[0.9rem]"><i class="fa-solid fa-sitemap text-cyan-600 dark:text-cyan-400 mr-1.5"></i> VLAN Segments Breakdown</h3>
+            <span id="vlan-count-badge" class="px-2 py-0.5 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-[0.7rem] rounded font-mono font-bold border border-cyan-500/20">0 Active VLANs</span>
         </div>
         <div id="vlan-cards-container" class="min-h-0 overflow-hidden">
-            <div class="text-[0.8rem] text-slate-400 p-1 col-span-full font-mono">Loading VLAN metrics...</div>
+            <div class="text-[0.8rem] text-slate-400 p-1 col-span-full">Loading VLAN metrics...</div>
         </div>
     </div>
 
     <!-- 3. SWITCH & AP -->
     <div class="grid grid-cols-5 gap-1.5 shrink-0">
         <div class="col-span-2 grid grid-cols-2 gap-1 content-start" id="switch-container">
-            <div class="text-[0.8rem] text-slate-400 font-mono">Loading switches...</div>
+            <div class="text-[0.8rem] text-slate-400">Loading switches...</div>
         </div>
 
-        <div class="noc-card px-3 py-2 rounded-xl shadow-sm col-span-3 flex items-center gap-4 overflow-hidden">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-2 rounded-xl shadow-sm col-span-3 flex items-center gap-4 overflow-hidden">
             <div class="flex items-center gap-2 shrink-0">
-                <div class="p-1.5 bg-cyan-500/10 rounded-lg text-cyan-400 border border-cyan-500/20 text-[1rem]"><i class="fa-solid fa-wifi"></i></div>
+                <div class="p-1.5 bg-cyan-500/10 rounded-lg text-cyan-500 border border-cyan-500/20 text-[1rem]"><i class="fa-solid fa-wifi"></i></div>
                 <div>
-                    <h3 class="font-bold text-slate-200 text-[0.9rem] leading-tight">UniFi AP Distribution</h3>
-                    <p class="text-[0.7rem] text-slate-400">Clients per AP</p>
+                    <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-[0.9rem] leading-tight">UniFi AP Distribution</h3>
+                    <p class="text-[0.7rem] text-slate-500 dark:text-slate-400">Clients per AP</p>
                 </div>
             </div>
             <div class="relative w-[6rem] h-[6rem] shrink-0"><canvas id="apChart"></canvas></div>
-            <div id="ap-legend" class="grid grid-cols-3 gap-x-4 gap-y-0 text-[0.75rem] text-slate-200 font-mono w-full min-w-0">
+            <div id="ap-legend" class="grid grid-cols-3 gap-x-4 gap-y-0 text-[0.75rem] text-slate-700 dark:text-slate-200 font-mono w-full min-w-0">
                 <div class="text-slate-400">Waiting AP...</div>
             </div>
         </div>
@@ -179,29 +161,28 @@
         let trafficHistoryTx = [];
 
         const COLOR_PALETTE = [
-            { border: 'border-cyan-500/40', text: 'text-cyan-400', badge: 'bg-cyan-500' },
-            { border: 'border-indigo-500/40', text: 'text-indigo-400', badge: 'bg-indigo-500' },
-            { border: 'border-emerald-500/40', text: 'text-emerald-400', badge: 'bg-emerald-500' },
-            { border: 'border-purple-500/40', text: 'text-purple-400', badge: 'bg-purple-500' },
-            { border: 'border-amber-500/40', text: 'text-amber-400', badge: 'bg-amber-500' },
-            { border: 'border-rose-500/40', text: 'text-rose-400', badge: 'bg-rose-500' },
-            { border: 'border-pink-500/40', text: 'text-pink-400', badge: 'bg-pink-500' },
-            { border: 'border-teal-500/40', text: 'text-teal-400', badge: 'bg-teal-500' },
-            { border: 'border-sky-500/40', text: 'text-sky-400', badge: 'bg-sky-500' },
-            { border: 'border-violet-500/40', text: 'text-violet-400', badge: 'bg-violet-500' },
-            { border: 'border-lime-500/40', text: 'text-lime-400', badge: 'bg-lime-500' },
-            { border: 'border-orange-500/40', text: 'text-orange-400', badge: 'bg-orange-500' }
+            { border: 'border-cyan-500/40', text: 'text-cyan-600 dark:text-cyan-400', badge: 'bg-cyan-500' },
+            { border: 'border-indigo-500/40', text: 'text-indigo-600 dark:text-indigo-400', badge: 'bg-indigo-500' },
+            { border: 'border-emerald-500/40', text: 'text-emerald-600 dark:text-emerald-400', badge: 'bg-emerald-500' },
+            { border: 'border-purple-500/40', text: 'text-purple-600 dark:text-purple-400', badge: 'bg-purple-500' },
+            { border: 'border-amber-500/40', text: 'text-amber-600 dark:text-amber-400', badge: 'bg-amber-500' },
+            { border: 'border-rose-500/40', text: 'text-rose-600 dark:text-rose-400', badge: 'bg-rose-500' },
+            { border: 'border-pink-500/40', text: 'text-pink-600 dark:text-pink-400', badge: 'bg-pink-500' },
+            { border: 'border-teal-500/40', text: 'text-teal-600 dark:text-teal-400', badge: 'bg-teal-500' },
+            { border: 'border-sky-500/40', text: 'text-sky-600 dark:text-sky-400', badge: 'bg-sky-500' },
+            { border: 'border-violet-500/40', text: 'text-violet-600 dark:text-violet-400', badge: 'bg-violet-500' },
+            { border: 'border-lime-500/40', text: 'text-lime-600 dark:text-lime-400', badge: 'bg-lime-500' },
+            { border: 'border-orange-500/40', text: 'text-orange-600 dark:text-orange-400', badge: 'bg-orange-500' }
         ];
 
         // ---------- Tema, fullscreen, jam ----------
         function initTheme() {
-            if (localStorage.getItem('theme') === 'light') { document.documentElement.classList.remove('dark'); document.documentElement.classList.add('light'); updateThemeUI(false); }
-            else { document.documentElement.classList.add('dark'); document.documentElement.classList.remove('light'); updateThemeUI(true); }
+            if (localStorage.getItem('theme') === 'light') { document.documentElement.classList.remove('dark'); updateThemeUI(false); }
+            else { document.documentElement.classList.add('dark'); updateThemeUI(true); }
         }
 
         function toggleTheme() {
             const isDark = document.documentElement.classList.toggle('dark');
-            document.documentElement.classList.toggle('light', !isDark);
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
             updateThemeUI(isDark);
             if (window.lastJsonData) {
@@ -213,7 +194,7 @@
         }
 
         function updateThemeUI(isDark) {
-            document.getElementById('theme-icon').className = isDark ? 'fa-solid fa-moon text-cyan-400' : 'fa-solid fa-sun text-amber-400';
+            document.getElementById('theme-icon').className = isDark ? 'fa-solid fa-moon text-cyan-400' : 'fa-solid fa-sun text-amber-500';
             document.getElementById('theme-text').innerText = isDark ? 'Dark' : 'Light';
         }
 
@@ -261,9 +242,9 @@
             const badge = document.getElementById('db-status-badge');
             const dot = document.getElementById('db-status-dot');
             badge.className = ok
-                ? "px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-[0.8rem] rounded-lg border border-emerald-500/30 flex items-center gap-1.5 font-medium"
-                : "px-2.5 py-1 bg-rose-500/10 text-rose-400 text-[0.8rem] rounded-lg border border-rose-500/30 flex items-center gap-1.5 font-medium";
-            dot.className = ok ? "w-2 h-2 rounded-full bg-emerald-400 animate-pulse" : "w-2 h-2 rounded-full bg-rose-400";
+                ? "px-2.5 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[0.8rem] rounded-lg border border-emerald-500/30 flex items-center gap-1.5 font-medium"
+                : "px-2.5 py-1 bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[0.8rem] rounded-lg border border-rose-500/30 flex items-center gap-1.5 font-medium";
+            dot.className = ok ? "w-2 h-2 rounded-full bg-emerald-500 animate-pulse" : "w-2 h-2 rounded-full bg-rose-500";
             document.getElementById('db-status-text').innerText = message;
         }
 
@@ -292,7 +273,7 @@
             const container = document.getElementById('wan-cards-container');
             container.innerHTML = '';
             const keys = Object.keys(wanMap);
-            if (!keys.length) { container.innerHTML = `<div class="text-[0.8rem] text-slate-400 p-1 font-mono">No active WAN metrics detected.</div>`; return; }
+            if (!keys.length) { container.innerHTML = `<div class="text-[0.8rem] text-slate-400 p-1">No active WAN metrics detected.</div>`; return; }
 
             let totalRx = 0, totalTx = 0;
             keys.forEach(wanName => {
@@ -302,17 +283,17 @@
                 if (isUp) { totalRx += rx; totalTx += tx; }
 
                 const badge = isUp
-                    ? `<span class="px-1.5 bg-emerald-500/20 text-emerald-400 rounded text-[0.7rem] font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>UP</span>`
-                    : `<span class="px-1.5 bg-rose-500/20 text-rose-400 rounded text-[0.7rem] font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>DOWN</span>`;
+                    ? `<span class="px-1.5 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded text-[0.7rem] font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>UP</span>`
+                    : `<span class="px-1.5 bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded text-[0.7rem] font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>DOWN</span>`;
 
                 container.innerHTML += `
-                    <div class="flex-1 min-w-0 noc-card-sub ${isUp ? '' : 'border-rose-500/50'} px-2 py-1 rounded-lg">
+                    <div class="flex-1 min-w-0 bg-slate-50 dark:bg-slate-950/70 border ${isUp ? 'border-slate-200 dark:border-slate-800' : 'border-rose-500/50'} px-2 py-1 rounded-lg">
                         <div class="flex justify-between items-center gap-2">
-                            <span class="font-bold text-[0.8rem] text-cyan-400 font-mono truncate" title="${wanName}">${wanName}</span>${badge}
+                            <span class="font-bold text-[0.8rem] text-cyan-600 dark:text-cyan-400 font-mono truncate" title="${wanName}">${wanName}</span>${badge}
                         </div>
                         <div class="text-[0.8rem] font-mono leading-snug">
-                            <div class="flex justify-between text-slate-400"><span>Down:</span><span class="text-cyan-400 font-semibold">${formatSpeed(rx)}</span></div>
-                            <div class="flex justify-between text-slate-400"><span>Up:</span><span class="text-purple-400 font-semibold">${formatSpeed(tx)}</span></div>
+                            <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>Down:</span><span class="text-cyan-600 dark:text-cyan-400 font-semibold">${formatSpeed(rx)}</span></div>
+                            <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>Up:</span><span class="text-purple-600 dark:text-purple-400 font-semibold">${formatSpeed(tx)}</span></div>
                         </div>
                     </div>`;
             });
@@ -331,7 +312,7 @@
             container.innerHTML = '';
             const list = Object.values(vlanMap);
             document.getElementById('vlan-count-badge').innerText = `${list.length} Active VLANs`;
-            if (!list.length) { container.innerHTML = `<div class="text-[0.8rem] text-slate-400 p-1 col-span-full font-mono">No active VLAN metrics detected.</div>`; return; }
+            if (!list.length) { container.innerHTML = `<div class="text-[0.8rem] text-slate-400 p-1 col-span-full">No active VLAN metrics detected.</div>`; return; }
 
             list.sort((a, b) => (parseFloat(b.RxMbps || 0) + parseFloat(b.TxMbps || 0)) - (parseFloat(a.RxMbps || 0) + parseFloat(a.TxMbps || 0)));
 
@@ -341,15 +322,15 @@
                 const t = COLOR_PALETTE[idx % COLOR_PALETTE.length];
 
                 container.innerHTML += `
-                    <div id="vlan-cards-container" class="noc-card-sub border ${t.border} px-2 py-1 rounded-lg">
+                    <div class="bg-slate-50 dark:bg-slate-950/80 border ${t.border} px-2 py-1 rounded-lg">
                         <div class="flex justify-between items-center gap-1">
                             <span class="font-bold text-[0.8rem] ${t.text} font-mono truncate" title="${v.VLANName}">${v.VLANName}</span>
                             <span class="w-2 h-2 rounded-full ${t.badge} animate-pulse shrink-0"></span>
                         </div>
                         <div class="text-[0.8rem] font-mono leading-snug">
-                            <div class="flex justify-between text-slate-400"><span>D:</span><span class="${t.text} font-semibold">${formatSpeed(rx)}</span></div>
-                            <div class="flex justify-between text-slate-400"><span>U:</span><span class="text-slate-300 font-semibold">${formatSpeed(tx)}</span></div>
-                            ${hasClients ? `<div class="flex justify-between text-slate-400"><span><i class="fa-solid fa-users text-[0.65rem]"></i></span><span class="text-slate-300 font-semibold">${v.Clients}</span></div>` : ''}
+                            <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>D:</span><span class="${t.text} font-semibold">${formatSpeed(rx)}</span></div>
+                            <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>U:</span><span class="text-slate-700 dark:text-slate-300 font-semibold">${formatSpeed(tx)}</span></div>
+                            ${hasClients ? `<div class="flex justify-between text-slate-500 dark:text-slate-400"><span><i class="fa-solid fa-users text-[0.65rem]"></i></span><span class="text-slate-700 dark:text-slate-300 font-semibold">${v.Clients}</span></div>` : ''}
                         </div>
                     </div>`;
             });
@@ -390,17 +371,17 @@
                 const ip = def.IP || db.IP || '';
 
                 let status = db.Status || db.status || "ONLINE";
-                if (key === "CCR2004_Core_Router") status = "ONLINE";
+                if (key === "CCR2004_Core_Router") status = "ONLINE"; // router ini yang menjalankan skrip
                 const isOnline = String(status).toUpperCase() === "ONLINE";
-                const badgeClass = isOnline ? "bg-emerald-500/20 text-emerald-400" : "bg-rose-500/20 text-rose-400";
+                const badgeClass = isOnline ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400" : "bg-rose-500/20 text-rose-600 dark:text-rose-400";
 
                 container.innerHTML += `
-                    <div class="noc-card px-2 py-1 rounded-lg shadow-sm flex items-center justify-between gap-2">
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2 py-1 rounded-lg shadow-sm flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2 overflow-hidden">
-                            <div class="p-1 bg-indigo-500/10 rounded text-indigo-400 border border-indigo-500/20 text-[0.75rem] shrink-0"><i class="fa-solid fa-network-wired"></i></div>
+                            <div class="p-1 bg-indigo-500/10 rounded text-indigo-500 border border-indigo-500/20 text-[0.75rem] shrink-0"><i class="fa-solid fa-network-wired"></i></div>
                             <div class="overflow-hidden">
-                                <h4 class="text-[0.8rem] font-bold text-slate-200 leading-tight truncate" title="${name}">${name}</h4>
-                                <p class="text-[0.65rem] text-slate-400 font-mono leading-tight truncate">${model}${ip ? ` <span class="text-cyan-400 font-semibold">• ${ip}</span>` : ''}</p>
+                                <h4 class="text-[0.8rem] font-bold text-slate-800 dark:text-slate-200 leading-tight truncate" title="${name}">${name}</h4>
+                                <p class="text-[0.65rem] text-slate-500 dark:text-slate-400 font-mono leading-tight truncate">${model}${ip ? ` <span class="text-cyan-600 dark:text-cyan-400 font-semibold">• ${ip}</span>` : ''}</p>
                             </div>
                         </div>
                         <span class="px-1.5 py-0.5 ${badgeClass} rounded text-[0.65rem] font-bold uppercase shrink-0">${isOnline ? 'ONLINE' : 'OFFLINE'}</span>
@@ -433,8 +414,8 @@
                 options: {
                     responsive: true, maintainAspectRatio: false, animation: false,
                     scales: {
-                        y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11, family: 'JetBrains Mono' }, maxTicksLimit: 4 } },
-                        x: { grid: { display: false }, ticks: { color: tickColor, font: { size: 11, family: 'JetBrains Mono' }, maxTicksLimit: 6 } }
+                        y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11 }, maxTicksLimit: 4 } },
+                        x: { grid: { display: false }, ticks: { color: tickColor, font: { size: 11 }, maxTicksLimit: 6 } }
                     },
                     plugins: { legend: { display: false } }
                 }
