@@ -9,6 +9,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Menggunakan font Tahoma secara menyeluruh */
+        body { font-family: Tahoma, Geneva, sans-serif; }
+        
         /* Satu layar penuh: semua ukuran memakai rem, dan rem mengikuti TINGGI + LEBAR layar,
             jadi isi selalu muat tanpa scroll. */
         html { font-size: clamp(9px, min(1.8vh, 0.95vw), 24px); height: 100%; }
@@ -24,7 +27,7 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 4px; }
     </style>
 </head>
-<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased flex flex-col p-2 gap-1.5 transition-colors duration-300">
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 antialiased flex flex-col p-2 gap-1.5 transition-colors duration-300">
 
     <!-- Header -->
     <header class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 flex justify-between items-center shadow-sm shrink-0">
