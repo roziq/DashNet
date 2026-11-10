@@ -9,15 +9,10 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-       /* Menggunakan font Trebuchet MS secara menyeluruh */
         body { font-family: 'Trebuchet MS', Geneva, sans-serif; }
-        
-        /* Satu layar penuh: semua ukuran memakai rem, dan rem mengikuti TINGGI + LEBAR layar,
-            jadi isi selalu muat tanpa scroll. */
         html { font-size: clamp(9px, min(1.8vh, 0.95vw), 24px); height: 100%; }
         body { height: 100%; overflow: hidden; }
 
-        /* HP / layar sempit: satu layar tidak mungkin, izinkan scroll */
         @media (max-width: 1023px) {
             html { font-size: 14px; }
             body { height: auto; min-height: 100%; overflow-y: auto; }
@@ -117,7 +112,7 @@
     <!-- 2. VLAN -->
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1.5 shadow-sm flex flex-col flex-1 min-h-0 overflow-hidden">
         <div class="flex justify-between items-center mb-1 shrink-0">
-            <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-[0.9rem]"><i class="fa-solid fa-sitemap text-cyan-600 dark:text-cyan-400 mr-1.5"></i> VLAN Segments Breakdown</h3>
+            <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-[0.9rem]"><i class="fa-solid fa-sitemap text-cyan-600 dark:text-cyan-400 mr-1.5"></i> VLAN Segments Breakdown <span class="text-[0.7rem] text-slate-400 font-normal ml-2">(Klik kartu untuk melihat Grafik RouterOS)</span></h3>
             <span id="vlan-count-badge" class="px-2 py-0.5 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-[0.7rem] rounded font-mono font-bold border border-cyan-500/20">0 Active VLANs</span>
         </div>
         <div id="vlan-cards-container" class="grid gap-1.5 overflow-y-auto custom-scrollbar p-1" style="grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));">
@@ -146,8 +141,47 @@
         </div>
     </div>
 
+    <!-- MODAL POPUP UNTUK STATISTIK GRAFIK INTERFACE ROUTEROS -->
+    <div id="graphModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+            <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
+                <div class="flex items-center gap-2">
+                    <div class="p-1.5 bg-cyan-500/10 text-cyan-500 rounded-lg"><i class="fa-solid fa-chart-line"></i></div>
+                    <div>
+                        <h3 id="modal-title" class="font-bold text-[1rem] text-slate-800 dark:text-slate-100">Interface Statistics</h3>
+                        <p class="text-[0.75rem] text-slate-500 dark:text-slate-400 font-mono">RouterOS Traffic Graph Integration</p>
+                    </div>
+                </div>
+                <button onclick="closeGraphModal()" class="px-3 py-1.5 bg-slate-200 dark:bg-slate-800 hover:bg-rose-500 hover:text-white text-slate-700 dark:text-slate-200 rounded-lg text-[0.8rem] font-semibold transition">
+                    <i class="fa-solid fa-xmark mr-1"></i> Tutup
+                </button>
+            </div>
+            <div class="p-4 overflow-y-auto custom-scrollbar flex flex-col gap-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-slate-50 dark:bg-slate-950 p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
+                        <p class="text-[0.75rem] font-bold text-slate-400 mb-1">Daily Graph (5 Min Avg)</p>
+                        <img id="graph-daily" src="" alt="Daily Graph" class="w-full rounded border border-slate-700/50 bg-white">
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-950 p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
+                        <p class="text-[0.75rem] font-bold text-slate-400 mb-1">Weekly Graph (30 Min Avg)</p>
+                        <img id="graph-weekly" src="" alt="Weekly Graph" class="w-full rounded border border-slate-700/50 bg-white">
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-950 p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
+                        <p class="text-[0.75rem] font-bold text-slate-400 mb-1">Monthly Graph (2 Hour Avg)</p>
+                        <img id="graph-monthly" src="" alt="Monthly Graph" class="w-full rounded border border-slate-700/50 bg-white">
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-950 p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
+                        <p class="text-[0.75rem] font-bold text-slate-400 mb-1">Yearly Graph (1 Day Avg)</p>
+                        <img id="graph-yearly" src="" alt="Yearly Graph" class="w-full rounded border border-slate-700/50 bg-white">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbx4Yx18S7GJQUU0WpWfIgVoRPxk-yKKe9MM8HmXN3IjLufLMnNQTQXohdIs4-6h5b1izw/exec";
+        const ROUTER_IP = "192.168.16.1"; // Sesuaikan IP RouterOS Anda jika berbeda
 
         let trafficChartInstance = null;
         let apChartInstance = null;
@@ -170,7 +204,6 @@
             { border: 'border-orange-500/40', text: 'text-orange-600 dark:text-orange-400', badge: 'bg-orange-500' }
         ];
 
-        // ---------- Tema, fullscreen, jam ----------
         function initTheme() {
             if (localStorage.getItem('theme') === 'light') { document.documentElement.classList.remove('dark'); updateThemeUI(false); }
             else { document.documentElement.classList.add('dark'); updateThemeUI(true); }
@@ -206,7 +239,6 @@
             document.getElementById('clock').innerText = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         }
 
-        // ---------- Data ----------
         function formatSpeed(mbpsVal) {
             const val = parseFloat(mbpsVal || 0);
             if (val < 0.001) return "0 Kbps";
@@ -282,7 +314,7 @@
                     : `<span class="px-1.5 bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded text-[0.7rem] font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>DOWN</span>`;
 
                 container.innerHTML += `
-                    <div class="flex-1 min-w-0 bg-slate-50 dark:bg-slate-950/70 border ${isUp ? 'border-slate-200 dark:border-slate-800' : 'border-rose-500/50'} px-2 py-1 rounded-lg">
+                    <div onclick="openGraphModal('${wanName}')" class="flex-1 min-w-0 bg-slate-50 dark:bg-slate-950/70 border ${isUp ? 'border-slate-200 dark:border-slate-800' : 'border-rose-500/50'} px-2 py-1 rounded-lg cursor-pointer hover:border-cyan-500 transition">
                         <div class="flex justify-between items-center gap-2">
                             <span class="font-bold text-[0.8rem] text-cyan-600 dark:text-cyan-400 font-mono truncate" title="${wanName}">${wanName}</span>${badge}
                         </div>
@@ -315,11 +347,12 @@
                 const rx = parseFloat(v.RxMbps || 0), tx = parseFloat(v.TxMbps || 0);
                 const hasClients = v.Clients !== undefined && v.Clients !== "";
                 const t = COLOR_PALETTE[idx % COLOR_PALETTE.length];
+                const vlanName = v.VLANName;
 
                 container.innerHTML += `
-                    <div class="bg-slate-50 dark:bg-slate-950/80 border ${t.border} px-2 py-1 rounded-lg">
+                    <div onclick="openGraphModal('${vlanName}')" class="bg-slate-50 dark:bg-slate-950/80 border ${t.border} px-2 py-1 rounded-lg cursor-pointer hover:border-cyan-400 transition">
                         <div class="flex justify-between items-center gap-1">
-                            <span class="font-bold text-[0.8rem] ${t.text} font-mono truncate" title="${v.VLANName}">${v.VLANName}</span>
+                            <span class="font-bold text-[0.8rem] ${t.text} font-mono truncate" title="${vlanName}">${vlanName}</span>
                             <span class="w-2 h-2 rounded-full ${t.badge} animate-pulse shrink-0"></span>
                         </div>
                         <div class="text-[0.8rem] font-mono leading-snug">
@@ -329,6 +362,27 @@
                         </div>
                     </div>`;
             });
+        }
+
+        // Fungsi Membuka Modal Grafik RouterOS
+        function openGraphModal(interfaceName) {
+            document.getElementById('modal-title').innerText = `Interface <${interfaceName}> Statistics`;
+            // Mengarahkan ke endpoint grafik bawaan RouterOS (RRDtool)
+            document.getElementById('graph-daily').src = `http://${ROUTER_IP}/graphs/iface/${interfaceName}/daily.png`;
+            document.getElementById('graph-weekly').src = `http://${ROUTER_IP}/graphs/iface/${interfaceName}/weekly.png`;
+            document.getElementById('graph-monthly').src = `http://${ROUTER_IP}/graphs/iface/${interfaceName}/monthly.png`;
+            document.getElementById('graph-yearly').src = `http://${ROUTER_IP}/graphs/iface/${interfaceName}/yearly.png`;
+            
+            document.getElementById('graphModal').classList.remove('hidden');
+        }
+
+        function closeGraphModal() {
+            document.getElementById('graphModal').classList.add('hidden');
+            // Reset src agar tidak terus melakukan request saat modal ditutup
+            document.getElementById('graph-daily').src = '';
+            document.getElementById('graph-weekly').src = '';
+            document.getElementById('graph-monthly').src = '';
+            document.getElementById('graph-yearly').src = '';
         }
 
         function updateSwitchCards(switchData) {
