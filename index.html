@@ -4,197 +4,157 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Network Control Center - SMKN 1 Purbalingga</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = { darkMode: 'class' }
-    </script>
-    <!-- Chart.js -->
+    <script>tailwind.config = { darkMode: 'class' }</script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .custom-scrollbar::-webkit-scrollbar {
-            height: 4px;
-            width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.1);
-        }
-        .dark .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.4);
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #06b6d4;
-            border-radius: 4px;
-        }
+        /* Skala font global: naik otomatis di layar besar / TV. Ubah angka ini untuk memperbesar semua. */
+        html { font-size: clamp(16px, 0.45vw + 9px, 22px); }
 
-        #vlan-cards-container {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 0.25rem;
-        }
-        @media (min-width: 640px) { #vlan-cards-container { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-        @media (min-width: 768px) { #vlan-cards-container { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
-        @media (min-width: 1024px) { #vlan-cards-container { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
-        @media (min-width: 1280px) { #vlan-cards-container { grid-template-columns: repeat(8, minmax(0, 1fr)); } }
+        .custom-scrollbar::-webkit-scrollbar { height: 4px; width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.1); }
+        .dark .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.4); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 4px; }
+
+        #vlan-cards-container { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.35rem; }
+        @media (min-width: 640px)  { #vlan-cards-container { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media (min-width: 768px)  { #vlan-cards-container { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+        @media (min-width: 1024px) { #vlan-cards-container { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+        @media (min-width: 1536px) { #vlan-cards-container { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
     </style>
 </head>
-<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased min-h-screen lg:h-screen overflow-y-auto lg:overflow-hidden flex flex-col p-2 space-y-1.5 transition-colors duration-300">
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased min-h-screen overflow-y-auto flex flex-col p-2 space-y-2 transition-colors duration-300">
 
-    <!-- Top Bar / Header -->
-    <header class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 flex justify-between items-center shadow-sm shrink-0">
-        <div class="flex items-center space-x-2.5">
-            <div class="bg-cyan-500 p-1.5 rounded-lg text-slate-950 font-bold shadow">
-                <i class="fa-solid fa-network-wired text-xs"></i>
+    <!-- Header -->
+    <header class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 flex justify-between items-center shadow-sm shrink-0">
+        <div class="flex items-center space-x-3">
+            <div class="bg-cyan-500 p-2 rounded-lg text-slate-950 font-bold shadow">
+                <i class="fa-solid fa-network-wired text-[1rem]"></i>
             </div>
             <div>
-                <h1 class="text-xs sm:text-sm font-bold tracking-wide text-slate-900 dark:text-slate-100 leading-tight">
+                <h1 class="text-[1.1rem] font-bold tracking-wide text-slate-900 dark:text-slate-100 leading-tight">
                     <span class="inline sm:hidden">NCC-SMEGA</span>
                     <span class="hidden sm:inline">Network Control Center</span>
                 </h1>
-                <p class="text-[9px] text-slate-500 dark:text-slate-400">SMK Negeri 1 Purbalingga • Infrastructure</p>
+                <p class="text-[0.75rem] text-slate-500 dark:text-slate-400">SMK Negeri 1 Purbalingga • Infrastructure</p>
             </div>
         </div>
-        
-        <!-- Action Buttons -->
         <div class="flex items-center space-x-2">
-            <button onclick="toggleTheme()" class="px-2.5 py-1 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-[10px] font-semibold transition flex items-center gap-1 border border-slate-300 dark:border-slate-700">
+            <button onclick="toggleTheme()" class="px-3 py-1.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-[0.8rem] font-semibold transition flex items-center gap-1.5 border border-slate-300 dark:border-slate-700">
                 <i id="theme-icon" class="fa-solid fa-moon text-cyan-400"></i>
-                <span id="theme-text" class="hidden xs:inline">Dark</span>
+                <span id="theme-text" class="hidden sm:inline">Dark</span>
             </button>
-
-            <span id="db-status-badge" class="px-2.5 py-1 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] rounded-lg border border-emerald-500/30 flex items-center gap-1 font-medium">
-                <span id="db-status-dot" class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>
-                <span id="db-status-text" class="hidden xs:inline">Connected</span>
+            <span id="db-status-badge" class="px-3 py-1.5 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[0.8rem] rounded-lg border border-emerald-500/30 flex items-center gap-1.5 font-medium">
+                <span id="db-status-dot" class="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>
+                <span id="db-status-text" class="hidden sm:inline">Connected</span>
             </span>
-            
-            <button onclick="fetchData()" class="px-3 py-1 bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-lg text-[10px] font-semibold transition flex items-center gap-1 shadow">
+            <button onclick="fetchData()" class="px-3 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-lg text-[0.8rem] font-semibold transition flex items-center gap-1.5 shadow">
                 <i class="fa-solid fa-rotate"></i> <span class="hidden sm:inline">Refresh</span>
             </button>
         </div>
     </header>
 
-    <!-- 1. MIKROTIK CORE & WAN AREA -->
+    <!-- 1. CORE & WAN -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 shrink-0">
         <div class="grid grid-cols-2 gap-2">
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2.5 py-1.5 rounded-xl shadow-sm flex items-center justify-between">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-2 rounded-xl shadow-sm flex items-center justify-between">
                 <div>
-                    <p class="text-[9px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Online Devices</p>
-                    <h3 id="stat-devices" class="text-xs sm:text-base font-extrabold text-cyan-600 dark:text-cyan-400 leading-tight mt-0.5">0 / 0</h3>
-                    <p class="text-[8px] text-emerald-600 dark:text-emerald-400 font-medium mt-0.5"><i class="fa-solid fa-check mr-0.5"></i> Healthy</p>
+                    <p class="text-[0.75rem] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Online Devices</p>
+                    <h3 id="stat-devices" class="text-[1.5rem] font-extrabold text-cyan-600 dark:text-cyan-400 leading-tight">0 / 0</h3>
+                    <p class="text-[0.75rem] text-emerald-600 dark:text-emerald-400 font-medium"><i class="fa-solid fa-check mr-0.5"></i> Healthy</p>
                 </div>
-                <div class="p-1.5 bg-cyan-500/10 rounded-lg text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 text-xs">
-                    <i class="fa-solid fa-server"></i>
-                </div>
+                <div class="p-2 bg-cyan-500/10 rounded-lg text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 text-[1rem]"><i class="fa-solid fa-server"></i></div>
             </div>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2.5 py-1.5 rounded-xl shadow-sm flex items-center justify-between">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-2 rounded-xl shadow-sm flex items-center justify-between">
                 <div>
-                    <p class="text-[9px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Active Clients</p>
-                    <h3 id="stat-clients" class="text-xs sm:text-base font-extrabold text-emerald-600 dark:text-emerald-400 leading-tight mt-0.5">0</h3>
-                    <p class="text-[8px] text-slate-500 dark:text-slate-400 mt-0.5">DHCP Leases</p>
+                    <p class="text-[0.75rem] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Active Clients</p>
+                    <h3 id="stat-clients" class="text-[1.5rem] font-extrabold text-emerald-600 dark:text-emerald-400 leading-tight">0</h3>
+                    <p class="text-[0.75rem] text-slate-500 dark:text-slate-400">Klien aktif (ARP)</p>
                 </div>
-                <div class="p-1.5 bg-emerald-500/10 rounded-lg text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs">
-                    <i class="fa-solid fa-users"></i>
-                </div>
+                <div class="p-2 bg-emerald-500/10 rounded-lg text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[1rem]"><i class="fa-solid fa-users"></i></div>
             </div>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2.5 py-1.5 rounded-xl shadow-sm flex items-center justify-between">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-2 rounded-xl shadow-sm flex items-center justify-between">
                 <div>
-                    <p class="text-[9px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">CPU Load</p>
-                    <h3 id="stat-cpu" class="text-xs sm:text-base font-extrabold text-amber-600 dark:text-amber-400 leading-tight mt-0.5">0%</h3>
-                    <p id="stat-core-name" class="text-[8px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">CCR2004</p>
+                    <p class="text-[0.75rem] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">CPU Load</p>
+                    <h3 id="stat-cpu" class="text-[1.5rem] font-extrabold text-amber-600 dark:text-amber-400 leading-tight">0%</h3>
+                    <p id="stat-core-name" class="text-[0.75rem] text-slate-500 dark:text-slate-400 font-mono">CCR2004</p>
                 </div>
-                <div class="p-1.5 bg-amber-500/10 rounded-lg text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs">
-                    <i class="fa-solid fa-microchip"></i>
-                </div>
+                <div class="p-2 bg-amber-500/10 rounded-lg text-amber-600 dark:text-amber-400 border border-amber-500/20 text-[1rem]"><i class="fa-solid fa-microchip"></i></div>
             </div>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2.5 py-1.5 rounded-xl shadow-sm flex items-center justify-between">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-2 rounded-xl shadow-sm flex items-center justify-between">
                 <div>
-                    <p class="text-[9px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Bandwidth</p>
-                    <h3 id="stat-bandwidth-total" class="text-xs sm:text-base font-extrabold text-purple-600 dark:text-purple-400 leading-tight mt-0.5">0 Mbps</h3>
-                    <p class="text-[8px] text-slate-500 dark:text-slate-400 flex gap-1 font-mono mt-0.5">
+                    <p class="text-[0.75rem] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Bandwidth</p>
+                    <h3 id="stat-bandwidth-total" class="text-[1.5rem] font-extrabold text-purple-600 dark:text-purple-400 leading-tight">0 Mbps</h3>
+                    <p class="text-[0.75rem] text-slate-500 dark:text-slate-400 flex gap-2 font-mono">
                         <span id="stat-rx" class="text-cyan-600 dark:text-cyan-400"><i class="fa-solid fa-arrow-down"></i> 0</span>
                         <span id="stat-tx" class="text-purple-600 dark:text-purple-400"><i class="fa-solid fa-arrow-up"></i> 0</span>
                     </p>
                 </div>
-                <div class="p-1.5 bg-purple-500/10 rounded-lg text-purple-600 dark:text-purple-400 border border-purple-500/20 text-xs">
-                    <i class="fa-solid fa-globe"></i>
-                </div>
+                <div class="p-2 bg-purple-500/10 rounded-lg text-purple-600 dark:text-purple-400 border border-purple-500/20 text-[1rem]"><i class="fa-solid fa-globe"></i></div>
             </div>
         </div>
 
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded-xl shadow-sm lg:col-span-2 flex flex-col justify-between">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-xl shadow-sm lg:col-span-2 flex flex-col justify-between">
             <div class="flex justify-between items-center mb-1">
-                <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-xs"><i class="fa-solid fa-chart-area text-cyan-600 dark:text-cyan-400 mr-1.5"></i> WAN Traffic Trend</h3>
-                <div class="flex items-center space-x-2 text-[9px] text-slate-500 dark:text-slate-400">
-                    <span class="flex items-center gap-1"><span class="w-2 h-1 bg-cyan-500 rounded"></span> Down</span>
-                    <span class="flex items-center gap-1"><span class="w-2 h-1 bg-purple-500 rounded"></span> Up</span>
+                <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-[0.95rem]"><i class="fa-solid fa-chart-area text-cyan-600 dark:text-cyan-400 mr-1.5"></i> WAN Traffic Trend</h3>
+                <div class="flex items-center space-x-3 text-[0.8rem] text-slate-500 dark:text-slate-400">
+                    <span class="flex items-center gap-1"><span class="w-3 h-1.5 bg-cyan-500 rounded"></span> Down</span>
+                    <span class="flex items-center gap-1"><span class="w-3 h-1.5 bg-purple-500 rounded"></span> Up</span>
                 </div>
             </div>
-            <div class="relative w-full h-16 sm:h-20">
+            <div class="relative w-full h-28 sm:h-32">
                 <canvas id="trafficChart"></canvas>
             </div>
         </div>
     </div>
 
-    <!-- WAN Gateways Horizontal List -->
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 shadow-sm shrink-0">
-        <div id="wan-cards-container" class="flex flex-nowrap gap-2 overflow-x-auto custom-scrollbar pb-0.5">
-            <div class="text-[10px] text-slate-400">Loading WAN gateways...</div>
+    <!-- WAN list -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 shadow-sm shrink-0">
+        <div id="wan-cards-container" class="flex flex-nowrap gap-2 overflow-x-auto custom-scrollbar pb-1">
+            <div class="text-[0.85rem] text-slate-400">Loading WAN gateways...</div>
         </div>
     </div>
 
-    <!-- 2. VLAN SEGMENTS AREA -->
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 shadow-sm flex flex-col shrink-0">
-        <div class="flex justify-between items-center mb-1 shrink-0">
-            <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-xs"><i class="fa-solid fa-sitemap text-cyan-600 dark:text-cyan-400 mr-1.5"></i> VLAN Segments Breakdown</h3>
-            <span id="vlan-count-badge" class="px-2 py-0.5 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-[9px] rounded font-mono font-bold border border-cyan-500/20">
-                0 Active VLANs
-            </span>
+    <!-- 2. VLAN -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 shadow-sm flex flex-col shrink-0">
+        <div class="flex justify-between items-center mb-2 shrink-0">
+            <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-[0.95rem]"><i class="fa-solid fa-sitemap text-cyan-600 dark:text-cyan-400 mr-1.5"></i> VLAN Segments Breakdown</h3>
+            <span id="vlan-count-badge" class="px-2 py-0.5 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-[0.75rem] rounded font-mono font-bold border border-cyan-500/20">0 Active VLANs</span>
         </div>
-        <div>
-            <div id="vlan-cards-container">
-                <div class="text-[10px] text-slate-400 p-1 col-span-full">Loading VLAN metrics...</div>
-            </div>
+        <div id="vlan-cards-container">
+            <div class="text-[0.85rem] text-slate-400 p-1 col-span-full">Loading VLAN metrics...</div>
         </div>
     </div>
 
-    <!-- 3. SWITCH & UNIFI AP DISTRIBUTION AREA -->
+    <!-- 3. SWITCH & AP -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 shrink-0">
-        <!-- Switch & Core Status -->
-        <div class="flex flex-col space-y-1" id="switch-container">
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded-xl shadow-sm flex items-center justify-between">
-                <div class="text-[10px] text-slate-400">Loading switches...</div>
+        <div class="flex flex-col space-y-1.5" id="switch-container">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded-xl shadow-sm">
+                <div class="text-[0.85rem] text-slate-400">Loading switches...</div>
             </div>
         </div>
 
-        <!-- UniFi AP Distribution Chart -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded-xl shadow-sm lg:col-span-2 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-xl shadow-sm lg:col-span-2 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div class="flex items-center space-x-2.5 w-full sm:w-auto shrink-0">
-                <div class="p-1.5 bg-cyan-500/10 rounded-lg text-cyan-500 border border-cyan-500/20 text-xs">
-                    <i class="fa-solid fa-wifi"></i>
-                </div>
+                <div class="p-2 bg-cyan-500/10 rounded-lg text-cyan-500 border border-cyan-500/20 text-[1rem]"><i class="fa-solid fa-wifi"></i></div>
                 <div>
-                    <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-xs">UniFi AP Distribution</h3>
-                    <p class="text-[9px] text-slate-500 dark:text-slate-400">Connected Clients per AP</p>
+                    <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-[0.95rem]">UniFi AP Distribution</h3>
+                    <p class="text-[0.75rem] text-slate-500 dark:text-slate-400">Connected Clients per AP</p>
                 </div>
             </div>
-            
             <div class="flex flex-col sm:flex-row items-center justify-between gap-3 w-full sm:w-auto flex-grow">
-                <div class="relative w-16 h-16 shrink-0">
-                    <canvas id="apChart"></canvas>
-                </div>
-                <div id="ap-legend" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-x-4 gap-y-0.5 text-[11px] text-slate-700 dark:text-slate-200 font-mono w-full">
-                    <div class="text-slate-400 text-xs">Waiting AP...</div>
+                <div class="relative w-24 h-24 shrink-0"><canvas id="apChart"></canvas></div>
+                <div id="ap-legend" class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-0.5 text-[0.85rem] text-slate-700 dark:text-slate-200 font-mono w-full">
+                    <div class="text-slate-400">Waiting AP...</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Script Logic -->
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbx4Yx18S7GJQUU0WpWfIgVoRPxk-yKKe9MM8HmXN3IjLufLMnNQTQXohdIs4-6h5b1izw/exec";
-        
+
         let trafficChartInstance = null;
         let apChartInstance = null;
         let trafficHistoryLabels = [];
@@ -242,23 +202,16 @@
         function updateThemeUI(isDark) {
             const icon = document.getElementById('theme-icon');
             const text = document.getElementById('theme-text');
-            if (isDark) {
-                icon.className = 'fa-solid fa-moon text-cyan-400';
-                text.innerText = 'Dark';
-            } else {
-                icon.className = 'fa-solid fa-sun text-amber-500';
-                text.innerText = 'Light';
-            }
+            if (isDark) { icon.className = 'fa-solid fa-moon text-cyan-400'; text.innerText = 'Dark'; }
+            else { icon.className = 'fa-solid fa-sun text-amber-500'; text.innerText = 'Light'; }
         }
 
+        // Satuan konsisten: 0 -> "0 Kbps", <1 Mbps -> "xxx Kbps", selebihnya "x.x Mbps"
         function formatSpeed(mbpsVal) {
             const val = parseFloat(mbpsVal || 0);
-            if (val === 0) return "0 Mbps";
-            if (val < 1.0) {
-                const kbps = (val * 1000).toFixed(0);
-                return `${kbps} K`;
-            }
-            return `${val.toFixed(1)} M`;
+            if (val < 0.001) return "0 Kbps";
+            if (val < 1.0) return `${(val * 1000).toFixed(0)} Kbps`;
+            return `${val.toFixed(1)} Mbps`;
         }
 
         async function fetchData() {
@@ -266,7 +219,7 @@
                 const res = await fetch(API_URL);
                 const json = await res.json();
                 window.lastJsonData = json;
-                
+
                 if (json.status === "success") {
                     setDatabaseStatus(true);
                     updateInventorySummary(json.devices || [], json.switches || [], json.ap_distribution || []);
@@ -287,40 +240,32 @@
             const badge = document.getElementById('db-status-badge');
             const dot = document.getElementById('db-status-dot');
             const text = document.getElementById('db-status-text');
-
             if (isConnected) {
-                badge.className = "px-2.5 py-1 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] rounded-lg border border-emerald-500/30 flex items-center gap-1 font-medium";
-                dot.className = "w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse";
-                text.innerText = message;
+                badge.className = "px-3 py-1.5 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[0.8rem] rounded-lg border border-emerald-500/30 flex items-center gap-1.5 font-medium";
+                dot.className = "w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse";
             } else {
-                badge.className = "px-2.5 py-1 bg-rose-500/10 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-[10px] rounded-lg border border-rose-500/30 flex items-center gap-1 font-medium";
-                dot.className = "w-1.5 h-1.5 rounded-full bg-rose-500 dark:bg-rose-400";
-                text.innerText = message;
+                badge.className = "px-3 py-1.5 bg-rose-500/10 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-[0.8rem] rounded-lg border border-rose-500/30 flex items-center gap-1.5 font-medium";
+                dot.className = "w-2 h-2 rounded-full bg-rose-500 dark:bg-rose-400";
             }
+            text.innerText = message;
         }
 
         function updateInventorySummary(devices, switches, apDist) {
-            let routerTotal = devices.length > 0 ? 1 : 0;
-            let routerOnline = routerTotal;
+            const routerTotal = devices.length > 0 ? 1 : 0;
+            const switchTotal = switches.length;
+            const switchOnline = switches.filter(s => String(s.Status || "").toUpperCase() === "ONLINE").length;
+            const apTotal = apDist.length;
+            const apOnline = apDist.filter(a => parseInt(a.ClientCount || 0) >= 0).length;
 
-            let switchTotal = switches.length;
-            let switchOnline = switches.filter(s => String(s.Status || "").toUpperCase() === "ONLINE").length;
-
-            let apTotal = apDist.length;
-            let apOnline = apDist.filter(a => parseInt(a.ClientCount || 0) >= 0).length;
-
-            let totalInfr = routerTotal + switchTotal + apTotal;
-            let onlineInfr = routerOnline + switchOnline + apOnline;
-
+            const totalInfr = routerTotal + switchTotal + apTotal;
+            const onlineInfr = routerTotal + switchOnline + apOnline;
             document.getElementById('stat-devices').innerText = `${onlineInfr} / ${totalInfr}`;
 
             if (devices.length > 0) {
                 const latestDev = devices[devices.length - 1];
                 const activeClients = parseInt(
-                    latestDev.ActiveClients || 
-                    latestDev.ActiveLeases || 
-                    latestDev.active_leases || 
-                    latestDev.active_clients || 0
+                    latestDev.ActiveClients || latestDev.ActiveLeases ||
+                    latestDev.active_leases || latestDev.active_clients || 0
                 );
                 const cpuLoad = latestDev.CpuLoad || latestDev.cpu_load || '0%';
 
@@ -331,45 +276,39 @@
         }
 
         function updateWanCards(wanData) {
+            // Ambil data terbaru per WAN (baris terakhir menang)
             const wanMap = {};
-            wanData.forEach(item => {
-                if (item.WANName) wanMap[item.WANName] = item;
-            });
+            wanData.forEach(item => { if (item.WANName) wanMap[item.WANName] = item; });
 
             const container = document.getElementById('wan-cards-container');
             container.innerHTML = '';
 
             const keys = Object.keys(wanMap);
             if (!keys.length) {
-                container.innerHTML = `<div class="text-[10px] text-slate-400 p-1">No active WAN metrics detected.</div>`;
+                container.innerHTML = `<div class="text-[0.85rem] text-slate-400 p-1">No active WAN metrics detected.</div>`;
                 return;
             }
 
-            let totalRx = 0;
-            let totalTx = 0;
+            let totalRx = 0, totalTx = 0;
 
             keys.forEach(wanName => {
                 const w = wanMap[wanName];
                 const rx = parseFloat(w.RxMbps || 0);
                 const tx = parseFloat(w.TxMbps || 0);
                 const isUp = (w.Status || "UP").toUpperCase() === "UP";
+                if (isUp) { totalRx += rx; totalTx += tx; }
 
-                if (isUp) {
-                    totalRx += rx;
-                    totalTx += tx;
-                }
-
-                const statusBadge = isUp 
-                    ? `<span class="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded text-[9px] font-semibold flex items-center gap-1"><span class="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></span> UP</span>`
-                    : `<span class="px-1.5 py-0.5 bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded text-[9px] font-semibold flex items-center gap-1"><span class="w-1 h-1 rounded-full bg-rose-500"></span> DOWN</span>`;
+                const statusBadge = isUp
+                    ? `<span class="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded text-[0.75rem] font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> UP</span>`
+                    : `<span class="px-1.5 py-0.5 bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded text-[0.75rem] font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> DOWN</span>`;
 
                 container.innerHTML += `
-                    <div class="flex-1 min-w-[130px] bg-slate-50 dark:bg-slate-950/70 border ${isUp ? 'border-slate-200 dark:border-slate-800' : 'border-rose-500/50'} px-2 py-1 rounded-lg flex flex-col justify-between">
-                        <div class="flex justify-between items-center mb-0.5">
-                            <span class="font-bold text-[10px] sm:text-xs text-cyan-600 dark:text-cyan-400 font-mono truncate">${wanName}</span>
+                    <div class="flex-1 min-w-[190px] bg-slate-50 dark:bg-slate-950/70 border ${isUp ? 'border-slate-200 dark:border-slate-800' : 'border-rose-500/50'} px-2.5 py-1.5 rounded-lg flex flex-col justify-between">
+                        <div class="flex justify-between items-center mb-1 gap-2">
+                            <span class="font-bold text-[0.85rem] text-cyan-600 dark:text-cyan-400 font-mono truncate" title="${wanName}">${wanName}</span>
                             ${statusBadge}
                         </div>
-                        <div class="space-y-0.5 text-[10px] font-mono">
+                        <div class="space-y-0.5 text-[0.85rem] font-mono">
                             <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>Down:</span> <span class="text-cyan-600 dark:text-cyan-400 font-semibold">${formatSpeed(rx)}</span></div>
                             <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>Up:</span> <span class="text-purple-600 dark:text-purple-400 font-semibold">${formatSpeed(tx)}</span></div>
                         </div>
@@ -377,8 +316,8 @@
                 `;
             });
 
-            document.getElementById('stat-rx').innerHTML = `<i class="fa-solid fa-arrow-down"></i> ${totalRx.toFixed(1)}M`;
-            document.getElementById('stat-tx').innerHTML = `<i class="fa-solid fa-arrow-up"></i> ${totalTx.toFixed(1)}M`;
+            document.getElementById('stat-rx').innerHTML = `<i class="fa-solid fa-arrow-down"></i> ${totalRx.toFixed(1)} M`;
+            document.getElementById('stat-tx').innerHTML = `<i class="fa-solid fa-arrow-up"></i> ${totalTx.toFixed(1)} M`;
             document.getElementById('stat-bandwidth-total').innerText = `${(totalRx + totalTx).toFixed(1)} Mbps`;
 
             updateTrafficChart(totalRx, totalTx);
@@ -386,9 +325,7 @@
 
         function updateVlanCards(vlanData) {
             const vlanMap = {};
-            vlanData.forEach(item => {
-                if (item.VLANName) vlanMap[item.VLANName] = item;
-            });
+            vlanData.forEach(item => { if (item.VLANName) vlanMap[item.VLANName] = item; });
 
             const container = document.getElementById('vlan-cards-container');
             container.innerHTML = '';
@@ -397,7 +334,7 @@
             document.getElementById('vlan-count-badge').innerText = `${list.length} Active VLANs`;
 
             if (!list.length) {
-                container.innerHTML = `<div class="text-[10px] text-slate-400 p-1 col-span-full">No active VLAN metrics detected.</div>`;
+                container.innerHTML = `<div class="text-[0.85rem] text-slate-400 p-1 col-span-full">No active VLAN metrics detected.</div>`;
                 return;
             }
 
@@ -411,116 +348,102 @@
                 const vlanName = v.VLANName;
                 const rx = parseFloat(v.RxMbps || 0);
                 const tx = parseFloat(v.TxMbps || 0);
+                const hasClients = v.Clients !== undefined && v.Clients !== "";
                 const theme = COLOR_PALETTE[idx % COLOR_PALETTE.length];
 
                 container.innerHTML += `
-                    <div class="bg-slate-50 dark:bg-slate-950/80 border ${theme.border} px-2 py-1 rounded-lg flex flex-col justify-between shadow-xs">
-                        <div class="flex justify-between items-center mb-0.5">
-                            <span class="font-bold text-[10px] sm:text-xs ${theme.text} font-mono truncate" title="${vlanName}">${vlanName}</span>
-                            <span class="w-1.5 h-1.5 rounded-full ${theme.badge} animate-pulse shrink-0"></span>
+                    <div class="bg-slate-50 dark:bg-slate-950/80 border ${theme.border} px-2.5 py-1.5 rounded-lg flex flex-col justify-between">
+                        <div class="flex justify-between items-center mb-1 gap-1">
+                            <span class="font-bold text-[0.85rem] ${theme.text} font-mono truncate" title="${vlanName}">${vlanName}</span>
+                            <span class="w-2 h-2 rounded-full ${theme.badge} animate-pulse shrink-0"></span>
                         </div>
-                        <div class="space-y-0.5 text-[9px] sm:text-[10px] font-mono">
+                        <div class="space-y-0.5 text-[0.85rem] font-mono">
                             <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>D:</span> <span class="${theme.text} font-semibold">${formatSpeed(rx)}</span></div>
                             <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>U:</span> <span class="text-slate-700 dark:text-slate-300 font-semibold">${formatSpeed(tx)}</span></div>
+                            ${hasClients ? `<div class="flex justify-between text-slate-500 dark:text-slate-400"><span><i class="fa-solid fa-users text-[0.7rem]"></i></span> <span class="text-slate-700 dark:text-slate-300 font-semibold">${v.Clients}</span></div>` : ''}
                         </div>
                     </div>
                 `;
             });
         }
 
-       function updateSwitchCards(switchData) {
-    const container = document.getElementById('switch-container');
-    if (!container) return;
+        function updateSwitchCards(switchData) {
+            const container = document.getElementById('switch-container');
+            if (!container) return;
 
-    // 1. Konfigurasi bawaan dengan kunci ber-underscore agar cocok dengan data MikroTik
-    const coreDefaults = {
-        "CCR2004_Core_Router": { DisplayName: "CCR2004 Core Router", Model: "MikroTik RouterOS", IP: "10.99.1.1" },
-        "EdgeSwitch_8_150W": { DisplayName: "EdgeSwitch 8 150W", Model: "ES-8-150W", IP: "10.99.1.2" },
-        "UniFi_Dream_Machine_Pro": { DisplayName: "UniFi Dream Machine Pro", Model: "UDM Pro", IP: "10.99.1.5" },
-        "AdGuard_Home_DNS": { DisplayName: "AdGuard Home DNS", Model: "Debian Server", IP: "192.168.16.254" }
-    };
+            const coreDefaults = {
+                "CCR2004_Core_Router": { DisplayName: "CCR2004 Core Router", Model: "MikroTik RouterOS", IP: "10.99.1.1" },
+                "EdgeSwitch_8_150W": { DisplayName: "EdgeSwitch 8 150W", Model: "ES-8-150W", IP: "10.99.1.2" },
+                "UniFi_Dream_Machine_Pro": { DisplayName: "UniFi Dream Machine Pro", Model: "UDM Pro", IP: "10.99.1.5" },
+                "AdGuard_Home_DNS": { DisplayName: "AdGuard Home DNS", Model: "Debian Server", IP: "192.168.16.254" }
+            };
 
-    const dbMap = {};
-    if (switchData && switchData.length > 0) {
-        switchData.forEach(item => {
-            const rawName = item.SwitchName || item.switch_name;
-            if (rawName) {
-                const cleanKey = String(rawName).trim().replace(/\s+/g, '_');
-                dbMap[cleanKey] = item;
+            const dbMap = {};
+            if (switchData && switchData.length > 0) {
+                switchData.forEach(item => {
+                    const rawName = item.SwitchName || item.switch_name;
+                    if (rawName) dbMap[String(rawName).trim().replace(/\s+/g, '_')] = item;
+                });
             }
-        });
-    }
 
-    const targetKeys = [
-        "CCR2004_Core_Router", 
-        "EdgeSwitch_8_150W", 
-        "UniFi_Dream_Machine_Pro", 
-        "AdGuard_Home_DNS"
-    ];
-    
-    if (switchData) {
-        switchData.forEach(item => {
-            const rawName = item.SwitchName || item.switch_name;
-            if (rawName) {
-                const cleanKey = String(rawName).trim().replace(/\s+/g, '_');
-                if (!targetKeys.includes(cleanKey)) {
-                    targetKeys.push(cleanKey);
-                }
+            const targetKeys = ["CCR2004_Core_Router", "EdgeSwitch_8_150W", "UniFi_Dream_Machine_Pro", "AdGuard_Home_DNS"];
+            if (switchData) {
+                switchData.forEach(item => {
+                    const rawName = item.SwitchName || item.switch_name;
+                    if (rawName) {
+                        const cleanKey = String(rawName).trim().replace(/\s+/g, '_');
+                        if (!targetKeys.includes(cleanKey)) targetKeys.push(cleanKey);
+                    }
+                });
             }
-        });
-    }
 
-    container.innerHTML = '';
+            container.innerHTML = '';
 
-    targetKeys.forEach(key => {
-        const dbItem = dbMap[key] || {};
-        const defaultConfig = coreDefaults[key] || {};
-        
-        const swName = defaultConfig.DisplayName || dbItem.SwitchName || dbItem.switch_name || key.replace(/_/g, ' ');
-        const swModel = (dbItem.Model || dbItem.model || defaultConfig.Model || 'Network Switch').replace(/_/g, ' ');
-        const swIP = defaultConfig.IP || dbItem.IP || '';
-        
-        // KHUSUS CCR: Karena skrip dijalankan dari CCR itu sendiri, 
-        // kita bisa memaksa statusnya selalu ONLINE atau membaca hasil dari database dengan benar
-        let rawStatus = dbItem.Status || dbItem.status || "ONLINE";
-        if (key === "CCR2004_Core_Router") {
-            rawStatus = "ONLINE"; // Paksa ONLINE karena router ini yang mengeksekusi skrip
+            targetKeys.forEach(key => {
+                const dbItem = dbMap[key] || {};
+                const defaultConfig = coreDefaults[key] || {};
+
+                const swName = defaultConfig.DisplayName || dbItem.SwitchName || dbItem.switch_name || key.replace(/_/g, ' ');
+                const swModel = (dbItem.Model || dbItem.model || defaultConfig.Model || 'Network Switch').replace(/_/g, ' ');
+                const swIP = defaultConfig.IP || dbItem.IP || '';
+
+                // CCR menjalankan skrip sendiri, jadi selalu ONLINE
+                let rawStatus = dbItem.Status || dbItem.status || "ONLINE";
+                if (key === "CCR2004_Core_Router") rawStatus = "ONLINE";
+
+                const isOnline = String(rawStatus).toUpperCase() === "ONLINE";
+                const badgeClass = isOnline
+                    ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                    : "bg-rose-500/20 text-rose-600 dark:text-rose-400";
+
+                container.innerHTML += `
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2.5 py-1.5 rounded-xl shadow-sm flex items-center justify-between">
+                        <div class="flex items-center space-x-2.5 overflow-hidden pr-2">
+                            <div class="p-1.5 bg-indigo-500/10 rounded-lg text-indigo-500 border border-indigo-500/20 text-[0.85rem] shrink-0">
+                                <i class="fa-solid fa-network-wired"></i>
+                            </div>
+                            <div class="overflow-hidden">
+                                <h4 class="text-[0.85rem] font-bold text-slate-800 dark:text-slate-200 leading-tight truncate" title="${swName}">${swName}</h4>
+                                <p class="text-[0.75rem] text-slate-500 dark:text-slate-400 font-mono flex items-center gap-1.5">
+                                    <span>${swModel}</span>
+                                    ${swIP ? `<span class="text-cyan-600 dark:text-cyan-400 font-semibold">• ${swIP}</span>` : ''}
+                                </p>
+                            </div>
+                        </div>
+                        <span class="px-2 py-0.5 ${badgeClass} rounded text-[0.75rem] font-bold uppercase shrink-0">${isOnline ? 'ONLINE' : 'OFFLINE'}</span>
+                    </div>
+                `;
+            });
         }
-        
-        const isOnline = String(rawStatus).toUpperCase() === "ONLINE";
-        const badgeClass = isOnline 
-            ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400" 
-            : "bg-rose-500/20 text-rose-600 dark:text-rose-400";
-        
-        container.innerHTML += `
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2 py-1 rounded-xl shadow-sm flex items-center justify-between">
-                <div class="flex items-center space-x-2 overflow-hidden pr-2">
-                    <div class="p-1 bg-indigo-500/10 rounded-lg text-indigo-500 border border-indigo-500/20 text-[10px] shrink-0">
-                        <i class="fa-solid fa-network-wired"></i>
-                    </div>
-                    <div class="overflow-hidden">
-                        <h4 class="text-[10px] font-bold text-slate-800 dark:text-slate-200 leading-tight truncate" title="${swName}">${swName}</h4>
-                        <p class="text-[9px] text-slate-500 dark:text-slate-400 font-mono flex items-center gap-1.5">
-                            <span>${swModel}</span>
-                            ${swIP ? `<span class="text-cyan-600 dark:text-cyan-400 font-semibold">• ${swIP}</span>` : ''}
-                        </p>
-                    </div>
-                </div>
-                <span class="px-2 py-0.5 ${badgeClass} rounded text-[9px] font-bold uppercase shrink-0">${isOnline ? 'ONLINE' : 'OFFLINE'}</span>
-            </div>
-        `;
-    });
-}
 
         function updateTrafficChart(latestRx, latestTx) {
-            const currentTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
             if (!trafficHistoryLabels.includes(currentTime)) {
                 trafficHistoryLabels.push(currentTime);
                 trafficHistoryRx.push(latestRx);
                 trafficHistoryTx.push(latestTx);
-
-                if (trafficHistoryLabels.length > 15) {
+                if (trafficHistoryLabels.length > 30) {
                     trafficHistoryLabels.shift();
                     trafficHistoryRx.shift();
                     trafficHistoryTx.shift();
@@ -529,7 +452,7 @@
 
             const isDark = document.documentElement.classList.contains('dark');
             const gridColor = isDark ? 'rgba(51, 65, 85, 0.25)' : 'rgba(226, 232, 240, 0.8)';
-            const tickColor = isDark ? '#64748b' : '#94a3b8';
+            const tickColor = isDark ? '#94a3b8' : '#64748b';
 
             const ctx = document.getElementById('trafficChart').getContext('2d');
             if (trafficChartInstance) trafficChartInstance.destroy();
@@ -539,16 +462,17 @@
                 data: {
                     labels: trafficHistoryLabels,
                     datasets: [
-                        { label: 'Download (Rx)', data: trafficHistoryRx, borderColor: '#06b6d4', backgroundColor: 'rgba(6, 182, 212, 0.1)', borderWidth: 1.8, fill: true, tension: 0.3, pointRadius: 2 },
-                        { label: 'Upload (Tx)', data: trafficHistoryTx, borderColor: '#a855f7', backgroundColor: 'rgba(168, 85, 247, 0.1)', borderWidth: 1.8, fill: true, tension: 0.3, pointRadius: 2 }
+                        { label: 'Download (Rx)', data: trafficHistoryRx, borderColor: '#06b6d4', backgroundColor: 'rgba(6, 182, 212, 0.1)', borderWidth: 2, fill: true, tension: 0.3, pointRadius: 2 },
+                        { label: 'Upload (Tx)', data: trafficHistoryTx, borderColor: '#a855f7', backgroundColor: 'rgba(168, 85, 247, 0.1)', borderWidth: 2, fill: true, tension: 0.3, pointRadius: 2 }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: false,
                     scales: {
-                        y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 9 } } },
-                        x: { grid: { display: false }, ticks: { color: tickColor, font: { size: 9 } } }
+                        y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 12 } } },
+                        x: { grid: { display: false }, ticks: { color: tickColor, font: { size: 12 }, maxTicksLimit: 6 } }
                     },
                     plugins: { legend: { display: false } }
                 }
@@ -557,9 +481,7 @@
 
         function updateApDistributionChart(apData) {
             const apMap = {};
-            apData.forEach(item => {
-                if (item.APName) apMap[item.APName] = parseInt(item.ClientCount) || 0;
-            });
+            apData.forEach(item => { if (item.APName) apMap[item.APName] = parseInt(item.ClientCount) || 0; });
 
             const labels = Object.keys(apMap).length ? Object.keys(apMap) : ['No AP Data'];
             const counts = Object.values(apMap).length ? Object.values(apMap) : [0];
@@ -570,16 +492,8 @@
 
             apChartInstance = new Chart(ctx, {
                 type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{ data: counts, backgroundColor: colors.slice(0, labels.length), borderWidth: 0 }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    cutout: '75%'
-                }
+                data: { labels: labels, datasets: [{ data: counts, backgroundColor: labels.map((_, i) => colors[i % colors.length]), borderWidth: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '75%' }
             });
 
             const legendDiv = document.getElementById('ap-legend');
@@ -591,7 +505,7 @@
                 legendDiv.innerHTML += `
                     <div class="flex items-center justify-between py-0.5">
                         <div class="flex items-center gap-1.5 truncate pr-1">
-                            <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${color}"></span>
+                            <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${color}"></span>
                             <span class="truncate" title="${cleanLabel}">${cleanLabel}</span>
                         </div>
                         <span class="font-bold shrink-0">${count}</span>
@@ -600,11 +514,10 @@
             });
         }
 
-        // Init App
         document.addEventListener('DOMContentLoaded', () => {
             initTheme();
             fetchData();
-            setInterval(fetchData, 30000); // Auto-refresh setiap 30 detik
+            setInterval(fetchData, 30000);
         });
     </script>
 </body>
