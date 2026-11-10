@@ -10,8 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* Satu layar penuh: semua ukuran memakai rem, dan rem mengikuti TINGGI + LEBAR layar,
-           jadi isi selalu muat tanpa scroll. Naikkan 1.8vh / 0.95vw untuk font lebih besar
-           (kalau ada bagian yang terpotong, turunkan lagi). */
+            jadi isi selalu muat tanpa scroll. */
         html { font-size: clamp(9px, min(1.8vh, 0.95vw), 24px); height: 100%; }
         body { height: 100%; overflow: hidden; }
 
@@ -23,13 +22,6 @@
 
         .custom-scrollbar::-webkit-scrollbar { height: 4px; width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 4px; }
-
-        #vlan-cards-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
-            gap: 0.35rem;
-            align-content: start;
-        }
     </style>
 </head>
 <body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased flex flex-col p-2 gap-1.5 transition-colors duration-300">
@@ -119,13 +111,13 @@
         </div>
     </div>
 
-    <!-- 2. VLAN (mengisi sisa tinggi layar) -->
+    <!-- 2. VLAN -->
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1.5 shadow-sm flex flex-col flex-1 min-h-0 overflow-hidden">
         <div class="flex justify-between items-center mb-1 shrink-0">
             <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-[0.9rem]"><i class="fa-solid fa-sitemap text-cyan-600 dark:text-cyan-400 mr-1.5"></i> VLAN Segments Breakdown</h3>
             <span id="vlan-count-badge" class="px-2 py-0.5 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-[0.7rem] rounded font-mono font-bold border border-cyan-500/20">0 Active VLANs</span>
         </div>
-        <div id="vlan-cards-container" class="min-h-0 overflow-hidden">
+        <div id="vlan-cards-container" class="grid gap-1.5 overflow-y-auto custom-scrollbar p-1" style="grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));">
             <div class="text-[0.8rem] text-slate-400 p-1 col-span-full">Loading VLAN metrics...</div>
         </div>
     </div>
@@ -371,7 +363,7 @@
                 const ip = def.IP || db.IP || '';
 
                 let status = db.Status || db.status || "ONLINE";
-                if (key === "CCR2004_Core_Router") status = "ONLINE"; // router ini yang menjalankan skrip
+                if (key === "CCR2004_Core_Router") status = "ONLINE";
                 const isOnline = String(status).toUpperCase() === "ONLINE";
                 const badgeClass = isOnline ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400" : "bg-rose-500/20 text-rose-600 dark:text-rose-400";
 
