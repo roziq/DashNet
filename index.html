@@ -128,13 +128,13 @@
             <div class="flex items-center gap-2 shrink-0">
                 <div class="p-1.5 bg-cyan-500/10 rounded-lg text-cyan-500 border border-cyan-500/20 text-[1rem]"><i class="fa-solid fa-wifi"></i></div>
                 <div>
-                    <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-[0.9rem] leading-tight">Wi-Fi vs LAN Clients</h3>
-                    <p class="text-[0.7rem] text-slate-500 dark:text-slate-400">UniFi APs + MikroTik DHCP</p>
+                    <h3 class="font-semibold text-slate-800 dark:text-slate-200 text-[0.9rem] leading-tight">UniFi AP Distribution</h3>
+                    <p class="text-[0.7rem] text-slate-500 dark:text-slate-400">Clients per AP</p>
                 </div>
             </div>
             <div class="relative w-[6rem] h-[6rem] shrink-0"><canvas id="apChart"></canvas></div>
-            <div id="ap-legend" class="grid grid-cols-1 gap-x-4 gap-y-1 text-[0.75rem] text-slate-700 dark:text-slate-200 font-mono w-full min-w-0">
-                <div class="text-slate-400">Waiting data...</div>
+            <div id="ap-legend" class="grid grid-cols-3 gap-x-4 gap-y-0 text-[0.75rem] text-slate-700 dark:text-slate-200 font-mono w-full min-w-0">
+                <div class="text-slate-400">Waiting AP...</div>
             </div>
         </div>
     </div>
@@ -185,7 +185,7 @@
                 updateWanCards(window.lastJsonData.wans || []);
                 updateVlanCards(window.lastJsonData.vlans || []);
                 updateSwitchCards(window.lastJsonData.switches || []);
-                updateClientDistribution(window.lastJsonData.vlans || [], window.lastJsonData.ap_distribution || []);
+                updateApDistributionChart(window.lastJsonData.ap_distribution || []);
             }
         }
 
@@ -234,7 +234,7 @@
                     updateWanCards(json.wans || []);
                     updateVlanCards(json.vlans || []);
                     updateSwitchCards(json.switches || []);
-                    updateClientDistribution(json.vlans || [], json.ap_distribution || []);
+                    updateApDistributionChart(json.ap_distribution || []);
                 } else { setDatabaseStatus(false, "API Error"); }
             } catch (err) {
                 console.error("Fetch Error:", err);
@@ -253,17 +253,21 @@
         }
 
         const PSEUDO_AP = /^(wired|other ap)/i;
+        
+        // Asumsi: VLAN ini adalah Wi-Fi
+        const WIFI_VLANS = ['vlan30-guru', 'vlan20-siswa'];
 
         function updateInventorySummary(devices, switches, apDist, vlans) {
-            // Kalkulasi Wi-Fi & LAN
+            // 1. Hitung total Wi-Fi dari UniFi
             const wifiClients = apDist
                 .filter(a => !PSEUDO_AP.test(String(a.APName || '')))
                 .reduce((n, a) => n + (parseInt(a.ClientCount) || 0), 0);
             
-            const totalMikrotikClients = vlans.reduce((n, v) => n + (parseInt(v.Clients) || 0), 0);
-            
-            // LAN = Total DHCP MikroTik - Wi-Fi (Karena Wi-Fi juga minta IP ke DHCP)
-            const lanClients = Math.max(0, totalMikrotikClients - wifiClients);
+            // 2. Hitung total LAN dari VLAN MikroTik (Kecuali VLAN Wi-Fi)
+            const lanClients = vlans
+                .filter(v => !WIFI_VLANS.includes(v.VLANName))
+                .reduce((n, v) => n + (parseInt(v.Clients) || 0), 0);
+                
             const totalClients = wifiClients + lanClients;
 
             const realAps = apDist.filter(a => !PSEUDO_AP.test(String(a.APName || '')));
@@ -457,37 +461,31 @@
             });
         }
 
-        // Grafik Donat: Wi-Fi vs LAN
-        function updateClientDistribution(vlanData, apData) {
-            const PSEUDO_AP_REGEX = /^(wired|other ap)/i;
+        function updateApDistributionChart(apData) {
+            const apMap = {};
+            apData.forEach(item => { if (item.APName) apMap[item.APName] = parseInt(item.ClientCount) || 0; });
 
-            const wifiClients = apData
-                .filter(a => !PSEUDO_AP_REGEX.test(String(a.APName || '')))
-                .reduce((n, a) => n + (parseInt(a.ClientCount) || 0), 0);
-            
-            const totalMikrotikClients = vlanData.reduce((n, v) => n + (parseInt(v.Clients) || 0), 0);
-            const lanClients = Math.max(0, totalMikrotikClients - wifiClients);
-
-            const labels = ['Wi-Fi (UniFi)', 'LAN (Wired)'];
-            const counts = [wifiClients, lanClients];
-            const colors = ['#06b6d4', '#6366f1']; // Cyan untuk Wi-Fi, Indigo untuk LAN
+            const labels = Object.keys(apMap).length ? Object.keys(apMap) : ['No AP Data'];
+            const counts = Object.values(apMap).length ? Object.values(apMap) : [0];
+            const colors = ['#06b6d4', '#6366f1', '#a855f7', '#ec4899', '#10b981', '#f59e0b', '#3b82f6'];
 
             const ctx = document.getElementById('apChart').getContext('2d');
             if (apChartInstance) apChartInstance.destroy();
             apChartInstance = new Chart(ctx, {
                 type: 'doughnut',
-                data: { labels, datasets: [{ data: counts, backgroundColor: colors, borderWidth: 0 }] },
+                data: { labels, datasets: [{ data: counts, backgroundColor: labels.map((_, i) => colors[i % colors.length]), borderWidth: 0 }] },
                 options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } }, cutout: '75%' }
             });
 
             const legend = document.getElementById('ap-legend');
             legend.innerHTML = '';
             labels.forEach((label, idx) => {
+                const clean = label.replace(/_/g, ' ');
                 legend.innerHTML += `
                     <div class="flex items-center justify-between leading-snug min-w-0">
                         <div class="flex items-center gap-1 truncate pr-1">
-                            <span class="w-2 h-2 rounded-full shrink-0" style="background-color:${colors[idx]}"></span>
-                            <span class="truncate">${label}</span>
+                            <span class="w-2 h-2 rounded-full shrink-0" style="background-color:${colors[idx % colors.length]}"></span>
+                            <span class="truncate" title="${clean}">${clean}</span>
                         </div>
                         <span class="font-bold shrink-0">${counts[idx]}</span>
                     </div>`;
