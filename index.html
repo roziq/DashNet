@@ -164,6 +164,7 @@
             { border: 'border-orange-500/40', text: 'text-orange-600 dark:text-orange-400', badge: 'bg-orange-500' }
         ];
 
+        // Sanitasi data dari sheet (cegah HTML/JS disisipkan)
         const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
         function sanitize(o, key) {
             if (Array.isArray(o)) return o.map(x => sanitize(x, key));
@@ -230,7 +231,7 @@
                     if (isFinite(age) && age <= 180) setDatabaseStatus(true);
                     else setDatabaseStatus(false, isFinite(age) ? 'Data lama ' + Math.round(age / 60) + ' mnt' : 'Tidak ada data');
 
-                    updateInventorySummary(json.devices || [], json.switches || [], json.ap_distribution || [], json.vlans || []);
+                    updateInventorySummary(json.devices || [], json.switches || [], json.ap_distribution || []);
                     updateWanCards(json.wans || []);
                     updateVlanCards(json.vlans || []);
                     updateSwitchCards(json.switches || []);
@@ -252,22 +253,16 @@
             document.getElementById('db-status-text').innerText = message;
         }
 
-        const PSEUDO_AP = /^(wired|other ap)/i;
-        
-        // Asumsi: VLAN ini adalah Wi-Fi
-        const WIFI_VLANS = ['vlan30-guru', 'vlan20-siswa'];
+        const PSEUDO_AP = /^(wired|other ap)/i; // baris ringkasan, bukan perangkat
 
-        function updateInventorySummary(devices, switches, apDist, vlans) {
-            // 1. Hitung total Wi-Fi dari UniFi
-            const wifiClients = apDist
-                .filter(a => !PSEUDO_AP.test(String(a.APName || '')))
-                .reduce((n, a) => n + (parseInt(a.ClientCount) || 0), 0);
-            
-            // 2. Hitung total LAN dari VLAN MikroTik (Kecuali VLAN Wi-Fi)
-            const lanClients = vlans
-                .filter(v => !WIFI_VLANS.includes(v.VLANName))
-                .reduce((n, v) => n + (parseInt(v.Clients) || 0), 0);
-                
+        function updateInventorySummary(devices, switches, apDist) {
+            // Klien tersambung dari UniFi: ambil nilai terakhir per nama (anti-duplikat)
+            const latest = {};
+            apDist.forEach(a => { latest[a.APName] = parseInt(a.ClientCount) || 0; });
+            let wifiClients = 0, lanClients = 0;
+            Object.entries(latest).forEach(([n, c]) => {
+                if (/^wired/i.test(n)) lanClients += c; else wifiClients += c;
+            });
             const totalClients = wifiClients + lanClients;
 
             const realAps = apDist.filter(a => !PSEUDO_AP.test(String(a.APName || '')));
@@ -349,7 +344,8 @@
             list.sort((a, b) => (parseFloat(b.RxMbps || 0) + parseFloat(b.TxMbps || 0)) - (parseFloat(a.RxMbps || 0) + parseFloat(a.TxMbps || 0)));
 
             list.forEach((v, idx) => {
-                const rx = parseFloat(v.RxMbps || 0), tx = parseFloat(v.TxMbps || 0);
+                // Arah ditukar: kolom Sheet terbalik terhadap sisi klien
+                const rx = parseFloat(v.TxMbps || 0), tx = parseFloat(v.RxMbps || 0);
                 const clientCount = parseInt(v.Clients) || 0;
                 const t = COLOR_PALETTE[idx % COLOR_PALETTE.length];
                 const vlanName = v.VLANName;
@@ -363,8 +359,8 @@
                         <div class="text-[0.8rem] font-mono leading-snug">
                             <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>D:</span><span class="${t.text} font-semibold">${formatSpeed(rx)}</span></div>
                             <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>U:</span><span class="text-slate-700 dark:text-slate-300 font-semibold">${formatSpeed(tx)}</span></div>
-                            <div class="flex justify-between text-slate-500 dark:text-slate-400" title="Perangkat terdaftar (DHCP Lease bound)">
-                                <span><i class="fa-solid fa-users text-[0.65rem]"></i> Client</span>
+                            <div class="flex justify-between text-slate-500 dark:text-slate-400" title="Perangkat terdaftar: lease DHCP + IP statis">
+                                <span><i class="fa-solid fa-users text-[0.65rem]"></i> Lease</span>
                                 <span class="text-slate-700 dark:text-slate-300 font-semibold">${clientCount}</span>
                             </div>
                         </div>
