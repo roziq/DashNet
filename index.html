@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { font-family: 'Trebuchet MS', Geneva, sans-serif; }
-        
+
         /* Satu layar penuh: semua ukuran memakai rem, dan rem mengikuti TINGGI + LEBAR layar,
             jadi isi selalu muat tanpa scroll. */
         html { font-size: clamp(9px, min(1.8vh, 0.95vw), 24px); height: 100%; }
@@ -69,7 +69,7 @@
                 <div>
                     <p class="text-[0.7rem] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Active Clients</p>
                     <h3 id="stat-clients" class="text-[1.5rem] font-extrabold text-emerald-600 dark:text-emerald-400 leading-tight">0</h3>
-                    <p class="text-[0.7rem] text-slate-500 dark:text-slate-400">Klien aktif (ARP)</p>
+                    <p id="stat-clients-sub" class="text-[0.7rem] text-slate-500 dark:text-slate-400">Klien tersambung (UniFi)</p>
                 </div>
                 <div class="p-1.5 bg-emerald-500/10 rounded-lg text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[1rem]"><i class="fa-solid fa-users"></i></div>
             </div>
@@ -170,6 +170,16 @@
             { border: 'border-orange-500/40', text: 'text-orange-600 dark:text-orange-400', badge: 'bg-orange-500' }
         ];
 
+        // ---------- Sanitasi data dari sheet (cegah HTML/JS disisipkan) ----------
+        const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        function sanitize(o, key) {
+            if (Array.isArray(o)) return o.map(x => sanitize(x, key));
+            if (o && typeof o === 'object') { const r = {}; for (const k in o) r[k] = sanitize(o[k], k); return r; }
+            if (typeof o !== 'string') return o;
+            // Nama interface dipakai di onclick: hanya izinkan huruf, angka, _, ., -
+            return (key === 'WANName' || key === 'VLANName') ? o.replace(/[^\w.\-]/g, '') : esc(o);
+        }
+
         // ---------- Tema, fullscreen, jam ----------
         function initTheme() {
             if (localStorage.getItem('theme') === 'light') { document.documentElement.classList.remove('dark'); updateThemeUI(false); }
@@ -222,10 +232,15 @@
         async function fetchData() {
             try {
                 const res = await fetch(API_URL);
-                const json = await res.json();
+                const json = sanitize(await res.json());
                 window.lastJsonData = json;
                 if (json.status === "success") {
-                    setDatabaseStatus(true);
+                    // Hijau hanya kalau router benar-benar masih mengirim data (< 3 menit)
+                    const last = (json.devices || []).slice(-1)[0];
+                    const age = last ? (Date.now() - Date.parse(last.Timestamp)) / 1000 : NaN;
+                    if (isFinite(age) && age <= 180) setDatabaseStatus(true);
+                    else setDatabaseStatus(false, isFinite(age) ? 'Data lama ' + Math.round(age / 60) + ' mnt' : 'Tidak ada data');
+
                     updateInventorySummary(json.devices || [], json.switches || [], json.ap_distribution || []);
                     updateWanCards(json.wans || []);
                     updateVlanCards(json.vlans || []);
@@ -248,21 +263,27 @@
             document.getElementById('db-status-text').innerText = message;
         }
 
+        const PSEUDO_AP = /^(wired|other ap)/i; // baris ringkasan, bukan perangkat
+
         function updateInventorySummary(devices, switches, apDist) {
+            const realAps = apDist.filter(a => !PSEUDO_AP.test(String(a.APName || '')));
             const routerTotal = devices.length > 0 ? 1 : 0;
             const switchOnline = switches.filter(s => String(s.Status || "").toUpperCase() === "ONLINE").length;
-            const apOnline = apDist.filter(a => parseInt(a.ClientCount || 0) >= 0).length;
-            const total = routerTotal + switches.length + apDist.length;
+            const apOnline = realAps.filter(a => !a.Status || String(a.Status).toUpperCase() === "ONLINE").length;
+            const total = routerTotal + switches.length + realAps.length;
             const online = routerTotal + switchOnline + apOnline;
             document.getElementById('stat-devices').innerText = `${online} / ${total}`;
 
+            // Klien tersambung = semua baris AP_Stats (Wi-Fi + WIRED / LAN)
+            document.getElementById('stat-clients').innerText = apDist.reduce((n, a) => n + (parseInt(a.ClientCount) || 0), 0);
+
             if (devices.length > 0) {
                 const d = devices[devices.length - 1];
-                const clients = parseInt(d.ActiveClients || d.ActiveLeases || d.active_leases || d.active_clients || 0);
                 const cpu = d.CpuLoad || d.cpu_load || '0%';
-                document.getElementById('stat-clients').innerText = clients;
                 document.getElementById('stat-cpu').innerText = typeof cpu === 'number' ? cpu + '%' : cpu;
                 document.getElementById('stat-core-name').innerText = d.DeviceName || 'CCR2004';
+                document.getElementById('stat-clients-sub').innerText =
+                    d.Leases ? `Klien UniFi • ${d.Leases} lease DHCP` : 'Klien tersambung (UniFi)';
             }
         }
 
@@ -331,7 +352,7 @@
                         <div class="text-[0.8rem] font-mono leading-snug">
                             <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>D:</span><span class="${t.text} font-semibold">${formatSpeed(rx)}</span></div>
                             <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>U:</span><span class="text-slate-700 dark:text-slate-300 font-semibold">${formatSpeed(tx)}</span></div>
-                            ${hasClients ? `<div class="flex justify-between text-slate-500 dark:text-slate-400"><span><i class="fa-solid fa-users text-[0.65rem]"></i></span><span class="text-slate-700 dark:text-slate-300 font-semibold">${v.Clients}</span></div>` : ''}
+                            ${hasClients ? `<div class="flex justify-between text-slate-500 dark:text-slate-400" title="Perangkat terdaftar: lease DHCP + IP statis"><span><i class="fa-solid fa-users text-[0.65rem]"></i></span><span class="text-slate-700 dark:text-slate-300 font-semibold">${v.Clients}</span></div>` : ''}
                         </div>
                     </div>`;
             });
