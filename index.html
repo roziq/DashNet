@@ -459,8 +459,9 @@
             const apMap = {};
             apData.forEach(item => { if (item.APName) apMap[item.APName] = parseInt(item.ClientCount) || 0; });
 
-            const labels = Object.keys(apMap).length ? Object.keys(apMap) : ['No AP Data'];
-            const counts = Object.values(apMap).length ? Object.values(apMap) : [0];
+            const sorted = Object.entries(apMap).sort((a, b) => b[1] - a[1]);
+            const labels = sorted.length ? sorted.map(e => e[0]) : ['No AP Data'];
+            const counts = sorted.length ? sorted.map(e => e[1]) : [0];
             const legend = document.getElementById('ap-legend');
             legend.innerHTML = '';
             labels.forEach((label, idx) => {
